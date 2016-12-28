@@ -1,0 +1,7 @@
+{
+  "name": "Push Me If You Can",
+  "short_name": "Push Me If You Can",
+  "start_url": "index.html",
+  "display": "fullscreen",
+  "orientation": "portrait"
+}

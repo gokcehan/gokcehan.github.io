@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html manifest="manifest.appcache">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="format-detection" content="telephone=no" />
+    <!-- WARNING: for iOS 7, remove the width=device-width and height=device-height attributes. See https://issues.apache.org/jira/browse/CB-4323 -->
+    <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width, height=device-height, target-densitydpi=device-dpi" />
+    <link rel="manifest" href="manifest.webmanifest">
+    <style>
+      body {
+        overflow: hidden;
+      }
+      #canvas, #wrapper {
+        border: 0;
+        margin: 0;
+        padding: 0;
+      }
+      #controls {
+        margin: auto;
+        text-align: center;
+      }
+      #help-footer {
+        text-align: center;
+      }
+    </style>
+    <link rel="stylesheet" href="css/font-awesome.min.css" />
+    <link rel="stylesheet" href="css/jquery.mobile-1.4.3.min.css" />
+    <script type="text/javascript" src="js/jquery-1.11.1.min.js"></script>
+    <script type="text/javascript" src="js/jquery.mobile-1.4.3.min.js"></script>
+    <title>Game of Life</title>
+  </head>
+  <body>
+
+    <div data-role="page">
+
+      <div data-role="header" data-position="fixed">
+        <h1>Game of Life</h1>
+        <a href="#menu-panel" data-rel="back" class="ui-btn ui-corner-all ui-icon-bars ui-btn-icon-left ui-btn-icon-notext"></a>
+        <a href="#help-popup" data-rel="popup" class="ui-btn ui-corner-all ui-icon-info ui-btn-icon-left ui-btn-icon-notext"></a>
+      </div>
+
+      <div id="wrapper" data-role="content">
+        <canvas id="canvas"></canvas>
+      </div>
+
+      <div id="controls" data-role="footer" data-position="fixed">
+        <div data-role="controlgroup" data-type="horizontal">
+          <a id="reset" class="ui-btn ui-corner-all"><i class="fa fa-fw fa-fast-backward"></i></a>
+          <a id="tick" class="ui-btn ui-corner-all"><i class="fa fa-fw fa-step-forward"></i></a>
+          <a id="play" class="ui-btn ui-corner-all"><i class="fa fa-fw fa-play"></i></a>
+          <a id="clear" class="ui-btn ui-corner-all"><i class="fa fa-fw fa-eject"></i></a>
+          <input name="erase-check" id="erase-check" type="checkbox">
+          <label id="erase-check-label" for="erase-check"><i class="fa fa-fw fa-eraser"></i></label>
+        </div>
+      </div>
+
+      <div data-role="panel" id="menu-panel" data-swipe-close="false">
+        <div class="ui-body">
+          <ul data-role="listview">
+            <li>
+              <label for="speed"><i class="fa fa-fw fa-border fa-cogs"></i><b> Speed</b></label>
+              <input type="range" id="speed" value="3" min="0" max="7" step="1" />
+            </li>
+            <li>
+              <label for="size"><i class="fa fa-fw fa-border fa-arrows"></i><b> Cell Size</b></label>
+              <input type="range" id="size" value="3" min="0" max="7" step="1" />
+            </li>
+            <li>
+              <label for="pattern" class="select"><i class="fa fa-fw fa-border fa-th-large"></i><b> Pattern</b></label>
+              <select id="pattern">
+                <option value="blank">           Blank                        </option>
+                <option value="random">          Random                       </option>
+                <option disabled="disabled">     -- Guns --                   </option>
+                <option value="gosperglidergun"> Gosper glider gun (36x9)     </option>
+                <option disabled="disabled">     -- Methuselahs --            </option>
+                <option value="acorn">           Acorn (7x3)                  </option>
+                <option value="bunnies">         Bunnies (8x4)                </option>
+                <option value="herschel">        Herschel (3x4)               </option>
+                <option value="lidka">           Lidka (9x15)                 </option>
+                <option value="rpentomino">      R-pentomino (3x3)            </option>
+                <option value="switchengine">    Switch engine (6x4)          </option>
+                <option disabled="disabled">     -- Oscillators --            </option>
+                <option value="beacon">          Beacon (4x4)                 </option>
+                <option value="blinker">         Blinker (3x1)                </option>
+                <option value="figureeight">     Figure eight (6x5)           </option>
+                <option value="pulsar">          Pulsar (13x13)               </option>
+                <option value="queenbeeshuttle"> Queen bee shuttle (22x7)     </option>
+                <option value="toad">            Toad (4x2)                   </option>
+                <option value="twinbeesshuttle"> Twin bees shuttle (29x11)    </option>
+                <option disabled="disabled">     -- Puffers --                </option>
+                <option value="blinkerpuffer1">  Blinker puffer 1 (9x18)      </option>
+                <option value="noahsark">        Noah's ark (15x15)           </option>
+                <option value="puffer1">         Puffer 1 (27x7)              </option>
+                <option disabled="disabled">     -- Spaceships --             </option>
+                <option value="glider">          Glider (3x3)                 </option>
+                <option value="lwss">            Lightweight Spaceship (5x4)  </option>
+                <option value="mwss">            Middleweight Spaceship (6x5) </option>
+                <option value="hwss">            Heavyweight Spaceship (7x5)  </option>
+                <option disabled="disabled">     -- Still Lifes --            </option>
+                <option value="aircraftcarrier"> Aircraft carrier (4x3)       </option>
+                <option value="beehive">         Beehive (4x3)                </option>
+                <option value="block">           Block (2x2)                  </option>
+                <option value="boat">            Boat (3x3)                   </option>
+                <option value="eater1">          Eater 1 (4x4)                </option>
+                <option value="loaf">            Loaf (4x4)                   </option>
+                <option value="pond">            Pond (4x4)                   </option>
+                <option value="ship">            Ship (3x3)                   </option>
+                <option value="snake">           Snake (4x2)                  </option>
+                <option value="tub">             Tub (3x3)                    </option>
+              </select>
+            </li>
+            <li><a data-rel="close">Return</a></li>
+          </ul>
+        </div>
+      </div>
+
+      <div data-role="popup" id="pattern-popup" data-position-to="window">
+        <div data-role="header">
+          <h1>Warning</h1>
+          <a href="#" data-rel="back" class="ui-btn ui-corner-all ui-icon-delete ui-btn-icon-notext ui-btn-right"></a>
+        </div>
+        <div role="main" class="ui-content">
+          <p>The selected pattern is bigger than the board itself. Please either decrease the cell size accordingly or select a different pattern from the settings.</p>
+        </div>
+        <div id="help-footer" data-role="footer">
+          <a data-rel="back" class="ui-btn ui-corner-all ui-icon-delete ui-btn-icon-left">Close</a>
+        </div>
+      </div>
+
+      <div data-role="popup" id="help-popup" data-position-to="window">
+        <div data-role="header">
+          <h1>Help</h1>
+          <a href="#" data-rel="back" class="ui-btn ui-corner-all ui-icon-delete ui-btn-icon-notext ui-btn-right"></a>
+        </div>
+        <div role="main" class="ui-content">
+          <h2>About</h2>
+          <p>This is a simulator for Conway's Game of Life which is a cellular automaton developed by mathematician John Horton Conway in 1970. The game universe consists of two-dimensional orthogonal square cells with two possible states, alive (black) or dead (white), each having 8 neighbours according to Moore neighbourhood. This version uses a user defined fixed size toroidal array as the board meaning that the top and the bottom most cells are neighbours as well as the left and the right most cells. Note that this game is referred as a zero-player game in which user interaction is minimal.</p>
+          <h2>Rules</h2>
+          <p>Rules are defined as follows:</p>
+          <p><b>Rule 1:</b> Any live cell with fewer than two live neighbours dies, as if caused by under-population.</p>
+          <p><b>Rule 2:</b> Any live cell with two or three live neighbours lives on to the next generation.</p>
+          <p><b>Rule 3:</b> Any live cell with more than three live neighbours dies, as if by overcrowding.</p>
+          <p><b>Rule 4:</b> Any dead cell with exactly three live neighbours becomes a live cell, as if by reproduction.</p>
+          <h2>Settings</h2>
+          <p><a class="ui-btn ui-corner-all ui-icon-bars ui-btn-icon-left ui-btn-icon-notext"></a>Settings can be found in the top left of the screen:</p>
+          <p><i class="fa fa-fw fa-border fa-cogs"></i><b> Speed:</b> Sets the play speed of the simulation to the n<sup>th</sup> power of 2 frames per second. Note that the actual speed of the simulation may depend on the board size and the performance of the device used.</p>
+          <p><i class="fa fa-fw fa-border fa-arrows"></i><b> Cell Size: </b> Sets the size of cells on the board to the n<sup>th</sup> power of 2 pixels.</p>
+          <p><i class="fa fa-fw fa-border fa-th-large"></i><b> Pattern: </b> Sets the initial pattern of the board. The list consists of some of the most common patterns and more can be found in <a href="http://www.conwaylife.com/wiki/Main_Page" target="_blank">here</a>.</p>
+          <h2>Controls</h2>
+          <div data-role="controlgroup" data-type="horizontal" data-mini="true">
+            <a class="ui-btn ui-corner-all"><i class="fa fa-fw fa-fast-backward"></i></a>
+            <a class="ui-btn ui-corner-all"><i class="fa fa-fw fa-step-forward"></i></a>
+            <a class="ui-btn ui-corner-all"><i class="fa fa-fw fa-play"></i></a>
+            <a class="ui-btn ui-corner-all"><i class="fa fa-fw fa-eject"></i></a>
+            <a class="ui-btn ui-corner-all"><i class="fa fa-fw fa-eraser"></i></a>
+          </div>
+          <p>Control buttons can be found in the bottom of the screen:</p>
+          <p><i class="fa fa-fw fa-border fa-fast-backward"></i> Resets the board to the initial pattern.</p>
+          <p><i class="fa fa-fw fa-border fa-step-forward"></i> Advances the board by one generation (i.e. "tick") and stops.</p>
+          <p><i class="fa fa-fw fa-border fa-play"></i> / <i class="fa fa-fw fa-border fa-pause"></i> Plays / Pauses the simulation.</p>
+          <p><i class="fa fa-fw fa-border fa-eject"></i> Clears the board.</p>
+          <p><i class="fa fa-fw fa-border fa-eraser"></i> Enables / Disables eraser mode to delete cells. Right click can be used wherever available to delete cells without using this button.</p>
+        </div>
+        <div id="help-footer" data-role="footer">
+          <a data-rel="back" class="ui-btn ui-corner-all ui-icon-delete ui-btn-icon-left">Close</a>
+        </div>
+      </div>
+
+    </div>
+
+    <script type="text/javascript" src="js/gameoflife.js"></script>
+    <script type="text/javascript">
+      init();
+    </script>
+  </body>
+</html>

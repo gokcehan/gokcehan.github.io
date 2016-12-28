@@ -1,0 +1,47 @@
+h1 {
+    text-align: center;
+}
+
+body {
+    margin: auto;
+    padding: 10px;
+    font-family: palatino;
+    text-align: justify;
+    line-height: 1.5;
+    background: palegoldenrod;
+}
+
+pre {
+    margin: 0px;
+    border: 0px;
+    padding: 10px;
+    border-radius: 3px;
+    color: beige;
+    background: darkslategray;
+    overflow-x: auto;
+    box-shadow: 0px 0px 5px 0px gray;
+}
+
+code {
+    margin: 0px;
+    border: 1px dotted;
+    padding: 3px;
+    border-radius: 3px;
+}
+
+blockquote {
+    text-align: center;
+    font-weight: bold;
+    font-style: italic;
+}
+
+.content {
+    margin: auto;
+    border: 0px;
+    padding: 0px;
+    max-width: 600px;
+    padding: 5%;
+    color: darkslategray;
+    background: beige;
+    box-shadow: 0px 5px 5px 0px gray;
+}

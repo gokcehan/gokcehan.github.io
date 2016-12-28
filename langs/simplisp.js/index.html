@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<title>Simplisp.js Worksheet</title>
+<style type="text/css" media="screen">
+    #editor {
+        position: absolute;
+        top: 0;
+        right: 50%;
+        bottom: 0;
+        left: 0;
+    }
+    #output {
+        position: absolute;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        left: 50%;
+    }
+</style>
+<script src="simplisp.js" type="text/javascript" charset="utf-8"></script>
+<script src="ace-builds-master/src-noconflict/ace.js" type="text/javascript" charset="utf-8"></script>
+</head>
+<body>
+
+<div id="editor">
+;; Welcome to the simplisp.js worksheet
+;; Hit Ctrl-Enter to execute everything
+
+
+;; atoms
+
+(define answer 42)
+
+answer
+
+;; functions
+
+(define sum-curry
+  (lambda (x)
+    (lambda (y)
+      (+ x y))))
+
+((sum-curry 1) 2)
+
+(define sum-normal
+  (lambda (x y)
+    (+ x y)))
+
+(sum-normal 1 2)
+
+(define (sum-sugar x y)
+  (+ x y))
+
+(sum-sugar 1 2)
+
+;; factorial examples
+
+(define (fact-naive n)
+  (if (< n 2)
+      1
+      (* n (fact-naive (- n 1)))))
+
+(fact-naive 5)
+
+(define (fact-tail n)
+  (define (fact-helper num acc)
+    (if (< num 2)
+        acc
+        (fact-helper (- num 1) (* acc num))))
+  (fact-helper n 1))
+
+(fact-tail 5) ;; no TCO yet
+
+(define (fact-sugar n)
+  (let fact-helper ((num n) (acc 1))
+    (if (< num 2)
+        acc
+        (fact-helper (- num 1) (* acc num)))))
+
+;(fact-sugar 5) ;; no named let yet
+
+;; sqrt example
+
+(define (square x) (* x x))
+
+(define (abs x)
+  (if (< x 0)
+      (- x)
+      x))
+
+(define (sqrt-iter guess x)
+  (if (good-enough? guess x)
+      guess
+      (sqrt-iter (improve guess x)
+                 x)))
+
+(define (improve guess x)
+  (average guess (/ x guess)))
+
+(define (average x y)
+  (/ (+ x y) 2))
+
+(define (good-enough? guess x)
+  (< (abs (- (square guess) x)) 0.001))
+
+(define (sqrt x)
+  (sqrt-iter 1.0 x))
+
+(sqrt 9)
+(sqrt (+ 100 37))
+(sqrt (+ (sqrt 2) (sqrt 3)))
+(square (sqrt 1000))
+
+;; halting problem
+
+(define (halts? program input)
+  ;; million dollar logic goes here
+  )
+
+(define (run-forever) (run-forever))
+
+(define (try program)
+  (if (halts? program program)
+      (run-forever)
+      (quote halted)))
+
+(try try)  ;; what now?
+</div>
+
+<div id="output"></div>
+
+<script>
+    var editor = ace.edit("editor");
+    editor.setTheme("ace/theme/monokai");
+    editor.getSession().setMode("ace/mode/scheme");
+    editor.commands.addCommand({
+        name: 'run',
+        bindKey: { win: 'Ctrl-Enter',  mac: 'Command-Enter' },
+        exec: function(editor) {
+            output.setValue();
+            output.setValue(run(editor.getValue()));
+        }
+    });
+    editor.renderer.setShowGutter(false);
+
+    var output = ace.edit("output");
+    output.setReadOnly(true);
+    output.setShowPrintMargin(false);
+    output.renderer.setShowGutter(false);
+</script>
+</body>
+</html>

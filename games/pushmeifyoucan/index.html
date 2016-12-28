@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html manifest="manifest.appcache">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="format-detection" content="telephone=no" />
+    <!-- WARNING: for iOS 7, remove the width=device-width and height=device-height attributes. See https://issues.apache.org/jira/browse/CB-4323 -->
+    <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width, height=device-height, target-densitydpi=device-dpi" />
+    <link rel="manifest" href="manifest.webmanifest">
+    <style>
+      * {
+        overflow: hidden;
+        border: 0;
+        margin: 0;
+        padding: 0;
+      }
+    </style>
+    <title>Push Me If You Can</title>
+  </head>
+  <body>
+    <svg id="svg" preserveAspectRatio="xMidYMid meet" viewBox="0 0 360 640">
+      <style>
+        svg {
+          background-color: black;
+        }
+        rect {
+          stroke: #333333;
+          stroke-width: 5;
+          fill: #666666;
+        }
+        circle {
+          stroke: #333333;
+          stroke-width: 5;
+          fill: #666666;
+        }
+        text {
+          stroke: black;
+          stroke-width: 1;
+          fill: white;
+          font-size: 24px;
+          font-family: monospace;
+          text-anchor: middle;
+          dominant-baseline: middle;
+        }
+      </style>
+
+      <circle id="circle-0-0" r="40" cy="340" cx="60"></circle>
+      <circle id="circle-1-0" r="40" cy="420" cx="60"></circle>
+      <circle id="circle-2-0" r="40" cy="500" cx="60"></circle>
+      <circle id="circle-3-0" r="40" cy="580" cx="60"></circle>
+      <circle id="circle-0-1" r="40" cy="340" cx="140"></circle>
+      <circle id="circle-1-1" r="40" cy="420" cx="140"></circle>
+      <circle id="circle-2-1" r="40" cy="500" cx="140"></circle>
+      <circle id="circle-3-1" r="40" cy="580" cx="140"></circle>
+      <circle id="circle-0-2" r="40" cy="340" cx="220"></circle>
+      <circle id="circle-1-2" r="40" cy="420" cx="220"></circle>
+      <circle id="circle-2-2" r="40" cy="500" cx="220"></circle>
+      <circle id="circle-3-2" r="40" cy="580" cx="220"></circle>
+      <circle id="circle-0-3" r="40" cy="340" cx="300"></circle>
+      <circle id="circle-1-3" r="40" cy="420" cx="300"></circle>
+      <circle id="circle-2-3" r="40" cy="500" cx="300"></circle>
+      <circle id="circle-3-3" r="40" cy="580" cx="300"></circle>
+
+      <rect style="fill: #bb3333" height="100" width="100" ry="10" rx="10" y="20" x="20"></rect>
+      <text y="45" x="70">best</text>
+      <text id="bestText" y="95" x="70">0</text>
+
+      <rect height="100" width="100" ry="10" rx="10" y="20" x="130"></rect>
+      <text y="45" x="180">score</text>
+      <text id="scoreText" y="95" x="180">0</text>
+
+      <rect height="100" width="100" ry="10" rx="10" y="20" x="240"></rect>
+      <text y="45" x="290">speed</text>
+      <text id="speedText" y="95" x="290">0</text>
+
+      <g id="menuPanel" display="none">
+        <rect height="480" width="320" ry="10" rx="10" y="140" x="20"></rect>
+        <g id="restPanel">
+          <rect height="210" width="280" ry="10" rx="10" y="160" x="40"></rect>
+          <text y="265" x="180">restart</text>
+        </g>
+        <g id="exitPanel">
+          <rect height="210" width="280" ry="10" rx="10" y="390" x="40"></rect>
+          <text y="495" x="180">exit</text>
+        </g>
+      </g>
+    </svg>
+    <script type="text/javascript" src="js/pushmeifyoucan.js"></script>
+    <script type="text/javascript">
+      init();
+    </script>
+  </body>
+</html> 

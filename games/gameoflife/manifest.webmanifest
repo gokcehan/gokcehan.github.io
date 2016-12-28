@@ -1,0 +1,7 @@
+{
+  "name": "Game of Life",
+  "short_name": "Game of Life",
+  "start_url": "index.html",
+  "display": "fullscreen",
+  "orientation": "portrait"
+}

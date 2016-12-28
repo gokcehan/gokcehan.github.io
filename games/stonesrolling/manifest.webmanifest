@@ -1,0 +1,7 @@
+{
+  "name": "Stone's Rolling",
+  "short_name": "Stone's Rolling",
+  "start_url": "index.html",
+  "display": "fullscreen",
+  "orientation": "portrait"
+}

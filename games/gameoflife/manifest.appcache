@@ -1,0 +1,22 @@
+CACHE MANIFEST
+
+CACHE:
+css/font-awesome.min.css
+css/jquery.mobile-1.4.3.min.css
+fonts/FontAwesome.otf
+fonts/fontawesome-webfont.eot
+fonts/fontawesome-webfont.svg
+fonts/fontawesome-webfont.ttf
+fonts/fontawesome-webfont.woff
+js/gameoflife.js
+js/jquery-1.11.1.min.js
+js/jquery.mobile-1.4.3.min.js
+
+FALLBACK:
+fonts/FontAwesome.otf          fonts/FontAwesome.otf
+fonts/fontawesome-webfont.eot  fonts/fontawesome-webfont.eot
+fonts/fontawesome-webfont.svg  fonts/fontawesome-webfont.svg
+fonts/fontawesome-webfont.ttf  fonts/fontawesome-webfont.ttf
+fonts/fontawesome-webfont.woff fonts/fontawesome-webfont.woff
+
+NETWORK:

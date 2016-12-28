@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>Recursive Descent Parsing</title>
+  <link rel="stylesheet" type="text/css" href="../style.css">
+</head>
+
+<body>
+<div class="content">
+
+<h1>Recursive Descent Parsing</h1>
+
+<p>
+Parsing is an important problem in computer science that comes up quite often.
+Recursive Descent (RD) parsing is one of the most intuitive algorithms out there for this problem.
+This is a common choice to implement hand written parsers as an alternative to using parser generators such as Yacc or Bison.
+In this post, a recursive descent parser for a very simple expression grammar is implemented.
+</p>
+
+<p>
+Let's first write an arithmetic expression grammar in a naive way:
+</p>
+
+<pre>
+E -> E + T | T
+T -> T * F | F
+F -> ( E ) | Int
+</pre>
+
+<p>
+In this grammar there are no <code>-</code> and <code>/</code> operators, negative numbers, and floating numbers for simplicity.
+However, it is not very difficult to add these once you understand the algorithm.
+</p>
+
+<h2>Left Recursion</h2>
+
+<p>
+Above grammar has a common problem in it.
+If you look at the first rule, you see that we need to parse <code>E</code> in order to parse <code>E</code> so that we can parse <code>E</code> and so on.
+It means the parser is going to deadlock unless we do something about it.
+</p>
+
+<p>
+In general, left recursive grammars have the following rules:
+</p>
+
+<pre>
+A -> Ab | c
+</pre>
+
+<p>
+This is called direct left recursion meaning a non-terminal exists as the left most element in its own derivation.
+There is also an indirect left recursion for basically the same thing over multiple rules.
+Note that recursion is acceptable in grammars as long as it's not left recursion.
+</p>
+
+<p>
+Let's try to convert the rules to have right recursion instead:
+</p>
+
+<pre>
+E -> T + E | T
+T -> F * T | F
+F -> ( E ) | Int
+</pre>
+
+<p>
+As a side note, keep in mind that this modification also changes the left/right associativity of parse trees.
+</p>
+
+<h2>Left Factoring</h2>
+
+<p>
+So now we have a grammar that can be parsed using an RD parser but there's still one problem, which is backtracking.
+Consider the case when you need to parse an <code>E</code> and your input is such that you should use the second derivation <code>T</code> instead of the first one <code>T + E</code>.
+An RD parser in this case first tries to parse <code>T</code> and then realizes it should be using another derivation when it couldn't find a <code>+</code> afterwards.
+When it tries to use the second derivation, it tries to parse <code>T</code> again.
+We don't usually want that as it will basically increase the complexity.
+</p>
+
+<p>
+In general, backtracking occurs when there are common initial elements in derivations of a rule as such:
+</p>
+
+<pre>
+A -> Bc | Bd
+</pre>
+
+<p>
+The solution is to factor out the common part to a new rule, namely left factoring.
+Rewriting our grammar after left factoring we get:
+</p>
+
+<pre>
+E  -> T E'
+E' -> + T E' | eps
+T  -> F T'
+T' -> * F T' | eps
+F  -> ( E )  | Int
+</pre>
+
+<p>
+Now I should mention that many people go directly from version 1 of our grammar to version 3 or sometimes even directly come up with version 3.
+This is perfectly acceptable and the only reason I have went through this burden is to show you the common problems associated with grammars.
+</p>
+
+<h2>Extended Backus Naur Form</h2>
+
+<p>
+Lastly we convert the above Context-free grammar (CFG) to its Extended Backus-Naur Form (EBNF):
+</p>
+
+<pre>
+E ::= T {+ T}
+T ::= F {* F}
+F ::= ( E ) | Int
+</pre>
+
+<p>
+Since repetitions are possible with EBNF, we are able to merge some of the rules.
+Each rule in this form corresponds to a function in the implementation.
+</p>
+
+<h2>Scanning Code</h2>
+
+<p>
+First thing to do before parsing is to get the input from the user.
+For this purpose, we use a scanning routine that will read a single line from stdin discarding all the whitespace:
+</p>
+
+<pre>
+int scan(char *s, int lim)
+{
+    int i, c;
+
+    i = 0;
+    while (--lim > 0 && (c = getchar()) != EOF && c != '\n') {
+        if (!isspace(c)) {
+            s[i++] = c;
+        }
+    }
+    if (c == '\n') {
+        s[i++] = c;
+    }
+    s[i] = '\0';
+    return i;
+}
+</pre>
+
+<p>
+By removing all whitespace from the input, we minimize the need for a seperate lexer.
+The only thing required for tokenization is to parse consecutive digits as a single number which is handled directly in parsing routines.
+</p>
+
+<h2>Looping Code</h2>
+
+<p>
+Main routine consists of a loop for reading the input, evaluating the expression, and printing the result, which is usually referred as Read-Eval-Print Loop (REPL):
+</p>
+
+<pre>
+#define MAXLINE 1000
+
+char *curr;
+
+int main(void)
+{
+    char line[MAXLINE];
+
+    printf("> ");
+    while (scan(line, MAXLINE)) {
+        curr = line;
+        printf("= %d\n> ", expr());
+    }
+    return 0;
+}
+</pre>
+
+<p>
+The current input char <code>*curr</code> is held as a global variable to be shared between parsing functions.
+</p>
+
+<h2>Expression Code</h2>
+
+<p>
+Expression parsing rule is pretty straightforward to implement:
+</p>
+
+<pre>
+// E ::= T {+ T}
+int expr(void)
+{
+    int result = term();
+    while (*curr == '+') {
+        ++curr;
+        result += term();
+    }
+    return result;
+}
+</pre>
+
+<p>
+Expressions are terms connected with the plus operator.
+Terms are parsed and summed up as long as there is <code>+</code> operator.
+This repetition is implemented with a simple loop.
+</p>
+
+<h2>Term Code</h2>
+
+<p>
+Term parsing rule is almost the same as the expression rule:
+</p>
+
+<pre>
+// T ::= F {* F}
+int term(void)
+{
+    int result = fact();
+    while (*curr == '*') {
+        ++curr;
+        result *= fact();
+    }
+    return result;
+}
+</pre>
+
+<p>
+Since term parsing is done while parsing expressions, precedence of <code>*</code> operator is higher than <code>+</code> operator just like in the grammar.
+</p>
+
+<h2>Factor Code</h2>
+
+<p>
+Factor parsing is the most complicated of the three:
+</p>
+
+<pre>
+// F ::= ( E ) | Int
+int fact(void)
+{
+    int result;
+
+    if (*curr == '(') {
+        ++curr;
+        result = expr();
+        if (*curr == ')') {
+            ++curr;
+        } else {
+            printf("error: expected ')'\n");
+            return 0;
+        }
+        return result;
+    } else if (isdigit(*curr)) {
+        result = *curr - '0';
+        ++curr;
+        while (isdigit(*curr)) {
+            result = result * 10 + (*curr - '0');
+            ++curr;
+        }
+        return result;
+    } else {
+        printf("error: expected a parenthesis or a number at: %c\n", *curr);
+        return 0;
+    }
+}
+</pre>
+
+<p>
+Factor parsing checks the current character to decide whether to parse a parenthesis expression or a number.
+If it is a parenthesis expression, a <code>)</code> character is expected after the expression.
+Number parsing is done as long as there are digits.
+</p>
+
+<p>
+Full code can be viewed <a href="../codes/rd.c.html">here</a>.
+</p>
+
+<hr>
+
+<footer>
+<a href="https://gokcehan.github.io">home</a> &middot; <a href="https://github.com/gokcehan">github</a> &middot; gokcehankara (at) gmail (dot) com 
+</footer>
+
+</div>
+</body>
+
+</html>

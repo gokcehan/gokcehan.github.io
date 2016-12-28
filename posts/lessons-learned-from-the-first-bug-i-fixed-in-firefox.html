@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>Lessons Learned from the First Bug I Fixed in Firefox</title>
+  <link rel="stylesheet" type="text/css" href="../style.css">
+</head>
+
+<body>
+<div class="content">
+
+<h1>Lessons Learned from the First Bug I Fixed in Firefox</h1>
+
+<p>
+I had a long standing desire to contribute to Firefox code and this summer I finally had the chance to do so.
+I like to share my experience for those who have similar intentions but haven't done so yet so here we go.
+</p>
+
+<p>
+Your first stop should of course be <a href="https://developer.mozilla.org/en-US/">MDN</a> which stands for Mozilla Developer Network.
+There you can find all kinds of information including the ones I will mention in this post and documentation about the development of Firefox and other Mozilla components.
+It's a wiki site meaning that you can already start seeking opportunities to contribute to Mozilla by possibly updating missing or outdated information in the documentation.
+I will not go into detail about how to build Firefox since all the information is already available there and it's pretty straightforward.
+</p> 
+
+<p>
+Your second objective is to find a bug you can work on.
+I used <a href="http://www.joshmatthews.net/bugsahoy/">bugsahoy</a> for this purpose and found myself a mentored bug.
+There are also a few alternative ways to find some work.
+You can fix a bug that you already encounter or try to add a feature that you want to see in Firefox although these could likely be more difficult than mentored bugs.
+</p>
+
+<p>So <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1019838">my first bug</a> was a simple memory leak in the <a href="http://lxr.mozilla.org/mozilla-central/source/js/src/jsprf.cpp">sprintf</a> function of the underlying JavaScript engine.
+At first I wasn't able to comprehend how the code was actually working since it was a little bit convoluted.
+Luckily, the leaking variable was already mentioned in the report so I was able to see the bug without understanding much of the code itself.
+</p> 
+
+<blockquote>
+<p>
+Sometimes you don't need to understand how the code works, it may be enough just to recognize the bug
+</p>
+</blockquote>
+
+<p>
+The particular function I have worked on was a 300 hundred lines beast.
+As we know, long functions are usually dangerous and this was no exception.
+It was leaking memory at early returns.
+High level conceptual overview of the function looks like this:
+</p>
+
+<pre>
+static int
+dosprintf(..)
+{
+    Resource* resource = allocate(..);
+
+    // ..
+    // 100 lines later
+    // ..
+
+    if (..) {
+        return -1;
+        // oops, we forgot to free the resource here
+    }
+
+    // ..
+    // 200 lines later
+    // ..
+
+    free(resource); // like this
+    return -1;
+}
+</pre>
+
+<p>
+This is a classical example for why people use <a href="https://en.wikipedia.org/wiki/Resource_Acquisition_Is_Initialization">RAII</a> idiom in C++ and this was already the suggestion in the first comment by the mentor.
+Since the bug wasn't touched for about 2 months, I started working on it without notifying anyone but in general you should tell people that you're working on the bug so people shall not work on the same bug at the same time.
+My first attempt looked like this:
+</p> 
+
+<pre>
+struct ResourceHandler
+{
+    Resource* resource;
+
+    ResourceHandler(..)
+    {
+        resource = allocate(..);
+    }
+
+    ~ResourceHandler() {
+        free(resource);
+    }
+};
+
+static int
+dosprintf(..)
+{
+    ResourceHandler handle(..);
+    Resource* resource = handle.resource;
+
+    // ..
+    // 100 lines later
+    // ..
+
+    if (..) {
+        // now we don't need to manually free resource here
+        return -1;
+    }
+
+    // ..
+    // 200 lines later
+    // ..
+
+    // as well as here
+    return -1;
+}
+</pre>
+
+<p>
+In the review, I was told to simplify the constructor since I was getting all the arguments of the allocator and construct the object inside the handler while I could simply take the pointer of the constructed object to be more generic.
+There was also a problem with my destructor.
+The way this allocator works was to allocate the memory on the stack when the number of items are small and on the heap when its large, so only in the latter case it was required to free the memory.
+</p>
+
+<blockquote>
+<p>
+Even the simplest stuff can take a lot of time especially the first time, don't get discouraged by this
+</p>
+</blockquote>
+
+<p>
+There was also another suggestion that I could use a unique pointer here instead of adding an extra class.
+Mozilla usually have its own implementation for these special purpose classes besides other commonly used structures such as vector.
+These are slightly different and often more capable than the versions provided by the standard.
+I was told that the usage examples for <code>mozilla::UniquePtr</code> class is available as comments in the source code.
+I found the file and start reading.
+</p> 
+
+<blockquote>
+<p>
+You may probably be required to read some existing code and get used to conventions
+</p>
+</blockquote>
+
+<p>
+So <code>mozilla::UniquePtr</code> takes two template parameters, one for the type itself and the other for the deletion operator to free the resource.
+There are already predefined deleters for existing types, but since our allocator was a little bit unusual returning either heap or stack data depending on the size, I couldn't find a way to use these existing deleters.
+Hence I asked for an example.
+</p> 
+
+<p>
+Turned out my hunch was right and we required a custom deleter class, so it wasn't much cleaner than the first solution.
+We then come to agree on the last suggestion that was going on in the discussion while we were working on this, which was to use a <code>mozilla::Vector</code> in the allocator.
+</p>
+
+<p>
+If you were actually paying attention to the details I have been telling, you might be wondering how could a vector be useful here.
+Unlike a standard vector, <code>mozilla::Vector</code> takes an additional template parameter as the size that is used to determine whether the memory should be allocated on the stack or the heap, which is exactly what the allocator was doing manually.
+After reading a little bit about <code>mozilla::Vector</code>, I have sent a new version of the patch using <code>mozilla::Vector</code> accordingly.
+</p> 
+
+<blockquote>
+<p>
+Be ready to make radical changes to your patch several times
+</p>
+</blockquote>
+
+<p>
+At first, I was returning the resource vector by value from the allocate function.
+I thought it wouldn't make an extra copy since <code>mozilla::Vector</code> already has a move assignment operator, but I had forgotten about the stack allocation case.
+For this case, the compiler would have to copy the vector before the function returns.
+My mentor sent a review immediately afterwards in which he told me to pass the resource vector as an out parameter instead, so in the end my updated patch looked something like this:
+</p>
+
+<pre>
+typedef Vector&lt;Resource, NAS_DEFAULT_NUM, SystemAllocPolicy&gt; ResourceVector;
+
+// ..
+
+static void
+allocate(.., ResourceVector& res)
+{
+    // fill the vector without
+    // explicitly managing heap or stack data
+}
+
+static int
+dosprintf(..)
+{
+    ResourceVector res;
+    allocate(.., res);
+
+    // ..
+    // 100 lines later
+    // ..
+
+    if (..) {
+        // Vector should free the memory here
+        return -1;
+    }
+
+    // ..
+    // 200 lines later
+    // ..
+
+    // as well as here
+    return -1;
+}
+</pre>
+
+<p>
+Now a somewhat interesting thing about this patch was that, since it wasn't required anymore to manually manage memory for heap and stack allocation cases in the allocation function as well as memory freeing in the <code>dosprintf</code> function, it was actually reducing the amount of code.
+Just to be specific, this was a -37 / +20 lines patch.
+Therefore I was quite satisfied with how the things worked out in the end.
+</p>
+
+<blockquote>
+<p>
+Believe it or not, if your patch removes some code this is often a good thing
+</p>
+</blockquote>
+
+<p>
+Discussions so far had involved another module peer as well, so my mentor decided to flag him for the review afterwards.
+He was a little busy at that time so the reviews took some time, which he later kindly apologized for it.
+I have got my first response after a week.
+I have changed a few things according to the review and then asked him a small question afterwards.
+I couldn't hear from him for a few days so I picked an arbitrary answer myself and sent an updated patch instead.
+After about a week, he came back to me and said the patch is OK except for a few small issues mostly about the style.
+He told me that he will fix these locally and push the patch afterwards.
+He also asked for my name and contact, which apparently I had forgotten to add to the patch.
+</p>
+
+<blockquote>
+<p>
+Reviews can take some time, so ideally you should work on multiple bugs at the same time
+</p>
+</blockquote>
+
+<p>
+Last week, about 2 weeks after the patch was merged, I received an email from this bug.
+Apparently, we had forgotten to change the return value in some conditional while we were tying our modified allocator function to the rest, in fact this was only on the final version of the patch after style fixes which I blamefully only skimmed through.
+It was was causing an uninitialized variable error so someone had reported a <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1070689">follow-up bug</a>:
+</p>
+
+<blockquote>
+<p>
+Things can come out of the grave at any time
+</p>
+</blockquote>
+
+<p>
+In the previous bug, we had already talked about changing the return type of functions from <code>int</code> to <code>bool</code> but then decided to leave it to a future bug afterwards.
+I took this chance to send a patch for this earlier today. We will see how it goes..
+</p>
+
+<hr>
+
+<footer>
+<a href="https://gokcehan.github.io">home</a> &middot; <a href="https://github.com/gokcehan">github</a> &middot; gokcehankara (at) gmail (dot) com 
+</footer>
+
+</div>
+</body>
+
+</html>
