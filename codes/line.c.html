@@ -1,0 +1,60 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+<title>~/Dropbox/workspace/web/codes/line.c.html</title>
+<meta name="Generator" content="Vim/8.0">
+<meta name="plugin-version" content="vim7.4_v2">
+<meta name="syntax" content="c">
+<meta name="settings" content="use_css,no_foldcolumn,expand_tabs,prevent_copy=">
+<meta name="colorscheme" content="none">
+<style type="text/css">
+<!--
+pre { font-family: monospace; color: #000000; background-color: #ffffff; }
+body { font-family: monospace; color: #000000; background-color: #ffffff; }
+* { font-size: 1em; }
+.PreProc { color: #c000c0; }
+.Type { color: #008000; }
+.Statement { color: #af5f00; }
+.Comment { color: #0000c0; }
+.Constant { color: #c00000; }
+-->
+</style>
+
+<script type='text/javascript'>
+<!--
+
+-->
+</script>
+</head>
+<body>
+<pre id='vimCodeElement'>
+<span class="Comment">//</span>
+<span class="Comment">// line.c</span>
+<span class="Comment">//</span>
+<span class="Comment">// Lines of fixed length</span>
+<span class="Comment">//</span>
+
+<span class="PreProc">#include </span><span class="Constant">&lt;stdio.h&gt;</span>
+<span class="PreProc">#include </span><span class="Constant">&lt;stdlib.h&gt;</span>
+
+<span class="PreProc">#define MAXLINE </span><span class="Constant">1000</span>
+
+<span class="Type">void</span> process(<span class="Type">char</span> *line)
+{
+    puts(line);
+}
+
+<span class="Type">int</span> main(<span class="Type">void</span>)
+{
+    <span class="Type">char</span> line[MAXLINE];
+    <span class="Statement">while</span> (fgets(line, MAXLINE, <span class="Constant">stdin</span>)) {
+        process(line);
+    }
+
+    <span class="Statement">return</span> <span class="Constant">0</span>;
+}
+</pre>
+</body>
+</html>
+<!-- vim: set foldmethod=manual : -->

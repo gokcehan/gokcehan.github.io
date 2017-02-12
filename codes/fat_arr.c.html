@@ -1,0 +1,193 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+<title>~/Dropbox/workspace/web/codes/fat_arr.c.html</title>
+<meta name="Generator" content="Vim/8.0">
+<meta name="plugin-version" content="vim7.4_v2">
+<meta name="syntax" content="c">
+<meta name="settings" content="use_css,no_foldcolumn,expand_tabs,prevent_copy=">
+<meta name="colorscheme" content="none">
+<style type="text/css">
+<!--
+pre { font-family: monospace; color: #000000; background-color: #ffffff; }
+body { font-family: monospace; color: #000000; background-color: #ffffff; }
+* { font-size: 1em; }
+.PreProc { color: #c000c0; }
+.Type { color: #008000; }
+.Statement { color: #af5f00; }
+.Comment { color: #0000c0; }
+.Constant { color: #c00000; }
+.Special { color: #c000c0; }
+-->
+</style>
+
+<script type='text/javascript'>
+<!--
+
+-->
+</script>
+</head>
+<body>
+<pre id='vimCodeElement'>
+<span class="Comment">//</span>
+<span class="Comment">// fat_arr.c</span>
+<span class="Comment">//</span>
+<span class="Comment">// Fat pointer array</span>
+<span class="Comment">//</span>
+
+<span class="PreProc">#include </span><span class="Constant">&lt;stdio.h&gt;</span>
+<span class="PreProc">#include </span><span class="Constant">&lt;stdlib.h&gt;</span>
+
+<span class="PreProc">#define ARR_INIT_CAP </span><span class="Constant">2</span>
+<span class="PreProc">#define ARR_GROW_RAT </span><span class="Constant">2</span>
+
+<span class="PreProc">#define TYPE </span><span class="Type">int</span>
+
+<span class="Type">typedef</span> TYPE *ARR;
+
+ARR  arrnew(<span class="Type">void</span>);
+ARR  arrnewcap(<span class="Type">int</span>);
+<span class="Type">void</span> arrdelete(ARR);
+ARR  arrappend(ARR, TYPE);
+ARR  arrresize(ARR, <span class="Type">int</span>);
+TYPE arrremove(ARR);
+<span class="Type">int</span>  arrlen(ARR);
+<span class="Type">int</span>  arrcap(ARR);
+
+<span class="Type">inline</span> ARR
+arrnew(<span class="Type">void</span>)
+{
+    <span class="Statement">return</span> arrnewcap(ARR_INIT_CAP);
+}
+
+<span class="Type">inline</span> ARR
+arrnewcap(<span class="Type">int</span> cap)
+{
+    <span class="Type">int</span> *buf;
+
+    <span class="Statement">if</span> ((buf = malloc(cap * <span class="Statement">sizeof</span>(TYPE) + <span class="Constant">2</span> * <span class="Statement">sizeof</span>(<span class="Type">int</span>))) == <span class="Constant">NULL</span>) {
+        <span class="Statement">return</span> <span class="Constant">NULL</span>;
+    }
+
+    buf[<span class="Constant">0</span>] = <span class="Constant">0</span>;
+    buf[<span class="Constant">1</span>] = cap;
+
+    <span class="Statement">return</span> (ARR)(buf + <span class="Constant">2</span>);
+}
+
+<span class="Type">inline</span> <span class="Type">void</span>
+arrdelete(ARR arr)
+{
+    free((<span class="Type">int</span> *)arr - <span class="Constant">2</span>);
+}
+
+<span class="Type">inline</span> ARR
+arrappend(ARR arr, TYPE val)
+{
+    <span class="Type">int</span> *buf, len, cap;
+
+    buf = (<span class="Type">int</span> *)arr - <span class="Constant">2</span>;
+    len = buf[<span class="Constant">0</span>];
+    cap = buf[<span class="Constant">1</span>];
+
+    <span class="Statement">if</span> (cap &lt;= len &amp;&amp; (arr = arrresize(arr, cap * ARR_GROW_RAT)) == <span class="Constant">NULL</span>) {
+        <span class="Statement">return</span> <span class="Constant">NULL</span>;
+    }
+
+    buf = (<span class="Type">int</span> *)arr - <span class="Constant">2</span>;
+    arr[buf[<span class="Constant">0</span>]++] = val;
+
+    <span class="Statement">return</span> arr;
+}
+
+<span class="Type">inline</span> ARR
+arrresize(ARR arr, <span class="Type">int</span> ncap)
+{
+    <span class="Type">int</span> *buf, len;
+
+    buf = (<span class="Type">int</span> *)arr - <span class="Constant">2</span>;
+    len = buf[<span class="Constant">0</span>];
+
+    <span class="Statement">if</span> ((buf = realloc(buf, ncap * <span class="Statement">sizeof</span>(TYPE) + <span class="Constant">2</span> * <span class="Statement">sizeof</span>(<span class="Type">int</span>))) == <span class="Constant">NULL</span>) {
+        <span class="Statement">return</span> <span class="Constant">NULL</span>;
+    }
+
+    buf[<span class="Constant">0</span>] = len;
+    buf[<span class="Constant">1</span>] = ncap;
+
+    <span class="Statement">return</span> (ARR)(buf + <span class="Constant">2</span>);
+}
+
+<span class="Type">inline</span> TYPE
+arrremove(ARR arr)
+{
+    <span class="Statement">return</span> arr[--((<span class="Type">int</span> *)arr - <span class="Constant">2</span>)[<span class="Constant">0</span>]];
+}
+
+<span class="Type">inline</span> <span class="Type">int</span>
+arrlen(ARR arr)
+{
+    <span class="Statement">return</span> ((<span class="Type">int</span> *)arr - <span class="Constant">2</span>)[<span class="Constant">0</span>];
+}
+
+<span class="Type">inline</span> <span class="Type">int</span>
+arrcap(ARR arr)
+{
+    <span class="Statement">return</span> ((<span class="Type">int</span> *)arr - <span class="Constant">2</span>)[<span class="Constant">1</span>];
+}
+
+<span class="Comment">////////////////////////////////////////////////////////////////////////////////</span>
+
+<span class="PreProc">#include </span><span class="Constant">&lt;stdio.h&gt;</span>
+
+<span class="PreProc">#define LIMIT </span><span class="Constant">100</span>
+
+<span class="Type">int</span> a = <span class="Constant">0</span>;
+<span class="Type">int</span> b = <span class="Constant">1</span>;
+
+<span class="Type">int</span> get(<span class="Type">void</span>)
+{
+    <span class="Type">int</span> tmp = a;
+    a = b;
+    b = tmp + b;
+    <span class="Statement">return</span> tmp;
+}
+
+<span class="Type">void</span> process(<span class="Type">int</span> i)
+{
+    printf(<span class="Constant">&quot;</span><span class="Special">%d</span><span class="Special">\n</span><span class="Constant">&quot;</span>, i);
+}
+
+<span class="Type">int</span> main(<span class="Type">int</span> argc, <span class="Type">char</span> *argv[])
+{
+    <span class="Type">int</span> i, num;
+
+    <span class="Type">int</span> limit = argc &lt; <span class="Constant">2</span> ? LIMIT : atoi(argv[<span class="Constant">1</span>]);
+
+    <span class="Type">int</span> *arr = arrnew();
+
+    <span class="Statement">while</span> ((num = get()) &lt; limit) {
+        arr = arrappend(arr, num);
+    }
+
+    <span class="Statement">for</span> (i = <span class="Constant">0</span>; i &lt; arrlen(arr); ++i) {
+        process(arr[i]);
+    }
+
+    <span class="Statement">for</span> (i = arrlen(arr)-<span class="Constant">1</span>; i &gt; <span class="Constant">0</span>; --i) {
+        arr[i] -= arr[i-<span class="Constant">1</span>];
+    }
+
+    <span class="Statement">for</span> (i = arrlen(arr)-<span class="Constant">1</span>; i &gt;= <span class="Constant">0</span>; --i) {
+        process(arrremove(arr));
+    }
+
+    arrdelete(arr);
+
+    <span class="Statement">return</span> <span class="Constant">0</span>;
+}
+</pre>
+</body>
+</html>
+<!-- vim: set foldmethod=manual : -->

@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Dynamic Arrays in C Language</title>
+  <link rel="stylesheet" type="text/css" href="../style.css">
+</head>
+
+<body>
+<div class="content">
+
+<h1>Dynamic Arrays in C Language</h1>
+
+<p>
+This post is about implementing dynamically growing arrays in C language.
+In other languages, this is implemented as <code>std::vector</code> in C++, <code>ArrayList</code> in Java, and <code>list</code> in Python and so on.
+Dynamic arrays also sometimes refer to dynamically allocated arrays which is not this post is about.
+Implementations more or less go from the simplest to the most complicated, the idea being you should stop whenever you find a good enough solution for your case.
+<p>
+
+<h2>Plain Arrays</h2>
+
+<p>
+Coming from a more advanced language, one might be tempted to look for a dynamic array right away.
+This may sound silly at first but good old plain arrays are the easiest choice for the job in many cases.
+This is possible when you can come up with a number for the maximum number of elements in the array.
+</p>
+
+<p>
+A common example is reading a line of text from a well formed standard input or file.
+For most applications, you can assume lines have at most a thousand characters or some other fixed value so you can allocate that much beforehand:
+</p>
+
+<pre>
+#define MAXLINE 1000
+char line[MAXLINE];
+while (fgets(line, MAXLINE, stdin)) {
+    process(line);
+}
+</pre>
+
+<p>
+In this example, standard <code>fgets</code> function reads until a <code>\n</code> occurs or the buffer is filled.
+Therefore, it is always safe against buffer overflows, however splitting a line is possible if a line is too long.
+You can optionally check the existence of a trailing <code>\n</code> in the end of <code>line</code> to see if a line is split or not.
+Also note that, above example allocates on the stack but you can also allocate on the heap if you need.
+</p>
+
+<p>
+Character arrays can be null terminated but this is not always possible for other types of arrays.
+For example, it is not possible to distinguish null termination and the number zero in integer arrays.
+For this reason, you might need to store an additional length parameter in the same scope, whether it is a struct, function, or a global scope.
+Finally, if you need a dynamically growing array, you can store a capacity parameter in addition to length and reallocate space when necessary:
+</p>
+
+<pre>
+int len = 0;
+int cap = 2;
+int *buf = malloc(cap * sizeof(int));
+
+while ((num = get()) < limit) {
+    if (cap <= len) {
+        buf = realloc(buf, (cap *= 2) * sizeof(int));
+    }
+    buf[len++] = num;
+}
+
+for (i = 0; i < len; ++i) {
+    process(buf[i]);
+}
+
+for (i = len-1; i > 0; --i) {
+    buf[i] -= buf[i-1];
+}
+
+for (i = len-1; i >= 0; --i) {
+    process(buf[--len]);
+}
+
+free(buf);
+</pre>
+
+<p>
+In this example, a new number is read into an integer named <code>num</code> using a <code>get()</code> function until the values of read numbers exceed the <code>limit</code> value.
+Since it may not be possible to determine the number of elements beforehand, we increase the array capacity dynamically.
+The rest of the code is just an arbitrary use case to demonstrate various operations on the array.
+</p>
+
+<p>
+Plain arrays can be used dynamically relatively easily but it can sometimes be error prone.
+You need to pass an extra length parameter to functions and check the capacity when adding new elements.
+Also you need to hold these parameters in the current scope which can make things complicated.
+</p>
+
+<h2>Dynamic Arrays</h2>
+
+<p>
+In order to create an abstraction, one might decide to implement a specific data structure to be used as dynamic arrays.
+For this purpose, we pack the buffer, length, and capacity parameters within a struct:
+</p>
+
+<pre>
+#define TYPE int
+
+struct arr {
+    TYPE *buf;
+    int   len;
+    int   cap;
+};
+</pre>
+
+<p>
+We also provide allocation and freeing functions with the new structure.
+In this example, <code>arrnew</code> creates an array with a default capacity, <code>arrnewcap</code> creates an array with a specified capacity, and <code>arrdelete</code> frees the array:
+</p>
+
+<pre>
+#define ARR_INIT_CAP 2
+
+inline struct arr *
+arrnew(void)
+{
+    return arrnewcap(ARR_INIT_CAP);
+}
+
+inline struct arr *
+arrnewcap(int cap)
+{
+    struct arr *arr;
+
+    if ((arr = malloc(sizeof(struct arr))) == NULL) {
+        return NULL;
+    }
+
+    if ((arr->buf = malloc(cap * sizeof(TYPE))) == NULL) {
+        free(arr);
+        return NULL;
+    }
+
+    arr->len = 0;
+    arr->cap = cap;
+
+    return arr;
+}
+
+inline void
+arrdelete(struct arr *arr)
+{
+    free(arr->buf);
+    free(arr);
+}
+</pre>
+
+<p>
+Similarly adding and removing elements is handled by <code>arrappend</code> and <code>arrremove</code> respectively.
+Reserving extra space or shrinking existing one is accomplished using <code>arrresize</code>:
+</p>
+
+<pre>
+#define ARR_GROW_RAT 2
+
+inline int
+arrappend(struct arr *arr, TYPE val)
+{
+    if (arr->cap <= arr->len && arrresize(arr, arr->cap * ARR_GROW_RAT) == -1) {
+        return -1;
+    }
+
+    arr->buf[arr->len++] = val;
+
+    return 0;
+}
+
+inline int
+arrresize(struct arr *arr, int ncap)
+{
+    TYPE *nbuf;
+
+    if ((nbuf = realloc(arr->buf, ncap * sizeof(TYPE))) == NULL) {
+        return -1;
+    }
+
+    arr->cap = ncap;
+    arr->buf = nbuf;
+
+    return 0;
+}
+
+inline TYPE
+arrremove(struct arr *arr)
+{
+    return arr->buf[--arr->len];
+}
+</pre>
+
+<p>
+Array indexing is done by directly accessing the <code>buf</code> field of the structure.
+Separate indexing functions can be provided but they don't provide much advantage over this.
+Similarly <code>len</code> and <code>cap</code> fields are considered public and can be accessed directly.
+The previous scenario can now be accomplished as follows:
+</p>
+
+<pre>
+struct arr *arr = arrnew();
+
+while ((num = get()) < limit) {
+    arrappend(arr, num);
+}
+
+for (i = 0; i < arr->len; ++i) {
+    process(arr->buf[i]);
+}
+
+for (i = arr->len-1; i > 0; --i) {
+    arr->buf[i] -= arr->buf[i-1];
+}
+
+for (i = arr->len-1; i >= 0; --i) {
+    process(arrremove(arr));
+}
+
+arrdelete(arr);
+</pre>
+
+<p>
+This code is pretty straightforward and idiomatic for C programmers, but it has a major problem.
+Code is not generic and you can only implement this for a single type since there is no function overloading in C.
+Therefore, this is only acceptable if you only need it for a single type in a small codebase.
+</p>
+
+<h2>Void Pointer Arrays</h2>
+
+<p>
+Void pointers can be used as an alternative when more than one type is needed.
+To define a void pointer array, we simply change the type in our previous code to a void pointer:
+</p>
+
+<pre>
+#define TYPE void *
+</pre>
+
+<p>
+Void pointer is a generic pointer type that can point to any type.
+We can use this implementation for any type we need.
+Our previous scenario now looks almost the same as before:
+</p>
+
+<pre>
+int num;
+struct arr *arr;
+
+arr = arrnew();
+
+while ((num = get()) < limit) {
+    arrappend(arr, num);
+}
+
+for (i = 0; i < arr->len; ++i) {
+    process_int(arr->buf[i]);
+}
+
+for (i = arr->len-1; i > 0; --i) {
+    arr->buf[i] -= arr->buf[i-1];
+}
+
+for (i = arr->len-1; i >= 0; --i) {
+    process_int(arrremove(arr));
+}
+
+arrdelete(arr);
+</pre>
+
+<p>
+In this code, <code>num</code> is an <code>int</code> but it is implicitly casted to <code>void *</code> when we pass it to <code>arrappend</code>.
+We could also make this more explicit by putting <code>(void *)</code> before <code>num</code>.
+Similarly <code>arr->buf[i]</code> is a <code>void *</code> but it is casted to <code>int</code> when we pass it to <code>process_int</code>.
+We change the previous name <code>process</code> to <code>process_int</code> to make it more explicit what type it accepts, otherwise it is the same code.
+</p>
+
+<p>
+Now this code should compile and most likely run as before.
+However, depending on the warning level you may see a warning as such:
+</p>
+
+<pre>
+warning: passing argument 2 of ‘arrappend’ makes pointer from integer without a cast [-Wint-conversion]
+         arrappend(arr, num);
+                        ^
+note: expected ‘void *’ but argument is of type ‘int’
+ arrappend(struct arr *arr, TYPE val)
+ ^
+</pre>
+
+<p>
+This is the implicit cast we talked about before.
+When we try to make the cast explicit, this time we get a warning as such:
+</p>
+
+<pre>
+warning: cast to pointer from integer of different size [-Wint-to-pointer-cast]
+         arrappend(arr, (void *)num);
+                        ^
+</pre>
+
+<p>
+This warning is more informative than the previous one.
+It basically states that <code>int</code> and <code>void *</code> have different sizes.
+We can check the sizes of types with the following code:
+</p>
+
+<pre>
+printf("sizeof(int)    = %zu\n", sizeof(int));
+printf("sizeof(int *)  = %zu\n", sizeof(int *));
+printf("sizeof(void *) = %zu\n", sizeof(char *));
+</pre>
+
+<p>
+Depending on your machine, you may or may not get the following output:
+</p>
+
+<pre>
+sizeof(int)    = 4
+sizeof(int *)  = 8
+sizeof(void *) = 8
+</pre>
+
+<p>
+This means we are actually trying to store 4 byte integers in 8 byte fields.
+Memory layout of an array having three elements with values 8, 13, and 21 should look like this:
+</p>
+
+<pre>
+0                   1                   2
+0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4
+|   8   | empty |  13   | empty |  21   | empty |
+</pre>
+
+<p>
+This is not an efficient way to store integers but it works without a problem.
+However, this is not true in general.
+If we were to store a type that is more than 8 bytes in size, then the elements would overwrite each other.
+This is the case for most structures consisting of multiple members.
+</p>
+
+<p>
+Therefore, the right way to use void pointer arrays is by using them with pointer types instead of value types.
+Void pointers are guaranteed to have a size that can hold pointers to any other data type.
+Our code looks like this when using integer pointers:
+</p>
+
+<pre>
+int num, *ip;
+struct arr *arr;
+
+arr = arrnew();
+
+while ((num = get()) < limit) {
+    ip = malloc(sizeof(int));
+    *ip = num;
+    arrappend(arr, ip);
+}
+
+for (i = 0; i < arr->len; ++i) {
+    process_intp(arr->buf[i]);
+}
+
+for (i = arr->len-1; i > 0; --i) {
+    *(int *)(arr->buf[i]) -= *(int *)(arr->buf[i-1]);
+}
+
+for (i = arr->len-1; i >= 0; --i) {
+    process_intp(arrremove(arr));
+    free(arr->buf[arr->len]);
+}
+
+arrdelete(arr);
+</pre>
+
+<p>
+In the above code, we allocate new integers on the heap.
+If we use the memory address of the <code>num</code> variable, all added elements would point to the same element on the stack and they would all change when we read a new element.
+</p>
+
+<p>
+We have already checked the size of integer pointers before.
+Memory layout of an array with integer pointers having values 8, 13, and 21 now looks like this:
+</p>
+
+<pre>
+0                   1                   2
+0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4
+|    pointer    |    pointer    |    pointer    |
+        |               |               |
+        |               v               |
+        v              +--+             |
+       +-+             |13|             v
+       |8|             +--+            +--+
+       +-+                             |21|
+                                       +--+
+</pre>
+
+<p>
+This works without a problem but since values are spread around the memory, performance may suffer.
+This may not be what you want depending on your needs.
+Also, since we are allocating on the heap, we also need to free memory when we remove an element.
+</p>
+
+<p>
+Note that for some types this implementation is simple to use.
+Consider the use case with strings as below:
+</p>
+
+<pre>
+struct arr *arr;
+
+arr = arrnew();
+
+arrappend(arr, "one");
+arrappend(arr, "two");
+arrappend(arr, "three");
+
+for (i = 0; i < arr->len; ++i) {
+    process_charp(arr->buf[i]);
+}
+
+arrdelete(arr);
+</pre>
+
+<p>
+Strings in this code are allocated statically so we don't need to allocate space or free them after the use.
+</p>
+
+<h2>Fat Pointer Arrays</h2>
+
+<p>
+A frequent complaint about C language is that arrays do not store their lenghts.
+Fat pointers have been proposed to solve this problem by holding more than just the address of elements in a pointer.
+This was considered as an addition to the language specification.
+However, it turns out that you can also simply offset pointers to simulate fat pointers without a language change.
+</p>
+
+<p>
+We can use fat pointers to simplify our dynamic array implementation.
+The idea behind is to allocate a little extra space in the beginning of the array when it is created.
+This extra space is used to hold length and capacity parameters of the array.
+Beginning address of elements is returned to the users instead of the actual beginning of allocated space.
+Thus, users are able to use the fat pointer as a regular pointer to access its elements.
+</p>
+
+<p>
+Memory layout of an array having three elements with values 8, 13, and 21 with a capacity of 4 should look like this: 
+</p>
+
+<pre>
+0                   1                   2
+0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4
+|len = 3|cap = 4|   8   |  13   |  21   | empty |
+|               |
+|               v
+v               beginning of elements (returned to users)
+beginning of allocated memory
+</pre>
+
+<p>
+In above example, length and capacity parameters are stored as 4 byte integers.
+Array is also an integer array with 4 byte elements, but these two do not actually need to be the same.
+We define our fat pointer array as a simple pointer for an integer type using a macro:
+</p>
+
+<pre>
+#define TYPE int
+
+typedef TYPE *ARR;
+</pre>
+
+<p>
+We implement allocation and freeing functions to simplify the management of fat pointer arrays.
+Similar to previous implementations, <code>arrnew</code> and <code>arrnewcap</code> allocates an array with a little extra space and returns the offset pointer as described before.
+For freeing, we implement <code>arrdelete</code> function which calculates the actual allocation address of the array and frees it properly:
+</p>
+
+<pre>
+#define ARR_INIT_CAP 2
+
+inline ARR
+arrnew(void)
+{
+    return arrnewcap(ARR_INIT_CAP);
+}
+
+inline ARR
+arrnewcap(int cap)
+{
+    int *buf;
+
+    if ((buf = malloc(cap * sizeof(TYPE) + 2 * sizeof(int))) == NULL) {
+        return NULL;
+    }
+
+    buf[0] = 0;
+    buf[1] = cap;
+
+    return (ARR)(buf + 2);
+}
+
+inline void
+arrdelete(ARR arr)
+{
+    free((int *)arr - 2);
+}
+</pre>
+
+<p>
+We also need to provide functions for operations that may change the array.
+Appending an element is implemented as <code>arrappend</code> which returns a possibly new address.
+Adjusting the capacity of the array is implemented as <code>arrresize</code> which reallocates memory.
+Lastly, removing an element is implemented as <code>arrremove</code> which reduces the length of the array and returns the removed element:
+</p>
+
+<pre>
+inline ARR
+arrappend(ARR arr, TYPE val)
+{
+    int *buf, len, cap;
+
+    buf = (int *)arr - 2;
+    len = buf[0];
+    cap = buf[1];
+
+    if (cap <= len && (arr = arrresize(arr, cap * ARR_GROW_RAT)) == NULL) {
+        return NULL;
+    }
+
+    buf = (int *)arr - 2;
+    arr[buf[0]++] = val;
+
+    return arr;
+}
+
+inline ARR
+arrresize(ARR arr, int ncap)
+{
+    int *buf, len;
+
+    buf = (int *)arr - 2;
+    len = buf[0];
+
+    if ((buf = realloc(buf, ncap * sizeof(TYPE) + 2 * sizeof(int))) == NULL) {
+        return NULL;
+    }
+
+    buf[0] = len;
+    buf[1] = ncap;
+
+    return (ARR)(buf + 2);
+}
+
+inline TYPE
+arrremove(ARR arr)
+{
+    return arr[--((int *)arr - 2)[0]];
+}
+</pre>
+
+<p>
+Unlike previous implementations, we also provide <code>arrlen</code> and <code>arrcap</code> functions to return the length and capacity of the array:
+</p>
+
+<pre>
+inline int
+arrlen(ARR arr)
+{
+    return ((int *)arr - 2)[0];
+}
+
+inline int
+arrcap(ARR arr)
+{
+    return ((int *)arr - 2)[1];
+}
+</pre>
+
+<p>
+We can now use fat pointers in our previous scenario as such:
+</p>
+
+<pre>
+int *arr = arrnew();
+
+while ((num = get()) < limit) {
+    arr = arrappend(arr, num);
+}
+
+for (i = 0; i < arrlen(arr); ++i) {
+    process(arr[i]);
+}
+
+for (i = arrlen(arr)-1; i > 0; --i) {
+    arr[i] -= arr[i-1];
+}
+
+for (i = arrlen(arr)-1; i >= 0; --i) {
+    process(arrremove(arr));
+}
+
+arrdelete(arr);
+</pre>
+
+<p>
+Note that we assign the result of <code>arrappend</code> call to the current pointer.
+We choose this design to make it more explicit in the code that the value of the pointer may have changed after appending an element.
+However, it is also possible to abstract this detail by using an extra macro depending on your taste.
+</p>
+
+<h2>Summary</h2>
+
+<p>
+Summary of each approach along with the code is given below:
+</p>
+
+<p>
+  <ul>
+    <li><a href="../codes/line.c">line.c</a> ( <a href="../codes/line.c.html">.html</a> )</li>
+      <ul>
+        <li>Builtin solution</li>
+        <li>Simple and easy to use</li>
+        <li>Need to know the maximum element size beforehand</li>
+      </ul>
+    <li><a href="../codes/plain_arr.c">plain_arr.c</a> ( <a href="../codes/plain_arr.c.html">.html</a> )</li>
+      <ul>
+        <li>Builtin solution</li>
+        <li>Simple and easy to use</li>
+        <li>Need to check capacity when adding new elements</li>
+        <li>Need to hold length and capacity parameters in the scope</li>
+        <li>Need to pass length parameter to functions</li>
+      </ul>
+    <li><a href="../codes/dyn_arr.c">dyn_arr.c</a> ( <a href="../codes/dyn_arr.c.html">.html</a> )</li>
+      <ul>
+        <li>Holds all parameters within a struct</li>
+        <li>Can only be implemented for a single type</li>
+      </ul>
+    <li><a href="../codes/void_arr.c">void_arr.c</a> ( <a href="../codes/void_arr.c.html">.html</a> )</li>
+      <ul>
+        <li>Holds all parameters within a struct</li>
+        <li>Can be used for any type</li>
+        <li>Can only be safely used with pointer types</li>
+        <li>Requires pointer casts when accessing elements</li>
+      </ul>
+    <li><a href="../codes/fat_arr.c">fat_arr.c</a> ( <a href="../codes/fat_arr.c.html">.html</a> )</li>
+      <ul>
+        <li>Clear syntax</li>
+        <li>Holds all parameters within a pointer</li>
+        <li>Can only be implemented for a single type</li>
+        <li>Need to remember using functions for operations</li>
+      </ul>
+  </ul>
+</p>
+
+<hr>
+
+<footer>
+<a href="https://gokcehan.github.io">home</a> &middot; <a href="https://github.com/gokcehan">github</a> &middot; gokcehankara (at) gmail (dot) com 
+</footer>
+
+</div>
+</body>
+
+</html>

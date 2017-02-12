@@ -1,0 +1,96 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+<title>~/Dropbox/workspace/web/codes/plain_arr.c.html</title>
+<meta name="Generator" content="Vim/8.0">
+<meta name="plugin-version" content="vim7.4_v2">
+<meta name="syntax" content="c">
+<meta name="settings" content="use_css,no_foldcolumn,expand_tabs,prevent_copy=">
+<meta name="colorscheme" content="none">
+<style type="text/css">
+<!--
+pre { font-family: monospace; color: #000000; background-color: #ffffff; }
+body { font-family: monospace; color: #000000; background-color: #ffffff; }
+* { font-size: 1em; }
+.PreProc { color: #c000c0; }
+.Type { color: #008000; }
+.Statement { color: #af5f00; }
+.Comment { color: #0000c0; }
+.Constant { color: #c00000; }
+.Special { color: #c000c0; }
+-->
+</style>
+
+<script type='text/javascript'>
+<!--
+
+-->
+</script>
+</head>
+<body>
+<pre id='vimCodeElement'>
+<span class="Comment">//</span>
+<span class="Comment">// plain_arr.c</span>
+<span class="Comment">//</span>
+<span class="Comment">// Plain array</span>
+<span class="Comment">//</span>
+
+<span class="PreProc">#include </span><span class="Constant">&lt;stdio.h&gt;</span>
+<span class="PreProc">#include </span><span class="Constant">&lt;stdlib.h&gt;</span>
+
+<span class="PreProc">#define LIMIT </span><span class="Constant">100</span>
+
+<span class="Type">int</span> a = <span class="Constant">0</span>;
+<span class="Type">int</span> b = <span class="Constant">1</span>;
+
+<span class="Type">int</span> get(<span class="Type">void</span>)
+{
+    <span class="Type">int</span> tmp = a;
+    a = b;
+    b = tmp + b;
+    <span class="Statement">return</span> tmp;
+}
+
+<span class="Type">void</span> process(<span class="Type">int</span> i)
+{
+    printf(<span class="Constant">&quot;</span><span class="Special">%d</span><span class="Special">\n</span><span class="Constant">&quot;</span>, i);
+}
+
+<span class="Type">int</span> main(<span class="Type">int</span> argc, <span class="Type">char</span> *argv[])
+{
+    <span class="Type">int</span> i, num;
+
+    <span class="Type">int</span> limit = argc &lt; <span class="Constant">2</span> ? LIMIT : atoi(argv[<span class="Constant">1</span>]);
+
+    <span class="Type">int</span> len = <span class="Constant">0</span>;
+    <span class="Type">int</span> cap = <span class="Constant">2</span>;
+    <span class="Type">int</span> *buf = malloc(cap * <span class="Statement">sizeof</span>(<span class="Type">int</span>));
+
+    <span class="Statement">while</span> ((num = get()) &lt; limit) {
+        <span class="Statement">if</span> (cap &lt;= len) {
+            buf = realloc(buf, (cap *= <span class="Constant">2</span>) * <span class="Statement">sizeof</span>(<span class="Type">int</span>));
+        }
+        buf[len++] = num;
+    }
+
+    <span class="Statement">for</span> (i = <span class="Constant">0</span>; i &lt; len; ++i) {
+        process(buf[i]);
+    }
+
+    <span class="Statement">for</span> (i = len-<span class="Constant">1</span>; i &gt; <span class="Constant">0</span>; --i) {
+        buf[i] -= buf[i-<span class="Constant">1</span>];
+    }
+
+    <span class="Statement">for</span> (i = len-<span class="Constant">1</span>; i &gt;= <span class="Constant">0</span>; --i) {
+        process(buf[--len]);
+    }
+
+    free(buf);
+
+    <span class="Statement">return</span> <span class="Constant">0</span>;
+}
+</pre>
+</body>
+</html>
+<!-- vim: set foldmethod=manual : -->
