@@ -19,7 +19,7 @@
 # script. An example for `ls` command is shown below:
 #
 # ltrace ls 2>&1 >/dev/null | ./leak.py
-
+#
 
 import re
 import sys
