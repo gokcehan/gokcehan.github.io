@@ -1,0 +1,173 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+<title>~/Dropbox/workspace/web/codes/pcap.py.html</title>
+<meta name="Generator" content="Vim/8.0">
+<meta name="plugin-version" content="vim7.4_v2">
+<meta name="syntax" content="python">
+<meta name="settings" content="use_css,no_foldcolumn,expand_tabs,prevent_copy=">
+<meta name="colorscheme" content="none">
+<style type="text/css">
+<!--
+pre { font-family: monospace; color: #000000; background-color: #ffffff; }
+body { font-family: monospace; color: #000000; background-color: #ffffff; }
+* { font-size: 1em; }
+.PreProc { color: #c000c0; }
+.Identifier { color: #008080; }
+.Statement { color: #af5f00; }
+.Comment { color: #0000c0; }
+.Constant { color: #c00000; }
+.Special { color: #c000c0; }
+-->
+</style>
+
+<script type='text/javascript'>
+<!--
+
+-->
+</script>
+</head>
+<body>
+<pre id='vimCodeElement'>
+<span class="Comment">#!/usr/bin/env python3</span>
+<span class="Comment">#</span>
+<span class="Comment"># pcap.py</span>
+<span class="Comment">#</span>
+<span class="Comment"># Pcap file decoder for the standard TCP/IP stack</span>
+<span class="Comment">#</span>
+<span class="Comment"># This is a basic decoder for TCP packets composed of IP and ETH packets within</span>
+<span class="Comment"># a pcap file. Other types of packets are simply denoted with 'UNK' and are not</span>
+<span class="Comment"># decoded any further. This is used for post-mortem analysis of network traffic</span>
+<span class="Comment"># captured beforehand.</span>
+<span class="Comment">#</span>
+<span class="Comment"># As an example use, `tcpdump` can be used to capture packets to a pcap file:</span>
+<span class="Comment">#</span>
+<span class="Comment">#     sudo tcpdump -w example.pcap</span>
+<span class="Comment">#</span>
+<span class="Comment"># Output file can then be given to this script to print the decoded output:</span>
+<span class="Comment">#</span>
+<span class="Comment">#     ./pcap.py example.pcap</span>
+<span class="Comment">#</span>
+<span class="Comment"># An example output of this script is as follows:</span>
+<span class="Comment"># </span>
+<span class="Comment">#     -- ETH Layer -- Tue Jun  5 10:52:34 2012 -- 54 bytes</span>
+<span class="Comment">#             src: 00:12:cf:e5:54:a0</span>
+<span class="Comment">#             dst: 00:1f:3c:23:db:d3</span>
+<span class="Comment">#             typ: 8</span>
+<span class="Comment">#             -- IP Layer --</span>
+<span class="Comment">#                     src: 192.168.10.226</span>
+<span class="Comment">#                     dst: 192.168.11.12</span>
+<span class="Comment">#                     typ: 6</span>
+<span class="Comment">#                     -- TCP Layer --</span>
+<span class="Comment">#                             src: 64332</span>
+<span class="Comment">#                             dst: 5888</span>
+<span class="Comment">#                             seq: 1492699879</span>
+<span class="Comment">#                             ack: 3729068838</span>
+<span class="Comment">#                             dat: b''</span>
+<span class="Comment">#     -- ETH Layer -- Tue Jun  5 10:52:35 2012 -- 60 bytes</span>
+<span class="Comment">#             src: 00:1f:3c:23:db:d3</span>
+<span class="Comment">#             dst: 00:12:cf:e5:54:a0</span>
+<span class="Comment">#             typ: 8</span>
+<span class="Comment">#             -- IP Layer --</span>
+<span class="Comment">#                     src: 192.168.11.12</span>
+<span class="Comment">#                     dst: 192.168.10.226</span>
+<span class="Comment">#                     typ: 6</span>
+<span class="Comment">#                     -- TCP Layer --</span>
+<span class="Comment">#                             src: 5888</span>
+<span class="Comment">#                             dst: 64332</span>
+<span class="Comment">#                             seq: 3729068838</span>
+<span class="Comment">#                             ack: 1509477095</span>
+<span class="Comment">#                             dat: b'\x00\x00\x00\x00\x00\x00'</span>
+<span class="Comment">#</span>
+<span class="Comment"># Indentation follows packet levels so that you can utilize folding feature in</span>
+<span class="Comment"># your text editor to display packets at the desired level. Following settings</span>
+<span class="Comment"># are used for vim editor:</span>
+<span class="Comment">#</span>
+<span class="Comment">#     set foldmethod=indent</span>
+<span class="Comment">#     set foldenable</span>
+<span class="Comment">#     set foldlevel=0 &quot; only show packets</span>
+<span class="Comment">#     set foldlevel=1 &quot; decode ETH layer</span>
+<span class="Comment">#     set foldlevel=2 &quot; decode IP layer</span>
+<span class="Comment">#     set foldlevel=3 &quot; decode TCP layer</span>
+<span class="Comment">#</span>
+<span class="Comment"># You can also directly read from stdin as follows:</span>
+<span class="Comment">#</span>
+<span class="Comment">#     ./pcap example.pcap | vim -</span>
+<span class="Comment">#</span>
+
+
+<span class="PreProc">import</span> sys
+<span class="PreProc">import</span> time
+<span class="PreProc">import</span> struct
+
+<span class="Statement">if</span> <span class="Identifier">len</span>(sys.argv) &lt; <span class="Constant">2</span>:
+    sys.stderr.write(<span class="Constant">'</span><span class="Constant">usage: {} [PCAP_FILE]</span><span class="Special">\n</span><span class="Constant">'</span>.format(sys.argv[<span class="Constant">0</span>]))
+    sys.exit(<span class="Constant">1</span>)
+
+<span class="Statement">def</span> <span class="Identifier">decode_eth</span>(packet):
+    src = struct.unpack(<span class="Constant">'</span><span class="Constant">6B</span><span class="Constant">'</span>, packet[<span class="Constant">0</span>:<span class="Constant">6</span>])
+    dst = struct.unpack(<span class="Constant">'</span><span class="Constant">6B</span><span class="Constant">'</span>, packet[<span class="Constant">6</span>:<span class="Constant">12</span>])
+    typ = struct.unpack(<span class="Constant">'</span><span class="Constant">H</span><span class="Constant">'</span>, packet[<span class="Constant">12</span>:<span class="Constant">14</span>])[<span class="Constant">0</span>]
+    <span class="Statement">return</span> src, dst, typ
+
+<span class="Statement">def</span> <span class="Identifier">decode_ip</span>(packet):
+    typ = struct.unpack(<span class="Constant">'</span><span class="Constant">B</span><span class="Constant">'</span>, packet[<span class="Constant">9</span>:<span class="Constant">10</span>])[<span class="Constant">0</span>]
+    src = struct.unpack(<span class="Constant">'</span><span class="Constant">4B</span><span class="Constant">'</span>, packet[<span class="Constant">12</span>:<span class="Constant">16</span>])
+    dst = struct.unpack(<span class="Constant">'</span><span class="Constant">4B</span><span class="Constant">'</span>, packet[<span class="Constant">16</span>:<span class="Constant">20</span>])
+    <span class="Statement">return</span> src, dst, typ
+
+<span class="Statement">def</span> <span class="Identifier">decode_tcp</span>(packet):
+    src = struct.unpack(<span class="Constant">'</span><span class="Constant">H</span><span class="Constant">'</span>, packet[<span class="Constant">0</span>:<span class="Constant">2</span>])[<span class="Constant">0</span>]
+    dst = struct.unpack(<span class="Constant">'</span><span class="Constant">H</span><span class="Constant">'</span>, packet[<span class="Constant">2</span>:<span class="Constant">4</span>])[<span class="Constant">0</span>]
+    seq = struct.unpack(<span class="Constant">'</span><span class="Constant">I</span><span class="Constant">'</span>, packet[<span class="Constant">4</span>:<span class="Constant">8</span>])[<span class="Constant">0</span>]
+    ack = struct.unpack(<span class="Constant">'</span><span class="Constant">I</span><span class="Constant">'</span>, packet[<span class="Constant">8</span>:<span class="Constant">12</span>])[<span class="Constant">0</span>]
+    <span class="Statement">return</span> src, dst, seq, ack
+
+<span class="Statement">with</span> <span class="Identifier">open</span>(sys.argv[<span class="Constant">1</span>], <span class="Constant">'</span><span class="Constant">rb</span><span class="Constant">'</span>) <span class="Statement">as</span> f:
+    bom, major, minor, off, cap, typ = struct.unpack(<span class="Constant">'</span><span class="Constant">IHHQII</span><span class="Constant">'</span>, f.read(<span class="Constant">24</span>))
+    <span class="Statement">if</span> typ != <span class="Constant">1</span>:
+        sys.stderr.write(<span class="Constant">'</span><span class="Constant">error: only ethernet frame is supported</span><span class="Special">\n</span><span class="Constant">'</span>)
+        sys.exit(<span class="Constant">1</span>)
+
+    <span class="Statement">while</span> <span class="Identifier">True</span>:
+        header = f.read(<span class="Constant">16</span>)
+        <span class="Statement">if</span> <span class="Statement">not</span> header:
+            <span class="Statement">break</span>
+
+        sec, msec, real, size = struct.unpack(<span class="Constant">'</span><span class="Constant">IIII</span><span class="Constant">'</span>, header)
+        <span class="Identifier">print</span>(<span class="Constant">'</span><span class="Constant">-- ETH Layer --</span><span class="Constant">'</span>, time.ctime(sec), <span class="Constant">'</span><span class="Constant">--</span><span class="Constant">'</span>, size, <span class="Constant">'</span><span class="Constant">bytes</span><span class="Constant">'</span>)
+        packet = f.read(size)
+
+        eth_src, eth_dst, eth_typ = decode_eth(packet)
+        <span class="Identifier">print</span>(<span class="Constant">'</span><span class="Special">\t</span><span class="Constant">src:</span><span class="Constant">'</span>, <span class="Constant">'</span><span class="Constant">:</span><span class="Constant">'</span>.join(<span class="Constant">&quot;</span><span class="Constant">%02x</span><span class="Constant">&quot;</span> % i <span class="Statement">for</span> i <span class="Statement">in</span> eth_src))
+        <span class="Identifier">print</span>(<span class="Constant">'</span><span class="Special">\t</span><span class="Constant">dst:</span><span class="Constant">'</span>, <span class="Constant">'</span><span class="Constant">:</span><span class="Constant">'</span>.join(<span class="Constant">&quot;</span><span class="Constant">%02x</span><span class="Constant">&quot;</span> % i <span class="Statement">for</span> i <span class="Statement">in</span> eth_dst))
+        <span class="Identifier">print</span>(<span class="Constant">'</span><span class="Special">\t</span><span class="Constant">typ:</span><span class="Constant">'</span>, eth_typ)
+
+        <span class="Statement">if</span> eth_typ != <span class="Constant">8</span>:
+            <span class="Identifier">print</span>(<span class="Constant">'</span><span class="Special">\t</span><span class="Constant">-- UNK Layer --</span><span class="Constant">'</span>)
+            <span class="Identifier">print</span>(<span class="Constant">'</span><span class="Special">\t\t</span><span class="Constant">dat:</span><span class="Constant">'</span>, packet[<span class="Constant">14</span>:])
+            <span class="Statement">continue</span>
+
+        ip_src, ip_dst, ip_typ = decode_ip(packet[<span class="Constant">14</span>:])
+        <span class="Identifier">print</span>(<span class="Constant">'</span><span class="Special">\t</span><span class="Constant">-- IP Layer --</span><span class="Constant">'</span>)
+        <span class="Identifier">print</span>(<span class="Constant">'</span><span class="Special">\t\t</span><span class="Constant">src:</span><span class="Constant">'</span>, <span class="Constant">'</span><span class="Constant">.</span><span class="Constant">'</span>.join(<span class="Identifier">str</span>(i) <span class="Statement">for</span> i <span class="Statement">in</span> ip_src))
+        <span class="Identifier">print</span>(<span class="Constant">'</span><span class="Special">\t\t</span><span class="Constant">dst:</span><span class="Constant">'</span>, <span class="Constant">'</span><span class="Constant">.</span><span class="Constant">'</span>.join(<span class="Identifier">str</span>(i) <span class="Statement">for</span> i <span class="Statement">in</span> ip_dst))
+        <span class="Identifier">print</span>(<span class="Constant">'</span><span class="Special">\t\t</span><span class="Constant">typ:</span><span class="Constant">'</span>, ip_typ)
+
+        <span class="Statement">if</span> ip_typ != <span class="Constant">6</span>:
+            <span class="Identifier">print</span>(<span class="Constant">'</span><span class="Special">\t\t</span><span class="Constant">-- UNK Layer --</span><span class="Constant">'</span>)
+            <span class="Identifier">print</span>(<span class="Constant">'</span><span class="Special">\t\t\t</span><span class="Constant">dat:</span><span class="Constant">'</span>, packet[<span class="Constant">34</span>:])
+            <span class="Statement">continue</span>
+
+        tcp_src, tcp_dst, tcp_seq, tcp_ack = decode_tcp(packet[<span class="Constant">34</span>:])
+        <span class="Identifier">print</span>(<span class="Constant">'</span><span class="Special">\t\t</span><span class="Constant">-- TCP Layer --</span><span class="Constant">'</span>)
+        <span class="Identifier">print</span>(<span class="Constant">'</span><span class="Special">\t\t\t</span><span class="Constant">src:</span><span class="Constant">'</span>, tcp_src)
+        <span class="Identifier">print</span>(<span class="Constant">'</span><span class="Special">\t\t\t</span><span class="Constant">dst:</span><span class="Constant">'</span>, tcp_dst)
+        <span class="Identifier">print</span>(<span class="Constant">'</span><span class="Special">\t\t\t</span><span class="Constant">seq:</span><span class="Constant">'</span>, tcp_seq)
+        <span class="Identifier">print</span>(<span class="Constant">'</span><span class="Special">\t\t\t</span><span class="Constant">ack:</span><span class="Constant">'</span>, tcp_ack)
+        <span class="Identifier">print</span>(<span class="Constant">'</span><span class="Special">\t\t\t</span><span class="Constant">dat:</span><span class="Constant">'</span>, packet[<span class="Constant">54</span>:])
+</pre>
+</body>
+</html>
+<!-- vim: set foldmethod=manual : -->

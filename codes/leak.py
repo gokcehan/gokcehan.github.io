@@ -18,7 +18,7 @@
 # and then redirect regular output to null device, and pipe stdout to this
 # script. An example for `ls` command is shown below:
 #
-# ltrace ls 2>&1 >/dev/null | ./leak.py
+#     ltrace ls 2>&1 >/dev/null | ./leak.py
 #
 
 import re
