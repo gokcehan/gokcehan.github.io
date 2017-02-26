@@ -1,0 +1,179 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+<title>~/Dropbox/workspace/web/codes/calc.ml.html</title>
+<meta name="Generator" content="Vim/8.0">
+<meta name="plugin-version" content="vim7.4_v2">
+<meta name="syntax" content="ocaml">
+<meta name="settings" content="use_css,no_foldcolumn,expand_tabs,prevent_copy=">
+<meta name="colorscheme" content="none">
+<style type="text/css">
+<!--
+pre { font-family: monospace; color: #000000; background-color: #ffffff; }
+body { font-family: monospace; color: #000000; background-color: #ffffff; }
+* { font-size: 1em; }
+.PreProc { color: #c000c0; }
+.Type { color: #008000; }
+.Statement { color: #af5f00; }
+.Comment { color: #0000c0; }
+.Constant { color: #c00000; }
+-->
+</style>
+
+<script type='text/javascript'>
+<!--
+
+-->
+</script>
+</head>
+<body>
+<pre id='vimCodeElement'>
+<span class="Comment">(*</span>
+<span class="Comment"> * calc.ml</span>
+<span class="Comment"> *</span>
+<span class="Comment"> * Calculator for simple expressions</span>
+<span class="Comment"> *</span>
+<span class="Comment"> * The expression grammar is as follows:</span>
+<span class="Comment"> *</span>
+<span class="Comment"> *     E ::= T {+ T}</span>
+<span class="Comment"> *     T ::= F {* F}</span>
+<span class="Comment"> *     F ::= ( E ) | Int</span>
+<span class="Comment"> *</span>
+<span class="Comment"> * Expressions are parsed and evaluated on the fly.</span>
+<span class="Comment"> *</span>
+<span class="Comment"> * You can compile this file with the following command:</span>
+<span class="Comment"> *</span>
+<span class="Comment"> *     ocamlc -I +camlp4 -pp camlp4o calc.ml -o calc</span>
+<span class="Comment"> *)</span>
+
+<span class="Comment">(* Lex *)</span>
+
+<span class="Statement">module</span><span class="PreProc"> Token</span> <span class="Statement">=</span>
+  <span class="PreProc">struct</span>
+    <span class="Statement">type</span> token <span class="Statement">=</span>
+      <span class="Statement">|</span> <span class="Constant">LPar</span>
+      <span class="Statement">|</span> <span class="Constant">RPar</span>
+      <span class="Statement">|</span> <span class="Constant">Plus</span>
+      <span class="Statement">|</span> <span class="Constant">Star</span>
+      <span class="Statement">|</span> <span class="Constant">Number</span> <span class="Statement">of</span> <span class="Type">float</span>
+  <span class="PreProc">end</span>
+
+<span class="Statement">let</span> <span class="Statement">rec</span> lex <span class="Statement">=</span> <span class="Statement">parser</span>
+  <span class="Statement">|</span> <span class="Statement">[</span><span class="Statement">&lt;</span> ' <span class="Statement">(</span><span class="Constant">' '</span> <span class="Statement">|</span> <span class="Constant">'\n'</span> <span class="Statement">|</span> <span class="Constant">'\r'</span> <span class="Statement">|</span> <span class="Constant">'\t'</span><span class="Statement">)</span><span class="Statement">;</span> stream <span class="Statement">&gt;</span><span class="Statement">]</span> <span class="Statement">-&gt;</span> lex stream
+  <span class="Statement">|</span> <span class="Statement">[</span><span class="Statement">&lt;</span> ' <span class="Statement">(</span><span class="Constant">'('</span><span class="Statement">)</span><span class="Statement">;</span> stream <span class="Statement">&gt;</span><span class="Statement">]</span> <span class="Statement">-&gt;</span> <span class="Statement">[</span><span class="Statement">&lt;</span> '<span class="PreProc">Token</span>.<span class="Constant">LPar</span><span class="Statement">;</span> lex stream <span class="Statement">&gt;</span><span class="Statement">]</span>
+  <span class="Statement">|</span> <span class="Statement">[</span><span class="Statement">&lt;</span> ' <span class="Statement">(</span><span class="Constant">')'</span><span class="Statement">)</span><span class="Statement">;</span> stream <span class="Statement">&gt;</span><span class="Statement">]</span> <span class="Statement">-&gt;</span> <span class="Statement">[</span><span class="Statement">&lt;</span> '<span class="PreProc">Token</span>.<span class="Constant">RPar</span><span class="Statement">;</span> lex stream <span class="Statement">&gt;</span><span class="Statement">]</span>
+  <span class="Statement">|</span> <span class="Statement">[</span><span class="Statement">&lt;</span> ' <span class="Statement">(</span><span class="Constant">'+'</span><span class="Statement">)</span><span class="Statement">;</span> stream <span class="Statement">&gt;</span><span class="Statement">]</span> <span class="Statement">-&gt;</span> <span class="Statement">[</span><span class="Statement">&lt;</span> '<span class="PreProc">Token</span>.<span class="Constant">Plus</span><span class="Statement">;</span> lex stream <span class="Statement">&gt;</span><span class="Statement">]</span>
+  <span class="Statement">|</span> <span class="Statement">[</span><span class="Statement">&lt;</span> ' <span class="Statement">(</span><span class="Constant">'*'</span><span class="Statement">)</span><span class="Statement">;</span> stream <span class="Statement">&gt;</span><span class="Statement">]</span> <span class="Statement">-&gt;</span> <span class="Statement">[</span><span class="Statement">&lt;</span> '<span class="PreProc">Token</span>.<span class="Constant">Star</span><span class="Statement">;</span> lex stream <span class="Statement">&gt;</span><span class="Statement">]</span>
+  <span class="Statement">|</span> <span class="Statement">[</span><span class="Statement">&lt;</span> ' <span class="Statement">(</span><span class="Constant">'0'</span> .. <span class="Constant">'9'</span> <span class="Statement">as</span> c<span class="Statement">)</span><span class="Statement">;</span> stream <span class="Statement">&gt;</span><span class="Statement">]</span> <span class="Statement">-&gt;</span>
+    <span class="Statement">let</span> buffer <span class="Statement">=</span> <span class="PreProc">Buffer</span>.create <span class="Constant">1</span> <span class="Statement">in</span>
+    <span class="PreProc">Buffer</span>.add_char buffer c<span class="Statement">;</span>
+    lex_number buffer stream
+  <span class="Statement">|</span> <span class="Constant">[&lt; &gt;]</span> <span class="Statement">-&gt;</span> <span class="Constant">[&lt; &gt;]</span>
+
+<span class="Statement">and</span> lex_number buffer <span class="Statement">=</span> <span class="Statement">parser</span>
+  <span class="Statement">|</span> <span class="Statement">[</span><span class="Statement">&lt;</span> ' <span class="Statement">(</span><span class="Constant">'0'</span> .. <span class="Constant">'9'</span> <span class="Statement">|</span> <span class="Constant">'.'</span> <span class="Statement">as</span> c<span class="Statement">)</span><span class="Statement">;</span> stream <span class="Statement">&gt;</span><span class="Statement">]</span> <span class="Statement">-&gt;</span>
+    <span class="PreProc">Buffer</span>.add_char buffer c<span class="Statement">;</span>
+    lex_number buffer stream
+  <span class="Statement">|</span> <span class="Statement">[</span><span class="Statement">&lt;</span> stream <span class="Statement">&gt;</span><span class="Statement">]</span> <span class="Statement">-&gt;</span>
+    <span class="Statement">let</span> contents <span class="Statement">=</span> <span class="PreProc">Buffer</span>.contents buffer <span class="Statement">in</span>
+    <span class="Statement">let</span> number <span class="Statement">=</span> float_of_string contents <span class="Statement">in</span>
+    <span class="Statement">[</span><span class="Statement">&lt;</span> '<span class="PreProc">Token</span>.<span class="Constant">Number</span> number<span class="Statement">;</span> lex stream <span class="Statement">&gt;</span><span class="Statement">]</span>
+
+<span class="Statement">let</span> print_token token <span class="Statement">=</span> <span class="Statement">match</span> token <span class="Statement">with</span>
+  <span class="Statement">|</span> <span class="PreProc">Token</span>.<span class="Constant">LPar</span> <span class="Statement">-&gt;</span> print_endline <span class="Constant">&quot;LPar&quot;</span>
+  <span class="Statement">|</span> <span class="PreProc">Token</span>.<span class="Constant">RPar</span> <span class="Statement">-&gt;</span> print_endline <span class="Constant">&quot;RPar&quot;</span>
+  <span class="Statement">|</span> <span class="PreProc">Token</span>.<span class="Constant">Plus</span> <span class="Statement">-&gt;</span> print_endline <span class="Constant">&quot;Plus&quot;</span>
+  <span class="Statement">|</span> <span class="PreProc">Token</span>.<span class="Constant">Star</span> <span class="Statement">-&gt;</span> print_endline <span class="Constant">&quot;Star&quot;</span>
+  <span class="Statement">|</span> <span class="PreProc">Token</span>.<span class="Constant">Number</span> value <span class="Statement">-&gt;</span> print_endline @@ <span class="Constant">&quot;Number: &quot;</span> <span class="Statement">^</span> string_of_float value
+
+<span class="Comment">(* Parse *)</span>
+
+<span class="Statement">module</span><span class="PreProc"> Expr</span> <span class="Statement">=</span>
+  <span class="PreProc">struct</span>
+    <span class="Statement">type</span> expr <span class="Statement">=</span>
+      <span class="Statement">|</span> <span class="Constant">Add</span> <span class="Statement">of</span> expr <span class="Statement">*</span> expr
+      <span class="Statement">|</span> <span class="Constant">Mul</span> <span class="Statement">of</span> expr <span class="Statement">*</span> expr
+      <span class="Statement">|</span> <span class="Constant">Num</span> <span class="Statement">of</span> <span class="Type">float</span>
+  <span class="PreProc">end</span>
+
+<span class="Comment">(* E -&gt; T E' *)</span>
+<span class="Statement">let</span> <span class="Statement">rec</span> parse_expr <span class="Statement">=</span> <span class="Statement">parser</span>
+  <span class="Statement">|</span> <span class="Statement">[</span><span class="Statement">&lt;</span> lhs<span class="Statement">=</span>parse_term<span class="Statement">;</span> expr<span class="Statement">=</span>parse_expr_rhs lhs <span class="Statement">&gt;</span><span class="Statement">]</span> <span class="Statement">-&gt;</span> expr
+
+<span class="Comment">(* E' -&gt; + T E' | eps *)</span>
+<span class="Statement">and</span> parse_expr_rhs lhs <span class="Statement">=</span> <span class="Statement">parser</span>
+  <span class="Statement">|</span> <span class="Statement">[</span><span class="Statement">&lt;</span> '<span class="PreProc">Token</span>.<span class="Constant">Plus</span><span class="Statement">;</span>
+       rhs<span class="Statement">=</span>parse_term<span class="Statement">;</span>
+       expr<span class="Statement">=</span>parse_expr_rhs <span class="Statement">(</span><span class="PreProc">Expr</span>.<span class="Constant">Add</span> <span class="Statement">(</span>lhs, rhs<span class="Statement">))</span> <span class="Statement">&gt;</span><span class="Statement">]</span> <span class="Statement">-&gt;</span> expr
+  <span class="Statement">|</span> <span class="Constant">[&lt; &gt;]</span> <span class="Statement">-&gt;</span> lhs
+
+<span class="Comment">(* T -&gt; F T' *)</span>
+<span class="Statement">and</span> parse_term <span class="Statement">=</span> <span class="Statement">parser</span>
+  <span class="Statement">|</span> <span class="Statement">[</span><span class="Statement">&lt;</span> lhs<span class="Statement">=</span>parse_factor<span class="Statement">;</span> expr<span class="Statement">=</span>parse_term_rhs lhs <span class="Statement">&gt;</span><span class="Statement">]</span> <span class="Statement">-&gt;</span> expr
+
+<span class="Comment">(* T' -&gt; * F T' | eps *)</span>
+<span class="Statement">and</span> parse_term_rhs lhs <span class="Statement">=</span> <span class="Statement">parser</span>
+  <span class="Statement">|</span> <span class="Statement">[</span><span class="Statement">&lt;</span> '<span class="PreProc">Token</span>.<span class="Constant">Star</span><span class="Statement">;</span>
+       rhs<span class="Statement">=</span>parse_factor<span class="Statement">;</span>
+       term<span class="Statement">=</span>parse_term_rhs <span class="Statement">(</span><span class="PreProc">Expr</span>.<span class="Constant">Mul</span> <span class="Statement">(</span>lhs, rhs<span class="Statement">))</span> <span class="Statement">&gt;</span><span class="Statement">]</span> <span class="Statement">-&gt;</span> term
+  <span class="Statement">|</span> <span class="Constant">[&lt; &gt;]</span> <span class="Statement">-&gt;</span> lhs
+
+<span class="Comment">(* F -&gt; ( E )  | Num *)</span>
+<span class="Statement">and</span> parse_factor <span class="Statement">=</span> <span class="Statement">parser</span>
+  <span class="Statement">|</span> <span class="Statement">[</span><span class="Statement">&lt;</span> '<span class="PreProc">Token</span>.<span class="Constant">LPar</span><span class="Statement">;</span> expr<span class="Statement">=</span>parse_expr<span class="Statement">;</span> '<span class="PreProc">Token</span>.<span class="Constant">RPar</span> <span class="Statement">&gt;</span><span class="Statement">]</span> <span class="Statement">-&gt;</span> expr
+  <span class="Statement">|</span> <span class="Statement">[</span><span class="Statement">&lt;</span> '<span class="PreProc">Token</span>.<span class="Constant">Number</span> value <span class="Statement">&gt;</span><span class="Statement">]</span> <span class="Statement">-&gt;</span> <span class="PreProc">Expr</span>.<span class="Constant">Num</span> value
+
+<span class="Statement">let</span> parse <span class="Statement">=</span> parse_expr
+
+<span class="Statement">let</span> <span class="Statement">rec</span> print_expr <span class="Statement">=</span> <span class="Statement">function</span>
+  <span class="Statement">|</span> <span class="PreProc">Expr</span>.<span class="Constant">Add</span> <span class="Statement">(</span>lhs, rhs<span class="Statement">)</span> <span class="Statement">-&gt;</span>
+    print_string <span class="Constant">&quot;Add(&quot;</span><span class="Statement">;</span>
+    print_expr lhs<span class="Statement">;</span>
+    print_string <span class="Constant">&quot;, &quot;</span><span class="Statement">;</span>
+    print_expr rhs<span class="Statement">;</span>
+    print_string <span class="Constant">&quot;)&quot;</span>
+  <span class="Statement">|</span> <span class="PreProc">Expr</span>.<span class="Constant">Mul</span> <span class="Statement">(</span>lhs, rhs<span class="Statement">)</span> <span class="Statement">-&gt;</span>
+    print_string <span class="Constant">&quot;Mul(&quot;</span><span class="Statement">;</span>
+    print_expr lhs<span class="Statement">;</span>
+    print_string <span class="Constant">&quot;, &quot;</span><span class="Statement">;</span>
+    print_expr rhs<span class="Statement">;</span>
+    print_string <span class="Constant">&quot;)&quot;</span>
+  <span class="Statement">|</span> <span class="PreProc">Expr</span>.<span class="Constant">Num</span> value <span class="Statement">-&gt;</span>
+    print_string <span class="Constant">&quot;Num(&quot;</span><span class="Statement">;</span>
+    print_float value<span class="Statement">;</span>
+    print_string <span class="Constant">&quot;)&quot;</span>
+
+<span class="Comment">(* Eval *)</span>
+
+<span class="Statement">let</span> <span class="Statement">rec</span> eval <span class="Statement">=</span> <span class="Statement">function</span>
+  <span class="Statement">|</span> <span class="PreProc">Expr</span>.<span class="Constant">Add</span> <span class="Statement">(</span>lhs, rhs<span class="Statement">)</span> <span class="Statement">-&gt;</span> eval lhs +. eval rhs
+  <span class="Statement">|</span> <span class="PreProc">Expr</span>.<span class="Constant">Mul</span> <span class="Statement">(</span>lhs, rhs<span class="Statement">)</span> <span class="Statement">-&gt;</span> eval lhs <span class="Statement">*</span>. eval rhs
+  <span class="Statement">|</span> <span class="PreProc">Expr</span>.<span class="Constant">Num</span> value <span class="Statement">-&gt;</span> value
+
+<span class="Comment">(* Main *)</span>
+
+<span class="Statement">let</span> print_result result <span class="Statement">=</span>
+  print_string <span class="Constant">&quot;= &quot;</span><span class="Statement">;</span>
+  print_float result<span class="Statement">;</span>
+  print_endline <span class="Constant">&quot;&quot;</span><span class="Statement">;</span>
+  flush stdout
+
+<span class="Statement">let</span> <span class="Constant">()</span> <span class="Statement">=</span>
+  <span class="Statement">try</span>
+    <span class="Statement">while</span> <span class="Constant">true</span> <span class="Statement">do</span>
+      <span class="Statement">try</span>
+        print_string <span class="Constant">&quot;&gt; &quot;</span><span class="Statement">;</span> flush stdout<span class="Statement">;</span>
+        <span class="Statement">let</span> line <span class="Statement">=</span> input_line stdin <span class="Statement">in</span>
+        <span class="Comment">(*Stream.of_string line |&gt; lex |&gt; Stream.iter print_token*)</span>
+        <span class="Comment">(*Stream.of_string line |&gt; lex |&gt; parse |&gt; print_expr; print_endline &quot;&quot;*)</span>
+        <span class="PreProc">Stream</span>.of_string line <span class="Statement">|</span><span class="Statement">&gt;</span> lex <span class="Statement">|</span><span class="Statement">&gt;</span> parse <span class="Statement">|</span><span class="Statement">&gt;</span> eval <span class="Statement">|</span><span class="Statement">&gt;</span> print_result
+      <span class="Statement">with</span>
+      <span class="Statement">|</span> <span class="Constant">End_of_file</span> <span class="Statement">-&gt;</span> <span class="Statement">raise</span> <span class="Constant">Exit</span>
+      <span class="Statement">|</span> exc <span class="Statement">-&gt;</span> print_endline @@ <span class="PreProc">Printexc</span>.to_string exc
+    <span class="Statement">done</span>
+  <span class="Statement">with</span> <span class="Constant">Exit</span> <span class="Statement">-&gt;</span> <span class="Constant">()</span>
+</pre>
+</body>
+</html>
+<!-- vim: set foldmethod=manual : -->

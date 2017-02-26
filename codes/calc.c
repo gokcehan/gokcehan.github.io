@@ -1,7 +1,7 @@
 //
-// rd.c
+// calc.c
 //
-// Recursive descent parser for simple expressions
+// Calculator for simple expressions
 //
 // The expression grammar is as follows:
 //
