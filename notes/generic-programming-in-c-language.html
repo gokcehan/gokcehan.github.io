@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Generic Programming in C Language</title>
+  <link rel="stylesheet" type="text/css" href="../style.css">
+</head>
+
+<body>
+<div class="content">
+
+<h1>Generic Programming in C Language</h1>
+
+<p>
+This post is about demonstrating two common techniques for generic programming in C language.
+Both of these techniques discussed here rely on the use of preprocessor as the language itself does not provide many features for polymorphism.
+One of the frequent uses of generic programming is to implement data structures that is able to work with different types.
+Example given here is a dynamic array implementation that is able to grow in size when required.
+<p>
+
+<p>
+There is also a complementary post "<a href="notes/dynamic-arrays-in-c-language.html">Dynamic Arrays in C Language</a>" which discusses different ways to implement dynamic arrays.
+Techniques discussed here can be applied to dynamic array and fat array implementations in the other post, but only the dynamic array implementation will be shown here for brevity.
+Refer to the other post for the single type implementations along with some explanation.
+<p>
+
+<h2>Dynamic Arrays (Concatenation)</h2>
+
+<p>
+One way to implement multiple dynamic arrays in a single codebase is to add type suffixes to struct and function names.
+Then we add an element to an integer array using <code>arrappend_int</code>, and to a float array using <code>arrappend_float</code> and so on.
+To avoid duplication of the logic, we can make use of the preprocessor to generate the code for each type we use.
+Specifically we use token concatenation feature to add a suffix to names:
+</p>
+
+<pre>
+#define ARR_INIT_CAP 2
+#define ARR_GROW_RAT 2
+
+#define DEFINE_ARR(TYPE, TAIL)                                                 \
+                                                                               \
+struct arr_##TAIL {                                                            \
+    TYPE *buf;                                                                 \
+    int   len;                                                                 \
+    int   cap;                                                                 \
+};                                                                             \
+</pre>
+
+<p>
+For allocation and freeing we provide the necessary functions as follows:
+</p>
+
+<pre>
+inline struct arr_##TAIL *                                                     \
+arrnew_##TAIL(void)                                                            \
+{                                                                              \
+    return arrnewcap_##TAIL(ARR_INIT_CAP);                                     \
+}                                                                              \
+                                                                               \
+inline struct arr_##TAIL *                                                     \
+arrnewcap_##TAIL(int cap)                                                      \
+{                                                                              \
+    struct arr_##TAIL *arr;                                                    \
+                                                                               \
+    if ((arr = malloc(sizeof(struct arr_##TAIL))) == NULL) {                   \
+        return NULL;                                                           \
+    }                                                                          \
+                                                                               \
+    if ((arr->buf = malloc(cap * sizeof(TYPE))) == NULL) {                     \
+        free(arr);                                                             \
+        return NULL;                                                           \
+    }                                                                          \
+                                                                               \
+    arr->len = 0;                                                              \
+    arr->cap = cap;                                                            \
+                                                                               \
+    return arr;                                                                \
+}                                                                              \
+                                                                               \
+inline void                                                                    \
+arrdelete_##TAIL(struct arr_##TAIL *arr)                                       \
+{                                                                              \
+    free(arr->buf);                                                            \
+    free(arr);                                                                 \
+}                                                                              \
+</pre>
+
+<p>
+Similarly for appending and removing elements we have:
+</p>
+
+<pre>
+inline int                                                                     \
+arrappend_##TAIL(struct arr_##TAIL *arr, TYPE val)                             \
+{                                                                              \
+    if (arr->cap <= arr->len &&                                                \
+            arrresize_##TAIL(arr, arr->cap * ARR_GROW_RAT) == -1) {            \
+        return -1;                                                             \
+    }                                                                          \
+                                                                               \
+    arr->buf[arr->len++] = val;                                                \
+                                                                               \
+    return 0;                                                                  \
+}                                                                              \
+                                                                               \
+inline int                                                                     \
+arrresize_##TAIL(struct arr_##TAIL *arr, int ncap)                             \
+{                                                                              \
+    TYPE *nbuf;                                                                \
+                                                                               \
+    if ((nbuf = realloc(arr->buf, ncap * sizeof(TYPE))) == NULL) {             \
+        return -1;                                                             \
+    }                                                                          \
+                                                                               \
+    arr->cap = ncap;                                                           \
+    arr->buf = nbuf;                                                           \
+                                                                               \
+    return 0;                                                                  \
+}                                                                              \
+                                                                               \
+inline TYPE                                                                    \
+arrremove_##TAIL(struct arr_##TAIL *arr)                                       \
+{                                                                              \
+    return arr->buf[--arr->len];                                               \
+}
+</pre>
+
+<p>
+In order to generate an implementation for a new type, we need to provide the type and an appropriate suffix for that type:
+</p>
+
+<pre>
+DEFINE_ARR(int, int)
+DEFINE_ARR(char *, charp)
+</pre>
+
+<p>
+Previous scenario for integer arrays now works as below:
+</p>
+
+<pre>
+struct arr_int *arr = arrnew_int();
+
+while ((num = get()) < limit) {
+    arrappend_int(arr, num);
+}
+
+for (i = 0; i < arr->len; ++i) {
+    process(arr->buf[i]);
+}
+
+for (i = arr->len-1; i > 0; --i) {
+    arr->buf[i] -= arr->buf[i-1];
+}
+
+for (i = arr->len-1; i >= 0; --i) {
+    process(arrremove_int(arr));
+}
+
+arrdelete_int(arr);
+</pre>
+
+<p>
+Similarly for char pointer arrays we have:
+</p>
+
+<pre>
+struct arr_charp *words = arrnew_charp();
+
+arrappend_charp(words, "one");
+arrappend_charp(words, "two");
+arrappend_charp(words, "three");
+
+for (i = 0; i < words->len; ++i) {
+    puts(words->buf[i]);
+}
+
+arrdelete_charp(words);
+</pre>
+
+<p>
+The downside of this method is the verbosity of the generated names.
+Each time we use a struct or a function, we need to remember the proper suffix and add them to the name.
+Also, you need to be careful not to define an array for a type multiple times.
+This can be complicated when there are multiple header and source files within the codebase which is almost always the case.
+</p>
+
+<h2>Dynamic Arrays (Types)</h2>
+
+<p>
+We can avoid defining new structs and functions for each type by having type parameters in macros when required and utilizing <code>sizeof</code> at other times.
+For this purpose, we make use of unnamed structs to expand the definition according to the given type:
+</p>
+
+<pre>
+#define arr(type) struct {                                                     \
+    type *buf;                                                                 \
+    int   len;                                                                 \
+    int   cap;                                                                 \
+}
+</pre>
+
+<p>
+For other operations, we wrap the statements within a do-while macro instead of functions.
+We remove error handling logic since it is not possible to return values from these macros.
+It is still possible to handle errors but it is not very straightforward.
+Allocation and freeing operations are given as follows:
+</p>
+
+<pre>
+#define ARR_INIT_CAP 2
+
+#define arrnew(arr) arrnewcap(arr, ARR_INIT_CAP)
+
+#define arrnewcap(arr, ncap) do {                                              \
+    arr.buf = malloc(ncap * sizeof(arr.buf[0]));                               \
+    arr.len = 0;                                                               \
+    arr.cap = ncap;                                                            \
+} while (0)
+
+#define arrdelete(arr) do {                                                    \
+    free(arr.buf);                                                             \
+} while (0)
+</pre>
+
+<p>
+Similarly, adding and removing elements is achieved with following macros:
+</p>
+
+<pre>
+#define ARR_GROW_RAT 2
+
+#define arrappend(arr, val) do {                                               \
+    if (arr.cap <= arr.len) {                                                  \
+        arrresize(arr, arr.cap * ARR_GROW_RAT);                                \
+    }                                                                          \
+    arr.buf[arr.len++] = val;                                                  \
+} while (0)
+
+#define arrresize(arr, ncap) do {                                              \
+    arr.buf = realloc(arr.buf, ncap * sizeof(arr.buf[0]));                     \
+    arr.cap = ncap;                                                            \
+} while (0)
+
+#define arrremove(arr) (arr.buf[--arr.len])
+</pre>
+
+<p>
+With this implementation, previous scenario now looks as follows:
+</p>
+
+<pre>
+arr(int) arr;
+
+arrnew(arr);
+
+while ((num = get()) < limit) {
+    arrappend(arr, num);
+}
+
+for (i = 0; i < arr.len; ++i) {
+    process(arr.buf[i]);
+}
+
+for (i = arr.len-1; i > 0; --i) {
+    arr.buf[i] -= arr.buf[i-1];
+}
+
+for (i = arr.len-1; i >= 0; --i) {
+    process(arrremove(arr));
+}
+
+arrdelete(arr);
+</pre>
+
+<p>
+Similarly for char pointer arrays we have:
+</p>
+
+<pre>
+arr(char *) words;
+
+arrnew(words);
+
+arrappend(words, "one");
+arrappend(words, "two");
+arrappend(words, "three");
+
+for (i = 0; i < words.len; ++i) {
+    puts(words.buf[i]);
+}
+
+arrdelete(words);
+</pre>
+
+<p>
+This method does not require defining arrays for each type before the use.
+Instead of having suffixes in function names, we provide the intended type to the macro as the first parameter.
+Error handling with this approach is difficult if not impossible.
+Also compile time errors and debugging can be cryptic.
+</p>
+
+<h2>Summary</h2>
+
+<p>
+Summary of both approaches along with the code is given below: 
+</p>
+
+<p>
+  <ul>
+    <li><a href="../codes/dyn_arr_cat.c">dyn_arr_cat.c</a> ( <a href="../codes/dyn_arr_cat.c.html">.html</a> )</li>
+      <ul>
+        <li>Simple and easy to reason</li>
+        <li>Need to define for each type before using</li>
+        <li>Type and function names are verbose</li>
+      </ul>
+    <li><a href="../codes/dyn_arr_typ.c">dyn_arr_typ.c</a> ( <a href="../codes/dyn_arr_typ.c.html">.html</a> )</li>
+      <ul>
+        <li>Error handling is not straightforward</li>
+        <li>Operations are always inlined</li>
+        <li>Compile time errors and debugging is cryptic</li>
+      </ul>
+  </ul>
+</p>
+
+<hr>
+
+<footer>
+<a href="https://gokcehan.github.io">home</a> &middot; <a href="https://github.com/gokcehan">github</a> &middot; gokcehankara (at) gmail (dot) com 
+</footer>
+
+</div>
+</body>
+
+</html>
