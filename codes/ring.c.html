@@ -1,0 +1,273 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+<title>~/Dropbox/workspace/web/codes/ring.c.html</title>
+<meta name="Generator" content="Vim/8.0">
+<meta name="plugin-version" content="vim7.4_v2">
+<meta name="syntax" content="c">
+<meta name="settings" content="use_css,no_foldcolumn,expand_tabs,prevent_copy=">
+<meta name="colorscheme" content="none">
+<style type="text/css">
+<!--
+pre { font-family: monospace; color: #000000; background-color: #ffffff; }
+body { font-family: monospace; color: #000000; background-color: #ffffff; }
+* { font-size: 1em; }
+.PreProc { color: #c000c0; }
+.Type { color: #008000; }
+.Statement { color: #af5f00; }
+.Comment { color: #0000c0; }
+.Constant { color: #c00000; }
+-->
+</style>
+
+<script type='text/javascript'>
+<!--
+
+-->
+</script>
+</head>
+<body>
+<pre id='vimCodeElement'>
+<span class="Comment">//</span>
+<span class="Comment">// ring.c</span>
+<span class="Comment">//</span>
+<span class="Comment">// Dynamic ring buffer implementation</span>
+<span class="Comment">//</span>
+<span class="Comment">// This is an implementation of a dynamically growing ring buffer. Ring is</span>
+<span class="Comment">// stored as a plain array with an offset value. Array's front and back are</span>
+<span class="Comment">// considered connected as a ring and this offset represent the starting</span>
+<span class="Comment">// position on this ring. Offset value is reset to zero after each</span>
+<span class="Comment">// reallocation.</span>
+<span class="Comment">//</span>
+<span class="Comment">// This structure can be used as a queue or dequeue when the maximum number of</span>
+<span class="Comment">// possible elements is not determined beforehand. Random access in constant</span>
+<span class="Comment">// time is also possible if desired. This is a cache-friendly implementation</span>
+<span class="Comment">// since elements are held in a plain array.</span>
+<span class="Comment">//</span>
+<span class="Comment">// Calculating the actual array position of a given element index is achieved</span>
+<span class="Comment">// with the following formula:</span>
+<span class="Comment">//</span>
+<span class="Comment">//     pos(ind) = (ind + off) % cap</span>
+<span class="Comment">//</span>
+<span class="Comment">// This can be replaced with the following bitmasking operation when the</span>
+<span class="Comment">// capacity is a power of two:</span>
+<span class="Comment">//</span>
+<span class="Comment">//     pos(ind) = (ind + off) &amp; (cap - 1)</span>
+<span class="Comment">//</span>
+<span class="Comment">// Bitmasking is usually more performant than the modulo operator. Hence</span>
+<span class="Comment">// capacities are rounded up to a power of two at all times and bitmasking is</span>
+<span class="Comment">// used to calculate positions in this implementation.</span>
+<span class="Comment">//</span>
+
+<span class="PreProc">#include </span><span class="Constant">&lt;stdlib.h&gt;</span>
+<span class="PreProc">#include </span><span class="Constant">&lt;string.h&gt;</span>
+
+<span class="PreProc">#define RING_INIT_CAP </span><span class="Constant">2</span>
+<span class="PreProc">#define RING_GROW_RAT </span><span class="Constant">2</span>
+
+<span class="Type">int</span> nextpow2(<span class="Type">int</span>);
+
+<span class="Type">inline</span> <span class="Type">int</span>
+nextpow2(<span class="Type">int</span> i)
+{
+    <span class="Type">int</span> next = <span class="Constant">1</span>;
+
+    <span class="Statement">while</span> (next &lt; i) {
+        next *= <span class="Constant">2</span>;
+    }
+
+    <span class="Statement">return</span> next;
+}
+
+<span class="PreProc">#define TYPE </span><span class="Type">int</span>
+
+<span class="Type">struct</span> ring {
+    TYPE *buf;
+    <span class="Type">int</span>   off;
+    <span class="Type">int</span>   len;
+    <span class="Type">int</span>   cap;
+};
+
+<span class="Type">struct</span> ring *ringnew(<span class="Type">void</span>);
+<span class="Type">struct</span> ring *ringnewcap(<span class="Type">int</span>);
+<span class="Type">void</span>         ringdelete(<span class="Type">struct</span> ring *);
+<span class="Type">int</span>          ringresize(<span class="Type">struct</span> ring *, <span class="Type">int</span>);
+<span class="Type">int</span>          ringputb(<span class="Type">struct</span> ring *, TYPE);
+<span class="Type">int</span>          ringputf(<span class="Type">struct</span> ring *, TYPE);
+TYPE         ringpopb(<span class="Type">struct</span> ring *);
+TYPE         ringpopf(<span class="Type">struct</span> ring *);
+TYPE         ringget(<span class="Type">struct</span> ring *, <span class="Type">int</span>);
+<span class="Type">void</span>         ringset(<span class="Type">struct</span> ring *, <span class="Type">int</span>, TYPE);
+
+<span class="Type">inline</span> <span class="Type">struct</span> ring *
+ringnew(<span class="Type">void</span>)
+{
+    <span class="Statement">return</span> ringnewcap(RING_INIT_CAP);
+}
+
+<span class="Type">inline</span> <span class="Type">struct</span> ring *
+ringnewcap(<span class="Type">int</span> cap)
+{
+    <span class="Type">struct</span> ring *ring;
+
+    cap = nextpow2(cap);
+
+    <span class="Statement">if</span> ((ring = malloc(<span class="Statement">sizeof</span>(<span class="Type">struct</span> ring))) == <span class="Constant">NULL</span>) {
+        <span class="Statement">return</span> <span class="Constant">NULL</span>;
+    }
+
+    <span class="Statement">if</span> ((ring-&gt;buf = malloc(cap * <span class="Statement">sizeof</span>(TYPE))) == <span class="Constant">NULL</span>) {
+        free(ring);
+        <span class="Statement">return</span> <span class="Constant">NULL</span>;
+    }
+
+    ring-&gt;off = <span class="Constant">0</span>;
+    ring-&gt;len = <span class="Constant">0</span>;
+    ring-&gt;cap = cap;
+
+    <span class="Statement">return</span> ring;
+}
+
+<span class="Type">inline</span> <span class="Type">void</span>
+ringdelete(<span class="Type">struct</span> ring *ring)
+{
+    free(ring-&gt;buf);
+    free(ring);
+}
+
+<span class="Type">inline</span> <span class="Type">int</span>
+ringresize(<span class="Type">struct</span> ring *ring, <span class="Type">int</span> ncap)
+{
+    TYPE *nbuf;
+
+    ncap = nextpow2(ncap);
+
+    <span class="Statement">if</span> ((nbuf = malloc(ncap * <span class="Statement">sizeof</span>(TYPE))) == <span class="Constant">NULL</span>) {
+        <span class="Statement">return</span> -<span class="Constant">1</span>;
+    }
+
+    <span class="Type">int</span> blen = ring-&gt;len - ring-&gt;off;
+    <span class="Type">int</span> flen = ring-&gt;off;
+
+    memcpy(nbuf, ring-&gt;buf + ring-&gt;off, blen * <span class="Statement">sizeof</span>(TYPE));
+    memcpy(nbuf + blen, ring-&gt;buf, flen * <span class="Statement">sizeof</span>(TYPE));
+
+    ring-&gt;off = <span class="Constant">0</span>;
+    ring-&gt;cap = ncap;
+    ring-&gt;buf = nbuf;
+
+    <span class="Statement">return</span> <span class="Constant">0</span>;
+}
+
+<span class="Type">inline</span> <span class="Type">int</span>
+ringputb(<span class="Type">struct</span> ring *ring, TYPE val)
+{
+    <span class="Statement">if</span> (ring-&gt;cap &lt;= ring-&gt;len &amp;&amp;
+            ringresize(ring, ring-&gt;cap * RING_GROW_RAT) == -<span class="Constant">1</span>) {
+        <span class="Statement">return</span> -<span class="Constant">1</span>;
+    }
+
+    ring-&gt;buf[(ring-&gt;off + ring-&gt;len) &amp; (ring-&gt;cap - <span class="Constant">1</span>)] = val;
+    ring-&gt;len++;
+
+    <span class="Statement">return</span> <span class="Constant">0</span>;
+}
+
+<span class="Type">inline</span> <span class="Type">int</span>
+ringputf(<span class="Type">struct</span> ring *ring, TYPE val)
+{
+    <span class="Statement">if</span> (ring-&gt;cap &lt;= ring-&gt;len) {
+        ringresize(ring, ring-&gt;cap * RING_GROW_RAT);
+    }
+
+    ++ring-&gt;len;
+    --ring-&gt;off;
+    ring-&gt;buf[ring-&gt;off] = val;
+
+    <span class="Statement">return</span> <span class="Constant">0</span>;
+}
+
+<span class="Type">inline</span> TYPE
+ringpopb(<span class="Type">struct</span> ring *ring)
+{
+    --ring-&gt;len;
+    <span class="Statement">return</span> ring-&gt;buf[(ring-&gt;len + ring-&gt;off) &amp; (ring-&gt;cap - <span class="Constant">1</span>)];
+}
+
+<span class="Type">inline</span> TYPE
+ringpopf(<span class="Type">struct</span> ring *ring)
+{
+    --ring-&gt;len;
+    ++ring-&gt;off;
+    <span class="Statement">return</span> ring-&gt;buf[ring-&gt;off - <span class="Constant">1</span>];
+}
+
+<span class="Type">inline</span> TYPE
+ringget(<span class="Type">struct</span> ring *ring, <span class="Type">int</span> ind)
+{
+    <span class="Statement">return</span> ring-&gt;buf[(ind + ring-&gt;off) &amp; (ring-&gt;cap - <span class="Constant">1</span>)];
+}
+
+<span class="Type">inline</span> <span class="Type">void</span>
+ringset(<span class="Type">struct</span> ring *ring, <span class="Type">int</span> ind, TYPE val)
+{
+    ring-&gt;buf[(ind + ring-&gt;off) &amp; (ring-&gt;cap - <span class="Constant">1</span>)] = val;
+}
+
+<span class="Comment">////////////////////////////////////////////////////////////////////////////////</span>
+
+<span class="PreProc">#include </span><span class="Constant">&lt;assert.h&gt;</span>
+
+<span class="Comment">//</span>
+<span class="Comment">// The following scenario is tested where : represents the offset</span>
+<span class="Comment">//</span>
+<span class="Comment">// : | |</span>
+<span class="Comment">// :1| |</span>
+<span class="Comment">// :1|2|</span>
+<span class="Comment">// :1|2|3| |</span>
+<span class="Comment">// | :2|3| |</span>
+<span class="Comment">// | :2|3|4|</span>
+<span class="Comment">// |5:2|3|4|</span>
+<span class="Comment">// :2|3|4|5|6| | | |</span>
+<span class="Comment">//</span>
+
+<span class="Type">int</span> main(<span class="Type">void</span>)
+{
+    <span class="Type">struct</span> ring *ring = ringnew();
+
+    ringputb(ring, <span class="Constant">1</span>);
+    ringputb(ring, <span class="Constant">2</span>);
+    ringputb(ring, <span class="Constant">3</span>);
+
+    assert(ring-&gt;len == <span class="Constant">3</span>);
+
+    assert(ringget(ring, <span class="Constant">0</span>) == <span class="Constant">1</span>);
+    assert(ringget(ring, <span class="Constant">1</span>) == <span class="Constant">2</span>);
+    assert(ringget(ring, <span class="Constant">2</span>) == <span class="Constant">3</span>);
+
+    ringpopf(ring);
+
+    assert(ring-&gt;len == <span class="Constant">2</span>);
+
+    assert(ringget(ring, <span class="Constant">0</span>) == <span class="Constant">2</span>);
+    assert(ringget(ring, <span class="Constant">1</span>) == <span class="Constant">3</span>);
+
+    ringputb(ring, <span class="Constant">4</span>);
+    ringputb(ring, <span class="Constant">5</span>);
+    ringputb(ring, <span class="Constant">6</span>);
+
+    assert(ring-&gt;len == <span class="Constant">5</span>);
+
+    assert(ringget(ring, <span class="Constant">0</span>) == <span class="Constant">2</span>);
+    assert(ringget(ring, <span class="Constant">1</span>) == <span class="Constant">3</span>);
+    assert(ringget(ring, <span class="Constant">2</span>) == <span class="Constant">4</span>);
+    assert(ringget(ring, <span class="Constant">3</span>) == <span class="Constant">5</span>);
+    assert(ringget(ring, <span class="Constant">4</span>) == <span class="Constant">6</span>);
+
+    <span class="Statement">return</span> <span class="Constant">0</span>;
+}
+</pre>
+</body>
+</html>
+<!-- vim: set foldmethod=manual : -->
