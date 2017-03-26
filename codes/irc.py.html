@@ -1,0 +1,109 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+<title>~/Dropbox/workspace/web/codes/irc.py.html</title>
+<meta name="Generator" content="Vim/8.0">
+<meta name="plugin-version" content="vim7.4_v2">
+<meta name="syntax" content="python">
+<meta name="settings" content="use_css,no_foldcolumn,expand_tabs,prevent_copy=">
+<meta name="colorscheme" content="none">
+<style type="text/css">
+<!--
+pre { font-family: monospace; color: #000000; background-color: #ffffff; }
+body { font-family: monospace; color: #000000; background-color: #ffffff; }
+* { font-size: 1em; }
+.PreProc { color: #c000c0; }
+.Type { color: #008000; }
+.Identifier { color: #008080; }
+.Statement { color: #af5f00; }
+.Comment { color: #0000c0; }
+.Constant { color: #c00000; }
+.Special { color: #c000c0; }
+-->
+</style>
+
+<script type='text/javascript'>
+<!--
+
+-->
+</script>
+</head>
+<body>
+<pre id='vimCodeElement'>
+<span class="Comment">#!/usr/bin/env python</span>
+<span class="Comment">#</span>
+<span class="Comment"># irc.py</span>
+<span class="Comment">#</span>
+<span class="Comment"># Barebones IRC client using TCP sockets</span>
+<span class="Comment">#</span>
+<span class="Comment"># This is a simple IRC client using TCP sockets. It runs with two threads for</span>
+<span class="Comment"># reading and writing messages. The following messages that are configurable in</span>
+<span class="Comment"># this script are sent when you first connect to the server:</span>
+<span class="Comment">#</span>
+<span class="Comment">#     NICK guest123</span>
+<span class="Comment">#     USER guest123 localhost irc.freenode.net :John Doe</span>
+<span class="Comment">#</span>
+<span class="Comment"># PING messages from the server are automatically responded with a PONG</span>
+<span class="Comment"># message. No special escaped commands are provided so you are required to</span>
+<span class="Comment"># directly use the IRC protocol as such:</span>
+<span class="Comment">#</span>
+<span class="Comment">#     JOIN #python</span>
+<span class="Comment">#     PRIVMSG #python :hi folks!</span>
+<span class="Comment">#     PRIVMSG John :hi John, how are you?</span>
+<span class="Comment">#</span>
+<span class="Comment"># Input lines are terminated with CR-LF characters. Messages from all joined</span>
+<span class="Comment"># channels are displayed on the same screen. Lastly a QUIT message is sent and</span>
+<span class="Comment"># the socket is closed when the program is interrupted.</span>
+<span class="Comment">#</span>
+<span class="Comment"># IRC protocol standard: <a href="https://tools.ietf.org/html/rfc1459">https://tools.ietf.org/html/rfc1459</a></span>
+<span class="Comment">#</span>
+
+<span class="PreProc">import</span> sys
+<span class="PreProc">import</span> socket
+<span class="PreProc">import</span> signal
+<span class="PreProc">import</span> threading
+
+nick = <span class="Constant">'</span><span class="Constant">guest123</span><span class="Constant">'</span>
+real = <span class="Constant">'</span><span class="Constant">John Doe</span><span class="Constant">'</span>
+host = <span class="Constant">'</span><span class="Constant">irc.freenode.net</span><span class="Constant">'</span>
+port = <span class="Constant">6667</span>
+
+sock = socket.socket()
+sock.connect((host, port))
+
+sock.send(<span class="Constant">'</span><span class="Constant">NICK %s</span><span class="Special">\r\n</span><span class="Constant">'</span> % nick)
+sock.send(<span class="Constant">'</span><span class="Constant">USER %s localhost %s :%s</span><span class="Special">\r\n</span><span class="Constant">'</span> % (nick, host, real))
+
+<span class="Statement">def</span> <span class="Identifier">reader</span>(sock):
+    <span class="Statement">while</span> <span class="Identifier">True</span>:
+        mesg = sock.recv(<span class="Constant">4096</span>)
+        toks = mesg.split()
+        <span class="Statement">if</span> toks[<span class="Constant">0</span>] == <span class="Constant">'</span><span class="Constant">PING</span><span class="Constant">'</span>:
+            sock.send(<span class="Constant">'</span><span class="Constant">PONG %s</span><span class="Special">\r\n</span><span class="Constant">'</span> % toks[<span class="Constant">1</span>])
+        <span class="Statement">else</span>:
+            <span class="Identifier">print</span> mesg,
+
+<span class="Statement">def</span> <span class="Identifier">writer</span>(sock):
+    <span class="Statement">while</span> <span class="Identifier">True</span>:
+        line = sys.stdin.readline()
+        sock.send(<span class="Constant">'</span><span class="Constant">%s</span><span class="Special">\r\n</span><span class="Constant">'</span> % line.rstrip())
+
+t1 = threading.Thread(target=reader, args=(sock,))
+t2 = threading.Thread(target=writer, args=(sock,))
+
+t1.daemon = <span class="Identifier">True</span>
+t2.daemon = <span class="Identifier">True</span>
+
+t1.start()
+t2.start()
+
+<span class="Statement">try</span>:
+    signal.pause()
+<span class="Statement">except</span> <span class="Type">KeyboardInterrupt</span>:
+    sock.send(<span class="Constant">'</span><span class="Constant">QUIT</span><span class="Special">\r\n</span><span class="Constant">'</span>)
+    sock.close()
+</pre>
+</body>
+</html>
+<!-- vim: set foldmethod=manual : -->
