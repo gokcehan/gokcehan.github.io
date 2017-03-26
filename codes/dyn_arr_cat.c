@@ -4,7 +4,6 @@
 // Dynamic array (concatenation)
 //
 
-#include <assert.h>
 #include <stdlib.h>
 
 #define ARR_INIT_CAP 2
