@@ -1,0 +1,580 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+<title>~/Dropbox/workspace/web/sheets/unix.sh.html</title>
+<meta name="Generator" content="Vim/8.0">
+<meta name="plugin-version" content="vim7.4_v2">
+<meta name="syntax" content="sh">
+<meta name="settings" content="use_css,no_foldcolumn,expand_tabs,prevent_copy=">
+<meta name="colorscheme" content="none">
+<style type="text/css">
+<!--
+pre { font-family: monospace; color: #000000; background-color: #ffffff; }
+body { font-family: monospace; color: #000000; background-color: #ffffff; }
+* { font-size: 1em; }
+.Todo { color: #000000; background-color: #ffff00; padding-bottom: 1px; }
+.PreProc { color: #c000c0; }
+.Identifier { color: #008080; }
+.Statement { color: #af5f00; }
+.Comment { color: #0000c0; }
+.Constant { color: #c00000; }
+.Special { color: #c000c0; }
+-->
+</style>
+
+<script type='text/javascript'>
+<!--
+
+-->
+</script>
+</head>
+<body>
+<pre id='vimCodeElement'>
+<span class="Comment">#!/bin/sh</span>
+
+<span class="Comment">## manuals and documentation</span>
+
+whatis ls
+<span class="Comment"># ls (1)               - list directory contents</span>
+
+whatis <span class="Special">-w</span> ls*
+<span class="Comment"># ls (1)               - list directory contents</span>
+<span class="Comment"># lsattr (1)           - list file attributes on a Linux second extended file system</span>
+<span class="Comment"># lsb_release (1)      - print distribution-specific information</span>
+<span class="Comment"># lsblk (8)            - list block devices</span>
+<span class="Comment"># lscpu (1)            - display information about the CPU architecture</span>
+<span class="Comment"># lsdiff (1)           - show which files are modified by a patch</span>
+<span class="Comment"># lsearch (3)          - linear search of an array</span>
+<span class="Comment"># lseek (2)            - reposition read/write file offset</span>
+<span class="Comment"># lseek64 (3)          - reposition 64-bit read/write file offset</span>
+<span class="Comment"># lshw (1)             - list hardware</span>
+<span class="Comment"># lsinitramfs (8)      - list content of an initramfs image</span>
+<span class="Comment"># lsipc (1)            - show information on IPC facilities currently employed in the system</span>
+<span class="Comment"># lslocks (8)          - list local system locks</span>
+<span class="Comment"># lslogins (1)         - display information about known users in the system</span>
+<span class="Comment"># lsmod (8)            - Show the status of modules in the Linux Kernel</span>
+<span class="Comment"># lsof (8)             - list open files</span>
+<span class="Comment"># lspci (8)            - list all PCI devices</span>
+<span class="Comment"># lspcmcia (8)         - display extended PCMCIA debugging information</span>
+<span class="Comment"># lspgpot (1)          - extracts the ownertrust values from PGP keyrings and list them in ...</span>
+<span class="Comment"># lstat (2)            - get file status</span>
+<span class="Comment"># lstat64 (2)          - get file status</span>
+<span class="Comment"># lsusb (8)            - list USB devices</span>
+
+apropos <span class="Special">-a</span> list directory
+<span class="Comment"># chacl (1)            - change the access control list of a file or directory</span>
+<span class="Comment"># dir (1)              - list directory contents</span>
+<span class="Comment"># File::Listing (3pm)  - parse directory listing</span>
+<span class="Comment"># ls (1)               - list directory contents</span>
+<span class="Comment"># ntfsls (8)           - list directory contents on an NTFS filesystem</span>
+<span class="Comment"># vdir (1)             - list directory contents</span>
+
+man ls
+<span class="Comment"># (displays manual page)</span>
+
+manpath
+<span class="Comment"># /usr/local/man:/usr/local/share/man:/usr/share/man</span>
+
+info ls
+<span class="Comment"># (displays info page)</span>
+
+help <span class="Statement">cd</span>
+<span class="Comment"># (displays shell help for builtins)</span>
+
+type ls
+<span class="Comment"># ls is /bin/ls</span>
+
+type <span class="Statement">cd</span>
+<span class="Comment"># cd is a shell builtin</span>
+
+<span class="Comment">## file displaying/editing</span>
+
+cat <span class="Statement">&lt;&lt; EOF</span><span class="Constant"> &gt; hello.c</span>
+<span class="Constant">#include &lt;stdio.h&gt;</span>
+
+<span class="Constant">int main() {</span>
+<span class="Constant">    puts(&quot;hello world&quot;);</span>
+<span class="Constant">    return 0;</span>
+<span class="Constant">}</span>
+<span class="Statement">EOF</span>
+<span class="Comment"># (creates `hello.c` file with content up to `EOF` (heredoc literal))</span>
+
+cat hello.c
+<span class="Comment"># #include &lt;stdio.h&gt;</span>
+<span class="Comment"># </span>
+<span class="Comment"># int main() {</span>
+<span class="Comment">#     puts(&quot;hello world&quot;);</span>
+<span class="Comment">#     return 0;</span>
+<span class="Comment"># }</span>
+
+file hello.c
+<span class="Comment"># hello.c: C source, ASCII text</span>
+
+file <span class="Special">-i</span> hello.c
+<span class="Comment"># text/x-c; charset=us-ascii</span>
+
+gcc hello.c <span class="Special">-o</span> hello
+<span class="Comment"># (compiles `hello.c` source into `hello` binary)</span>
+
+./hello
+<span class="Comment"># hello world</span>
+
+file hello
+<span class="Comment"># hello: ELF 64-bit LSB executable, x86-64, version 1 (SYSV), dynamically linked, interpreter /lib64/ld-linux-x86-64.so.2, for GNU/Linux 2.6.32, BuildID[sha1]=5f4ee315765406f6c704eb194a5f624d834de000, not stripped</span>
+
+file <span class="Special">-i</span> hello
+<span class="Comment"># application/x-executable; charset=binary</span>
+
+head <span class="Special">-n</span> <span class="Constant">3</span> hello.c
+<span class="Comment"># #include &lt;stdio.h&gt;</span>
+<span class="Comment"># </span>
+<span class="Comment"># int main() {</span>
+
+tail <span class="Special">-n</span> <span class="Constant">3</span> hello.c
+<span class="Comment">#     puts(&quot;hello world&quot;);</span>
+<span class="Comment">#     return 0;</span>
+<span class="Comment"># }</span>
+
+tail <span class="Special">-f</span> /var/log/syslog
+<span class="Comment"># (follows log file -- interrupt with Ctrl-c to quit)</span>
+
+more hello.c
+<span class="Comment"># (displays file one page at a time)</span>
+
+less hello.c
+<span class="Comment"># (displays file as a pager)</span>
+
+gedit hello.c
+<span class="Comment"># (opens graphical text editor by GNOME)</span>
+
+nano hello.c
+<span class="Comment"># (opens terminal text editor by GNU)</span>
+
+vi hello.c
+<span class="Comment"># (opens terminal text editor -- POSIX standard)</span>
+
+vim hello.c
+<span class="Comment"># (opens vim -- vi improved)</span>
+
+vimtutor
+<span class="Comment"># (opens tutorial for vim)</span>
+
+<span class="Comment">## pipes and redirection</span>
+
+cat <span class="Statement">&lt;&lt; EOF</span><span class="Constant"> &gt; streams.c</span>
+<span class="Constant">#include &lt;stdio.h&gt;</span>
+
+<span class="Constant">int main()</span>
+<span class="Constant">{</span>
+<span class="Constant">    fputs(&quot;this text goes to STDOUT</span><span class="Special">\n</span><span class="Constant">&quot;, stdout);</span>
+<span class="Constant">    fputs(&quot;this text goes to STDERR</span><span class="Special">\n</span><span class="Constant">&quot;, stderr);</span>
+<span class="Constant">    return 0;</span>
+<span class="Constant">}</span>
+<span class="Statement">EOF</span>
+
+gcc streams.c <span class="Special">-o</span> streams
+
+./streams
+<span class="Comment"># this text goes to STDERR</span>
+<span class="Comment"># this text goes to STDOUT</span>
+
+./streams <span class="Statement">&gt;</span> /dev/null
+<span class="Comment"># this text goes to STDERR</span>
+
+./streams <span class="Constant">1</span><span class="Statement">&gt;</span> /dev/null
+<span class="Comment"># this text goes to STDERR</span>
+
+./streams <span class="Constant">2</span><span class="Statement">&gt;</span> /dev/null
+<span class="Comment"># this text goes to STDOUT</span>
+
+./streams &amp;<span class="Statement">&gt;</span> /dev/null
+
+./streams <span class="Statement">&gt;</span> /dev/null <span class="Constant">2</span><span class="Statement">&gt;&amp;1</span>
+
+<span class="Comment"># print 5th number in a file (you should better use sed (1))</span>
+cat streams.c | head <span class="Special">-n</span>5 | tail <span class="Special">-n</span>1
+<span class="Comment">#     fputs(&quot;this text goes to STDOUT\n&quot;, stdout);</span>
+
+<span class="Comment"># create a random string of specified length (you should better use mkpasswd (1))</span>
+cat /dev/urandom | strings <span class="Special">-n</span> <span class="Constant">1</span> | tr <span class="Special">-d</span> <span class="Statement">'</span><span class="Constant">[:space:]</span><span class="Statement">'</span> | head <span class="Special">-c</span> <span class="Constant">30</span>
+<span class="Comment"># K@_Q+a)4mLI'~4#%N?))~B@^L!;i@j</span>
+
+<span class="Comment"># word frequency challenge (<a href="http://dl.acm.org/citation.cfm?id=5948.315654)">http://dl.acm.org/citation.cfm?id=5948.315654)</a></span>
+cat basics.sh | tr <span class="Special">-cs</span> A-Za-z <span class="Statement">'</span><span class="Constant">\n</span><span class="Statement">'</span> | tr A-Z a-z | sort | uniq <span class="Special">-c</span> | sort <span class="Special">-rn</span> | head <span class="Special">-n</span>5
+<span class="Comment">#      24 hello</span>
+<span class="Comment">#      24 c</span>
+<span class="Comment">#      17 list</span>
+<span class="Comment">#      16 file</span>
+<span class="Comment">#      13 text</span>
+
+./streams | tee output.txt
+<span class="Comment"># this text goes to STDERR</span>
+<span class="Comment"># this text goes to STDOUT</span>
+
+cat output.txt
+<span class="Comment"># this text goes to STDOUT</span>
+
+./streams <span class="Constant">2</span><span class="Statement">&gt;&amp;1</span> | tee output.txt
+<span class="Comment"># this text goes to STDERR</span>
+<span class="Comment"># this text goes to STDOUT</span>
+
+cat output.txt
+<span class="Comment"># this text goes to STDERR</span>
+<span class="Comment"># this text goes to STDOUT</span>
+
+<span class="Comment">## aliases and functions</span>
+
+<span class="Comment"># create alias for when a parameter is at the end</span>
+alias <span class="Identifier">freq</span>=<span class="Statement">&quot;</span><span class="Constant">cat basics.sh | tr -cs A-Za-z '</span><span class="Special">\n</span><span class="Constant">' | tr A-Z a-z | sort | uniq -c | sort -rn | head -n</span><span class="Statement">&quot;</span>
+
+freq <span class="Constant">5</span>
+<span class="Comment">#      24 hello</span>
+<span class="Comment">#      24 c</span>
+<span class="Comment">#      17 list</span>
+<span class="Comment">#      16 file</span>
+<span class="Comment">#      13 text</span>
+
+unalias freq
+
+<span class="Comment"># create a function for when a parameter is at an arbitrary location</span>
+<span class="Identifier">freq() {</span> curl <span class="PreProc">$1</span> <span class="Constant">2</span><span class="Statement">&gt;</span> /dev/null <span class="Statement">|</span> tr <span class="Special">-cs</span> A-Za-z <span class="Statement">'</span><span class="Constant">\n</span><span class="Statement">'</span> <span class="Statement">|</span> tr A-Z a-z <span class="Statement">|</span> sort <span class="Statement">|</span> uniq <span class="Special">-c</span> <span class="Statement">|</span> sort <span class="Special">-rn</span> <span class="Statement">|</span> head <span class="Special">-n</span>5<span class="Statement">;</span> <span class="Identifier">}</span>
+
+freq <a href="http://www.gutenberg.org/cache/epub/">http://www.gutenberg.org/cache/epub/</a><span class="Constant">1342</span>/pg1342.txt
+<span class="Comment">#    4507 the</span>
+<span class="Comment">#    4243 to</span>
+<span class="Comment">#    3730 of</span>
+<span class="Comment">#    3658 and</span>
+<span class="Comment">#    2225 her</span>
+
+freq <a href="http://boun.edu.tr/">http://boun.edu.tr/</a>
+<span class="Comment">#     314 a</span>
+<span class="Comment">#     244 tr</span>
+<span class="Comment">#     176 class</span>
+<span class="Comment">#     158 div</span>
+<span class="Comment">#     154 href</span>
+
+<span class="Comment">## searching</span>
+
+grep hello hello.c
+<span class="Comment">#     puts(&quot;hello world&quot;);</span>
+
+grep hello hello.c <span class="Special">-v</span>
+<span class="Comment"># #include &lt;stdio.h&gt;</span>
+<span class="Comment"># </span>
+<span class="Comment"># int main() {</span>
+<span class="Comment">#     return 0;</span>
+<span class="Comment"># }</span>
+
+grep hello <span class="Special">-r</span> .
+<span class="Comment"># ./basics.sh:# create `hello.c` file with content up to `EOF` (heredoc literal)</span>
+<span class="Comment"># ./basics.sh:cat &lt;&lt; EOF &gt; hello.c</span>
+<span class="Comment"># ./basics.sh:    puts(&quot;hello world&quot;);</span>
+<span class="Comment"># ./basics.sh:# print `hello.c` file stdout</span>
+<span class="Comment"># ./basics.sh:cat hello.c</span>
+<span class="Comment"># ./basics.sh:#     puts(&quot;hello world&quot;);</span>
+<span class="Comment"># ./basics.sh:file hello.c</span>
+<span class="Comment"># ./basics.sh:# hello.c: C source, ASCII text</span>
+<span class="Comment"># ./basics.sh:file -i hello.c</span>
+<span class="Comment"># ./basics.sh:gcc hello.c -o hello</span>
+<span class="Comment"># ./basics.sh:./hello</span>
+<span class="Comment"># ./basics.sh:# hello world</span>
+<span class="Comment"># ./basics.sh:file hello</span>
+<span class="Comment"># ./basics.sh:# hello: ELF 64-bit LSB executable, x86-64, version 1 (SYSV), dynamically linked, interpreter /lib64/ld-linux-x86-64.so.2, for GNU/Linux 2.6.32, BuildID[sha1]=5f4ee315765406f6c704eb194a5f624d834de000, not stripped</span>
+<span class="Comment"># ./basics.sh:file -i hello</span>
+<span class="Comment"># ./basics.sh:head -n 3 hello.c</span>
+<span class="Comment"># ./basics.sh:tail -n 3 hello.c</span>
+<span class="Comment"># ./basics.sh:#     puts(&quot;hello world&quot;);</span>
+<span class="Comment"># ./basics.sh:more hello.c</span>
+<span class="Comment"># ./basics.sh:less hello.c</span>
+<span class="Comment"># ./basics.sh:gedit hello.c</span>
+<span class="Comment"># ./basics.sh:nano hello.c</span>
+<span class="Comment"># ./basics.sh:vi hello.c</span>
+<span class="Comment"># ./basics.sh:vim hello.c</span>
+<span class="Comment"># ./basics.sh:#      24 hello</span>
+<span class="Comment"># ./basics.sh:#      24 hello</span>
+<span class="Comment"># ./basics.sh:# ./hello</span>
+<span class="Comment"># ./basics.sh:# ./hello.c</span>
+<span class="Comment"># ./basics.sh:# ./hello.c</span>
+<span class="Comment"># ./basics.sh:# ./hello</span>
+<span class="Comment"># ./basics.sh:# ./hello</span>
+<span class="Comment"># Binary file ./hello matches</span>
+<span class="Comment"># ./hello.c:    puts(&quot;hello world&quot;);</span>
+
+which ls
+<span class="Comment"># /bin/ls</span>
+
+which vim
+<span class="Comment"># /usr/local/bin/vim</span>
+
+which <span class="Special">-a</span> vim
+<span class="Comment"># /usr/local/bin/vim</span>
+<span class="Comment"># /usr/bin/vim</span>
+
+find .
+<span class="Comment"># .</span>
+<span class="Comment"># ./streams.c</span>
+<span class="Comment"># ./basics.sh</span>
+<span class="Comment"># ./hello</span>
+<span class="Comment"># ./hello.c</span>
+<span class="Comment"># ./streams</span>
+
+find<span class="Statement"> . </span>-name <span class="Statement">'</span><span class="Constant">*.c</span><span class="Statement">'</span>
+<span class="Comment"># ./streams.c</span>
+<span class="Comment"># ./hello.c</span>
+
+find<span class="Statement"> . </span>-executable
+<span class="Comment"># .</span>
+<span class="Comment"># ./basics.sh</span>
+<span class="Comment"># ./hello</span>
+<span class="Comment"># ./streams</span>
+
+find<span class="Statement"> . </span>-executable <span class="Special">-type</span> f
+<span class="Comment"># ./basics.sh</span>
+<span class="Comment"># ./hello</span>
+<span class="Comment"># ./streams</span>
+
+<span class="Comment"># find the longest header files under `/usr/include`</span>
+find /usr/include <span class="Special">-name</span> <span class="Statement">'</span><span class="Constant">*.h</span><span class="Statement">'</span> <span class="Special">-type</span> f <span class="Special">-exec</span> wc <span class="Special">-l</span> <span class="Special">{}</span> \; | sort <span class="Special">-rn</span> | head
+<span class="Comment"># 18690 /usr/include/epoxy/gl_generated.h</span>
+<span class="Comment"># 11864 /usr/include/xcb/xproto.h</span>
+<span class="Comment"># 8424 /usr/include/xcb/glx.h</span>
+<span class="Comment"># 7126 /usr/include/valgrind/valgrind.h</span>
+<span class="Comment"># 6761 /usr/include/google/protobuf/descriptor.pb.h</span>
+<span class="Comment"># 5904 /usr/include/c++/5/bits/random.h</span>
+<span class="Comment"># 5587 /usr/include/c++/5/bits/basic_string.h</span>
+<span class="Comment"># 5546 /usr/include/c++/5/bits/stl_algo.h</span>
+<span class="Comment"># 4833 /usr/include/llvm-3.8/llvm/IR/Instructions.h</span>
+<span class="Comment"># 4698 /usr/include/valgrind/vki/vki-linux.h</span>
+
+ln <span class="Special">-s</span> basics.sh foo
+
+<span class="Statement">test</span> <span class="Special">-e</span> foo &amp;&amp; <span class="Statement">echo</span><span class="Constant"> </span><span class="Statement">'</span><span class="Constant">file exists</span><span class="Statement">'</span><span class="Constant"> </span>|| <span class="Statement">echo</span><span class="Constant"> </span><span class="Statement">'</span><span class="Constant">file does not exists</span><span class="Statement">'</span>
+<span class="Comment"># file exists</span>
+
+ln <span class="Special">-s</span> /path/to/non/existent/file bar
+
+<span class="Statement">test</span> <span class="Special">-e</span> bar &amp;&amp; <span class="Statement">echo</span><span class="Constant"> </span><span class="Statement">'</span><span class="Constant">file exists</span><span class="Statement">'</span><span class="Constant"> </span>|| <span class="Statement">echo</span><span class="Constant"> </span><span class="Statement">'</span><span class="Constant">file does not exists</span><span class="Statement">'</span>
+<span class="Comment"># file does not exists</span>
+
+find<span class="Statement"> . </span>-type l
+<span class="Comment"># ./bar</span>
+<span class="Comment"># ./foo</span>
+
+find<span class="Statement"> . </span>-type l <span class="Special">-print</span>
+<span class="Comment"># ./bar</span>
+<span class="Comment"># ./foo</span>
+
+find<span class="Statement"> . </span>-type l <span class="Special">-print</span> <span class="Special">-print</span>
+<span class="Comment"># ./bar</span>
+<span class="Comment"># ./bar</span>
+<span class="Comment"># ./foo</span>
+<span class="Comment"># ./foo</span>
+
+<span class="Comment"># find existing links in current directory</span>
+find<span class="Statement"> . </span>-type l <span class="Special">-exec</span> <span class="Statement">test</span> <span class="Special">-e</span> <span class="Special">{}</span> \; <span class="Special">-print</span>
+<span class="Comment"># ./foo</span>
+
+<span class="Comment"># find broken links in current directory</span>
+find<span class="Statement"> . </span>-type l -! <span class="Special">-exec</span> <span class="Statement">test</span> <span class="Special">-e</span> <span class="Special">{}</span> \; <span class="Special">-print</span>
+<span class="Comment"># ./bar</span>
+
+locate stdio.h
+<span class="Comment"># /usr/include/stdio.h</span>
+<span class="Comment"># /usr/include/c++/5/tr1/stdio.h</span>
+<span class="Comment"># /usr/include/glib-2.0/glib/gstdio.h</span>
+<span class="Comment"># /usr/include/x86_64-linux-gnu/bits/stdio.h</span>
+<span class="Comment"># /usr/lib/x86_64-linux-gnu/perl/5.22.1/CORE/nostdio.h</span>
+
+whereis gcc
+<span class="Comment"># gcc: /usr/bin/gcc /usr/lib/gcc /usr/share/man/man1/gcc.1.gz</span>
+
+<span class="Comment">## packages (debian)</span>
+
+<span class="Comment"># search a package</span>
+apt search wget
+apt-cache search wget
+
+<span class="Comment"># show package info</span>
+apt show wget
+apt-cache show wget
+
+<span class="Comment"># install a package</span>
+sudo apt install wget
+sudo apt-get install wget
+
+<span class="Comment"># remove a package</span>
+sudo apt remove wget
+sudo apt-get remove wget
+
+<span class="Comment"># update list of packages</span>
+sudo apt update
+sudo apt-get update
+
+<span class="Comment"># upgrade all installed packages</span>
+sudo apt upgrade
+sudo apt-get upgrade
+
+<span class="Comment"># list installed files of a package</span>
+dpkg <span class="Special">-L</span> tree
+<span class="Comment"># /.</span>
+<span class="Comment"># /usr</span>
+<span class="Comment"># /usr/bin</span>
+<span class="Comment"># /usr/bin/tree</span>
+<span class="Comment"># /usr/share</span>
+<span class="Comment"># /usr/share/doc</span>
+<span class="Comment"># /usr/share/doc/tree</span>
+<span class="Comment"># /usr/share/doc/tree/</span><span class="Todo">TODO</span>
+<span class="Comment"># /usr/share/doc/tree/copyright</span>
+<span class="Comment"># /usr/share/doc/tree/README.gz</span>
+<span class="Comment"># /usr/share/doc/tree/changelog.Debian.gz</span>
+<span class="Comment"># /usr/share/man</span>
+<span class="Comment"># /usr/share/man/man1</span>
+<span class="Comment"># /usr/share/man/man1/tree.1.gz</span>
+
+<span class="Comment"># find the owner package of a file</span>
+dpkg-query <span class="Special">-S</span> /bin/ls
+<span class="Comment"># coreutils: /bin/ls</span>
+
+<span class="Comment">## archives</span>
+
+<span class="Comment"># create a tar file from c files</span>
+tar cf files.tar *.c
+
+<span class="Comment"># list contents of a tar file</span>
+tar tf files.tar
+<span class="Comment"># hello.c</span>
+<span class="Comment"># streams.c</span>
+
+<span class="Comment"># uncompress a tar file</span>
+tar xf files.tar
+
+<span class="Comment"># create a gunzipped tar file from c files</span>
+tar czf files.tar.gz *.c
+
+<span class="Comment"># uncompress a gunzipped tar file</span>
+tar xf files.tar
+
+<span class="Comment">## processes</span>
+
+cat <span class="Statement">&lt;&lt; EOF</span><span class="Constant"> &gt; loop.c</span>
+<span class="Constant">#include &lt;stdio.h&gt;</span>
+<span class="Constant">#include &lt;unistd.h&gt;</span>
+
+<span class="Constant">int main()</span>
+<span class="Constant">{</span>
+<span class="Constant">    int curr = 0;</span>
+<span class="Constant">    while (1) {</span>
+<span class="Constant">        printf(&quot;running for %d seconds</span><span class="Special">\n</span><span class="Constant">&quot;, curr++);</span>
+<span class="Constant">        sleep(1);</span>
+<span class="Constant">    }</span>
+<span class="Constant">    return 0;</span>
+<span class="Constant">}</span>
+<span class="Statement">EOF</span>
+
+gcc loop.c <span class="Special">-o</span> loop
+
+<span class="Comment"># use Ctrl-C to quit</span>
+./loop
+<span class="Comment"># running for 0 seconds</span>
+<span class="Comment"># running for 1 seconds</span>
+<span class="Comment"># running for 2 seconds</span>
+<span class="Comment"># running for 3 seconds</span>
+<span class="Comment"># ^C</span>
+
+<span class="Comment"># use Ctrl-Z to stop</span>
+./loop
+<span class="Comment"># running for 0 seconds</span>
+<span class="Comment"># running for 1 seconds</span>
+<span class="Comment"># running for 2 seconds</span>
+<span class="Comment"># running for 3 seconds</span>
+<span class="Comment"># ^Z</span>
+<span class="Comment"># [1]+  Stopped                 ./loop</span>
+
+jobs
+<span class="Comment"># [1]+  Stopped                 ./loop</span>
+
+fg
+<span class="Comment"># ./loop</span>
+<span class="Comment"># running for 4 seconds</span>
+<span class="Comment"># running for 5 seconds</span>
+<span class="Comment"># running for 6 seconds</span>
+<span class="Comment"># ^Z</span>
+<span class="Comment"># [1]+  Stopped                 ./loop</span>
+
+bg
+<span class="Comment"># [1]+ ./loop &amp;</span>
+<span class="Comment"># gokce@ext:~/Dropbox/cmpe230/basics$ running for 7 seconds</span>
+<span class="Comment"># running for 8 seconds</span>
+<span class="Comment"># running for 9 seconds</span>
+<span class="Comment"># running for 10 seconds</span>
+
+disown
+<span class="Comment"># (abondons the last job)</span>
+
+disown <span class="Special">-h</span>
+<span class="Comment"># (abondons the last job with nohup)</span>
+
+disown <span class="Special">-r</span>
+<span class="Comment"># (abondons running jobs)</span>
+
+disown <span class="Special">-a</span>
+<span class="Comment"># (abondons all jobs)</span>
+
+jobs
+<span class="Comment"># (lists jobs)</span>
+
+ps
+<span class="Comment"># (shows all processes in the current terminal)</span>
+
+ps <span class="Special">-a</span>
+<span class="Comment"># (shows all processes attached to a terminal)</span>
+
+ps <span class="Special">-e</span>
+<span class="Comment"># (shows all processes)</span>
+
+cat <span class="Statement">&lt;&lt; EOF</span><span class="Constant"> &gt; lock.c</span>
+<span class="Constant">#include &lt;stdio.h&gt;</span>
+
+<span class="Constant">int main()</span>
+<span class="Constant">{</span>
+<span class="Constant">    int curr = 0;</span>
+<span class="Constant">    while (1) {</span>
+<span class="Constant">        ++curr;</span>
+<span class="Constant">    }</span>
+<span class="Constant">    return 0;</span>
+<span class="Constant">}</span>
+<span class="Statement">EOF</span>
+
+gcc lock.c <span class="Special">-o</span> lock
+
+top
+<span class="Comment"># (shows resource usage of all processes)</span>
+
+top <span class="Special">-u</span> gokce
+<span class="Comment"># (shows resource usage of all processes owned by gokce)</span>
+
+pgrep lock
+<span class="Comment"># (lists all processes with the name loop)</span>
+
+<span class="Statement">kill</span> <span class="Constant">1234</span>
+<span class="Comment"># (kills process with id 1234)</span>
+
+<span class="Statement">kill</span> <span class="Constant">-9</span> <span class="Constant">1234</span>
+<span class="Comment"># (force kills process with id 1234)</span>
+
+pkill lock
+<span class="Comment"># (kills all processes with the name lock)</span>
+
+pkill <span class="Constant">-9</span> lock
+<span class="Comment"># (force kills all processes with the name lock)</span>
+
+killall lock
+<span class="Comment"># (kills all processes with the exact name lock)</span>
+
+killall <span class="Constant">-9</span> lock
+<span class="Comment"># (force kills all processes with the exact name lock)</span>
+</pre>
+</body>
+</html>
+<!-- vim: set foldmethod=manual : -->

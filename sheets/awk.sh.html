@@ -1,0 +1,296 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+<title>~/Dropbox/workspace/web/sheets/awk.sh.html</title>
+<meta name="Generator" content="Vim/8.0">
+<meta name="plugin-version" content="vim7.4_v2">
+<meta name="syntax" content="sh">
+<meta name="settings" content="use_css,no_foldcolumn,expand_tabs,prevent_copy=">
+<meta name="colorscheme" content="none">
+<style type="text/css">
+<!--
+pre { font-family: monospace; color: #000000; background-color: #ffffff; }
+body { font-family: monospace; color: #000000; background-color: #ffffff; }
+* { font-size: 1em; }
+.Identifier { color: #008080; }
+.Statement { color: #af5f00; }
+.Comment { color: #0000c0; }
+.Constant { color: #c00000; }
+.Special { color: #c000c0; }
+-->
+</style>
+
+<script type='text/javascript'>
+<!--
+
+-->
+</script>
+</head>
+<body>
+<pre id='vimCodeElement'>
+<span class="Comment">#!/bin/sh</span>
+<span class="Comment"># see also `man awk`</span>
+
+awk <span class="Statement">'</span><span class="Constant">{ print }</span><span class="Statement">'</span> /etc/passwd | head
+<span class="Comment"># root:x:0:0:root:/root:/bin/bash</span>
+<span class="Comment"># daemon:x:1:1:daemon:/usr/sbin:/usr/sbin/nologin</span>
+<span class="Comment"># bin:x:2:2:bin:/bin:/usr/sbin/nologin</span>
+<span class="Comment"># sys:x:3:3:sys:/dev:/usr/sbin/nologin</span>
+<span class="Comment"># sync:x:4:65534:sync:/bin:/bin/sync</span>
+<span class="Comment"># games:x:5:60:games:/usr/games:/usr/sbin/nologin</span>
+<span class="Comment"># man:x:6:12:man:/var/cache/man:/usr/sbin/nologin</span>
+<span class="Comment"># lp:x:7:7:lp:/var/spool/lpd:/usr/sbin/nologin</span>
+<span class="Comment"># mail:x:8:8:mail:/var/mail:/usr/sbin/nologin</span>
+<span class="Comment"># news:x:9:9:news:/var/spool/news:/usr/sbin/nologin</span>
+
+awk <span class="Statement">'</span><span class="Constant">{ print $0 }</span><span class="Statement">'</span> /etc/passwd | head
+<span class="Comment"># root:x:0:0:root:/root:/bin/bash</span>
+<span class="Comment"># daemon:x:1:1:daemon:/usr/sbin:/usr/sbin/nologin</span>
+<span class="Comment"># bin:x:2:2:bin:/bin:/usr/sbin/nologin</span>
+<span class="Comment"># sys:x:3:3:sys:/dev:/usr/sbin/nologin</span>
+<span class="Comment"># sync:x:4:65534:sync:/bin:/bin/sync</span>
+<span class="Comment"># games:x:5:60:games:/usr/games:/usr/sbin/nologin</span>
+<span class="Comment"># man:x:6:12:man:/var/cache/man:/usr/sbin/nologin</span>
+<span class="Comment"># lp:x:7:7:lp:/var/spool/lpd:/usr/sbin/nologin</span>
+<span class="Comment"># mail:x:8:8:mail:/var/mail:/usr/sbin/nologin</span>
+<span class="Comment"># news:x:9:9:news:/var/spool/news:/usr/sbin/nologin</span>
+
+head /etc/passwd | awk <span class="Statement">'</span><span class="Constant">{ print $0 }</span><span class="Statement">'</span>
+<span class="Comment"># root:x:0:0:root:/root:/bin/bash</span>
+<span class="Comment"># daemon:x:1:1:daemon:/usr/sbin:/usr/sbin/nologin</span>
+<span class="Comment"># bin:x:2:2:bin:/bin:/usr/sbin/nologin</span>
+<span class="Comment"># sys:x:3:3:sys:/dev:/usr/sbin/nologin</span>
+<span class="Comment"># sync:x:4:65534:sync:/bin:/bin/sync</span>
+<span class="Comment"># games:x:5:60:games:/usr/games:/usr/sbin/nologin</span>
+<span class="Comment"># man:x:6:12:man:/var/cache/man:/usr/sbin/nologin</span>
+<span class="Comment"># lp:x:7:7:lp:/var/spool/lpd:/usr/sbin/nologin</span>
+<span class="Comment"># mail:x:8:8:mail:/var/mail:/usr/sbin/nologin</span>
+<span class="Comment"># news:x:9:9:news:/var/spool/news:/usr/sbin/nologin</span>
+
+head /etc/passwd | awk <span class="Statement">'</span><span class="Constant">{ print $1 }</span><span class="Statement">'</span>
+<span class="Comment"># root:x:0:0:root:/root:/bin/bash</span>
+<span class="Comment"># daemon:x:1:1:daemon:/usr/sbin:/usr/sbin/nologin</span>
+<span class="Comment"># bin:x:2:2:bin:/bin:/usr/sbin/nologin</span>
+<span class="Comment"># sys:x:3:3:sys:/dev:/usr/sbin/nologin</span>
+<span class="Comment"># sync:x:4:65534:sync:/bin:/bin/sync</span>
+<span class="Comment"># games:x:5:60:games:/usr/games:/usr/sbin/nologin</span>
+<span class="Comment"># man:x:6:12:man:/var/cache/man:/usr/sbin/nologin</span>
+<span class="Comment"># lp:x:7:7:lp:/var/spool/lpd:/usr/sbin/nologin</span>
+<span class="Comment"># mail:x:8:8:mail:/var/mail:/usr/sbin/nologin</span>
+<span class="Comment"># news:x:9:9:news:/var/spool/news:/usr/sbin/nologin</span>
+
+head /etc/passwd | awk <span class="Special">-F</span>: <span class="Statement">'</span><span class="Constant">{ print $1 }</span><span class="Statement">'</span>
+<span class="Comment"># root</span>
+<span class="Comment"># daemon</span>
+<span class="Comment"># bin</span>
+<span class="Comment"># sys</span>
+<span class="Comment"># sync</span>
+<span class="Comment"># games</span>
+<span class="Comment"># man</span>
+<span class="Comment"># lp</span>
+<span class="Comment"># mail</span>
+<span class="Comment"># news</span>
+
+head /etc/passwd | awk <span class="Special">-F</span>: <span class="Statement">'</span><span class="Constant">{ printf &quot;%-20s%s\n&quot;, $1, $7 }</span><span class="Statement">'</span>
+<span class="Comment"># root                /bin/bash</span>
+<span class="Comment"># daemon              /usr/sbin/nologin</span>
+<span class="Comment"># bin                 /usr/sbin/nologin</span>
+<span class="Comment"># sys                 /usr/sbin/nologin</span>
+<span class="Comment"># sync                /bin/sync</span>
+<span class="Comment"># games               /usr/sbin/nologin</span>
+<span class="Comment"># man                 /usr/sbin/nologin</span>
+<span class="Comment"># lp                  /usr/sbin/nologin</span>
+<span class="Comment"># mail                /usr/sbin/nologin</span>
+<span class="Comment"># news                /usr/sbin/nologin</span>
+
+head /etc/passwd | awk <span class="Statement">'</span><span class="Constant">BEGIN { FS=&quot;:&quot; } { print $1 }</span><span class="Statement">'</span>
+<span class="Comment"># root</span>
+<span class="Comment"># daemon</span>
+<span class="Comment"># bin</span>
+<span class="Comment"># sys</span>
+<span class="Comment"># sync</span>
+<span class="Comment"># games</span>
+<span class="Comment"># man</span>
+<span class="Comment"># lp</span>
+<span class="Comment"># mail</span>
+<span class="Comment"># news</span>
+
+awk <span class="Statement">'</span><span class="Constant">BEGIN { print ARGC }</span><span class="Statement">'</span> /etc/passwd
+<span class="Comment"># 2</span>
+
+awk <span class="Statement">'</span><span class="Constant">BEGIN { for (i = 0; i &lt; ARGC; i++) print ARGV[i] }</span><span class="Statement">'</span> /etc/passwd
+<span class="Comment"># awk</span>
+<span class="Comment"># /etc/passwd</span>
+
+awk <span class="Statement">'</span>
+<span class="Constant">BEGIN {</span>
+<span class="Constant">    for (i = 0; i &lt; ARGC; i++) {</span>
+<span class="Constant">        print ARGV[i]</span>
+<span class="Constant">    }</span>
+<span class="Constant">}</span><span class="Statement">'</span> /etc/passwd
+<span class="Comment"># awk</span>
+<span class="Comment"># /etc/passwd</span>
+
+awk <span class="Statement">'</span><span class="Constant">BEGIN { print ENVIRON[&quot;HOME&quot;] }</span><span class="Statement">'</span>
+<span class="Comment"># /home/gokce</span>
+
+head /etc/passwd | awk <span class="Special">-F</span>: <span class="Statement">'</span><span class="Constant">{ printf &quot;%d - %d\n&quot;, NR, NF }</span><span class="Statement">'</span>
+<span class="Comment"># 1 - 7</span>
+<span class="Comment"># 2 - 7</span>
+<span class="Comment"># 3 - 7</span>
+<span class="Comment"># 4 - 7</span>
+<span class="Comment"># 5 - 7</span>
+<span class="Comment"># 6 - 7</span>
+<span class="Comment"># 7 - 7</span>
+<span class="Comment"># 8 - 7</span>
+<span class="Comment"># 9 - 7</span>
+<span class="Comment"># 10 - 7</span>
+
+cat /etc/passwd | awk <span class="Special">-F</span>: <span class="Statement">'</span><span class="Constant">/bash/</span><span class="Statement">'</span>
+<span class="Comment"># root:x:0:0:root:/root:/bin/bash</span>
+<span class="Comment"># gokce:x:1000:1000:gokce,,,:/home/gokce:/bin/bash</span>
+
+cat /etc/passwd | awk <span class="Special">-F</span>: <span class="Statement">'</span><span class="Constant">/bash/ { print $0 }</span><span class="Statement">'</span>
+<span class="Comment"># root:x:0:0:root:/root:/bin/bash</span>
+<span class="Comment"># gokce:x:1000:1000:gokce,,,:/home/gokce:/bin/bash</span>
+
+cat /etc/passwd | awk <span class="Special">-F</span>: <span class="Statement">'</span><span class="Constant">/bash/ { print $1 }</span><span class="Statement">'</span>
+<span class="Comment"># root</span>
+<span class="Comment"># gokce</span>
+
+cat /etc/passwd | awk <span class="Special">-F</span>: <span class="Statement">'</span><span class="Constant">$7 == &quot;/bin/bash&quot; { print $1 }</span><span class="Statement">'</span>
+<span class="Comment"># root</span>
+<span class="Comment"># gokce</span>
+
+cat /etc/passwd | awk <span class="Special">-F</span>: <span class="Statement">'</span><span class="Constant">NR == 1, NR == 5 { print $1 }</span><span class="Statement">'</span>
+<span class="Comment"># root</span>
+<span class="Comment"># daemon</span>
+<span class="Comment"># bin</span>
+<span class="Comment"># sys</span>
+<span class="Comment"># sync</span>
+
+cat /etc/passwd | awk <span class="Statement">'</span>
+<span class="Constant">{ numlines++ }</span>
+<span class="Constant">END { print numlines }</span><span class="Statement">'</span>
+<span class="Comment"># 41</span>
+
+cat /etc/passwd | awk <span class="Special">-F</span>: <span class="Statement">'</span>
+<span class="Constant">{ shell[$7]++ }</span>
+<span class="Constant">END { for (i in shell) printf &quot;%-20s%d\n&quot;, i, shell[i] }</span><span class="Statement">'</span>
+<span class="Comment"># /bin/sync           1</span>
+<span class="Comment"># /bin/bash           2</span>
+<span class="Comment"># /bin/false          22</span>
+<span class="Comment"># /usr/sbin/nologin   16</span>
+
+awk <span class="Statement">'</span><span class="Constant">BEGIN {</span>
+<span class="Constant">    &quot;date&quot; | getline line</span>
+<span class="Constant">    print line</span>
+<span class="Constant">    close(&quot;date&quot;)</span>
+<span class="Constant">}</span><span class="Statement">'</span>
+<span class="Comment"># Thu Oct 13 21:04:58 EEST 2016</span>
+
+awk <span class="Statement">'</span><span class="Constant">BEGIN {</span>
+<span class="Constant">    cmd = &quot;date -u&quot;</span>
+<span class="Constant">    cmd | getline line</span>
+<span class="Constant">    print line</span>
+<span class="Constant">    close(cmd)</span>
+<span class="Constant">}</span><span class="Statement">'</span>
+<span class="Comment"># Thu Oct 13 18:05:03 UTC 2016</span>
+
+awk <span class="Statement">'</span><span class="Constant">BEGIN {</span>
+<span class="Constant">    print &quot;hello world&quot; | &quot;cat&quot;</span>
+<span class="Constant">    close(&quot;cat&quot;)</span>
+<span class="Constant">}</span><span class="Statement">'</span>
+<span class="Comment"># hello world</span>
+
+awk <span class="Statement">'</span><span class="Constant">BEGIN {</span>
+<span class="Constant">    print &quot;ls -l /bin/echo&quot; | &quot;sh&quot;</span>
+<span class="Constant">    close(&quot;sh&quot;)</span>
+<span class="Constant">}</span><span class="Statement">'</span>
+<span class="Comment"># -rwxr-xr-x 1 root root 31376 Feb 18  2016 /bin/echo</span>
+
+awk <span class="Statement">'</span><span class="Constant">BEGIN { system(&quot;ls -l /bin/echo&quot;) }</span><span class="Statement">'</span>
+<span class="Comment"># -rwxr-xr-x 1 root root 31376 Feb 18  2016 /bin/echo</span>
+
+awk <span class="Statement">'</span>
+<span class="Constant">BEGIN {</span>
+<span class="Constant">    print fact(5)</span>
+<span class="Constant">}</span>
+
+<span class="Constant">function fact(n) {</span>
+<span class="Constant">    if (n &lt; 2)</span>
+<span class="Constant">        return 1;</span>
+<span class="Constant">    return n * fact(n-1);</span>
+<span class="Constant">}</span><span class="Statement">'</span>
+<span class="Comment"># 120</span>
+
+<span class="Comment"># mean</span>
+seq <span class="Constant">100</span> | shuf | head | awk <span class="Statement">'</span>
+<span class="Constant">{ sum += $0 } </span>
+<span class="Constant">END { print sum / NR }</span><span class="Statement">'</span>
+<span class="Comment"># 72.7</span>
+
+<span class="Comment"># escape '$' characters inside double quotes for aliasing</span>
+alias <span class="Identifier">mean</span>=<span class="Statement">&quot;</span><span class="Constant">awk '{ sum += </span><span class="Special">\$</span><span class="Constant">0 } END { print sum / NR }'</span><span class="Statement">&quot;</span>
+
+seq <span class="Constant">100</span> | shuf | head | mean
+<span class="Comment"># 49.2</span>
+
+<span class="Comment"># stdev</span>
+seq <span class="Constant">100</span> | shuf | head | awk <span class="Statement">'</span>
+<span class="Constant">{ sum += $0; sumsq += $0^2 }</span>
+<span class="Constant">END { print sqrt(NR * sumsq - sum^2) / NR; }</span><span class="Statement">'</span>
+<span class="Comment"># 29.3966</span>
+
+<span class="Comment"># escape '$' characters inside double quotes for aliasing</span>
+alias <span class="Identifier">stdev</span>=<span class="Statement">&quot;</span><span class="Constant">awk '{ sum += </span><span class="Special">\$</span><span class="Constant">0; sumsq += </span><span class="Special">\$</span><span class="Constant">0^2 } END { print sqrt(NR * sumsq - sum^2) / NR; }'</span><span class="Statement">&quot;</span>
+
+seq <span class="Constant">100</span> | shuf | head | stdev
+<span class="Comment"># 27.7027</span>
+
+<span class="Comment"># from 20 random words generate a text with 100 random words</span>
+shuf /usr/share/dict/words | head <span class="Constant">-20</span> | shuf <span class="Special">-r</span> | head <span class="Constant">-100</span> | fmt
+<span class="Comment"># updating poignantly poignantly lobotomies Intel's seesaw's baas vise's</span>
+<span class="Comment"># hurray's Intel's Grampians Grampians settlement whooshing intertwines</span>
+<span class="Comment"># Terrell lobotomies baas tiny Turing hurray's lobotomies hurray's idea's</span>
+<span class="Comment"># underwriter's Grampians seesaw's Turing Intel's whooshing vise's idea's</span>
+<span class="Comment"># Terrell baas underwriter's whooshing Turing Gorbachev freshets pluckier</span>
+<span class="Comment"># settlement lobotomies baas Terrell settlement pluckier freshets pluckier</span>
+<span class="Comment"># underwriter's Terrell baas lobotomies pluckier poignantly intertwines</span>
+<span class="Comment"># tiny idea's settlement pluckier tiny Terrell baas settlement pluckier</span>
+<span class="Comment"># idea's freshets vise's updating Grampians underwriter's settlement</span>
+<span class="Comment"># intertwines hurray's poignantly vise's underwriter's updating baas idea's</span>
+<span class="Comment"># intertwines Turing underwriter's underwriter's Grampians vise's baas</span>
+<span class="Comment"># Terrell Terrell poignantly Grampians hurray's seesaw's pluckier Turing</span>
+<span class="Comment"># lobotomies poignantly Terrell freshets underwriter's tiny</span>
+
+<span class="Comment"># word frequency (adapted from 'Effective awk Programming' by 'Arnold Robbins')</span>
+shuf /usr/share/dict/words | head <span class="Constant">-20</span> | shuf <span class="Special">-r</span> | head <span class="Constant">-100</span> | fmt | awk <span class="Statement">'</span>
+<span class="Constant">{</span>
+<span class="Constant">    $0 = tolower($0)</span>
+<span class="Constant">    gsub(/[^[:alnum:]_[:blank:]]/, &quot;&quot;, $0)</span>
+<span class="Constant">    for (i = 1; i &lt;= NF; i++) {</span>
+<span class="Constant">        freq[$i]++</span>
+<span class="Constant">        if (maxlen &lt; length($i)) {</span>
+<span class="Constant">            maxlen = length($i)</span>
+<span class="Constant">        }</span>
+<span class="Constant">    }</span>
+<span class="Constant">}</span>
+
+<span class="Constant">END {</span>
+<span class="Constant">    sort = &quot;sort -k2 -rn | head -n 5&quot;</span>
+<span class="Constant">    for (word in freq) {</span>
+<span class="Constant">        printf &quot;%-*s%d\n&quot;, maxlen, word, freq[word] | sort</span>
+<span class="Constant">    }</span>
+<span class="Constant">    close(sort)</span>
+<span class="Constant">}</span><span class="Statement">'</span>
+<span class="Comment"># walmarts    11</span>
+<span class="Comment"># hogs        7</span>
+<span class="Comment"># trousseaux  6</span>
+<span class="Comment"># trees       6</span>
+<span class="Comment"># priming     6</span>
+</pre>
+</body>
+</html>
+<!-- vim: set foldmethod=manual : -->
