@@ -1,7 +1,6 @@
 #!/bin/sh
 # see also `man sh` and `man bash`
-# see wiki.ubuntu.com/DashAsBinSh for bash specific features
-# see mywiki.wooledge.org/BashPitfalls for common pitfalls
+# see https://wiki.ubuntu.com/DashAsBinSh for bash specific (non-POSIX) features
 
 ## tilde expansion
 
@@ -32,6 +31,8 @@ echo `which ls`            # /bin/ls
 echo `ls -l \`which ls\``  # -rwxr-xr-x 1 root root 126584 Feb 18 2016 /bin/ls
 echo $(which ls)           # /bin/ls
 echo $(ls -l $(which ls))  # -rwxr-xr-x 1 root root 126584 Feb 18 2016 /bin/ls
+echo '`which ls`'          # `which ls`
+echo "`which ls`"          # /bin/ls
 
 ## arithmetic expansion
 
@@ -43,21 +44,31 @@ echo '5/2' | bc            # 2
 echo 'scale=10; 5/2' | bc  # 2.5000000000
 echo '5/2' | bc -l         # 2.50000000000000000000
 
-## path expansion
+## glob expansion
 
-echo *    # foo foo.c bar bar.c ..
-echo *.c  # foo.c bar.c ..
-echo '*'  # *
-echo "*"  # *
+echo *       # foo foo.c bar bar.c ..
+echo *.c     # foo.c bar.c ..
+echo *.[ch]  # foo.c bar.h ..
+echo *.?     # foo.c bar.h baz.a ..
+echo '*'     # *
+echo "*"     # *
 
-## brace expansion (bash)
+## brace expansion (bash only -- not POSIX standard)
 
-echo foo.{c,h}  # foo.c foo.h
-echo foo{.c,}   # foo.c foo
+echo foo.{c,h}    # foo.c foo.h
+echo foo{.c,}     # foo.c foo
+echo 'foo.{c,h}'  # foo.{c,h}
+echo "foo.{c,h}"  # foo.{c,h}
+
+## statement separator
+
+echo 'hello'; echo 'world'
+# hello
+# world
 
 ## conditionals (0 means true, non-0 means false)
 
-# you can put this in your ~/.bashrc to display error codes
+# TIP: put this in your ~/.bashrc to display error codes
 EC() { echo -e '\e[1;33m'code $?'\e[m\n'; }
 trap EC ERR
 
@@ -69,12 +80,22 @@ type -a false
 # false is a shell builtin
 # false is /bin/false
 
-true;  echo $?                              # 0
-false; echo $?                              # 1
-true  && echo 'is true'                     # is true
-false && echo 'is false'                    #
-true  && echo 'is true' || echo 'is false'  # is true
-false && echo 'is true' || echo 'is false'  # is false
+true; echo $?
+# 0
+
+false; echo $?
+# 1
+
+true && echo 'is true'
+# is true
+
+false && echo 'is false'
+
+true && echo 'is true' || echo 'is false'
+# is true
+
+false && echo 'is true' || echo 'is false'
+# is false
 
 ## test (1) - check file types and compare values
 
@@ -82,23 +103,56 @@ type -a test
 # test is a shell builtin
 # test is /usr/bin/test
 
-test -e /bin; echo $?                        # 0
-test -e /bin/ls; echo $?                     # 0
-test -f /bin; echo $?                        # 1
-test -f /bin/ls; echo $?                     # 0
-test -f /path/to/non/existent/file; echo $?  # 1
-test -d /bin; echo $?                        # 0
-test -d /bin/ls; echo $?                     # 1
-test -d /path/to/non/existent/dir; echo $?   # 1
-test -r /bin/ls; echo $?                     # 0
-test -w /bin/ls; echo $?                     # 1
-test -r /bin/ls -a -w /bin/ls; echo $?       # 1
-test -r /bin/ls -o -w /bin/ls; echo $?       # 0
-test ! -r /bin/ls; echo $?                   # 1
-test -n $HOSTNAME; echo $?                   # 0
-test -z $HOSTNAME; echo $?                   # 1
-test $(uname -s) = "Linux"; echo $?          # 0
-test $(uname -m) != "x86_64"; echo $?        # 1
+test -e /bin; echo $?
+# 0
+
+test -e /bin/ls; echo $?
+# 0
+
+test -f /bin; echo $?
+# 1
+
+test -f /bin/ls; echo $?
+# 0
+
+test -f /path/to/non/existent/file; echo $?
+# 1
+
+test -d /bin; echo $?
+# 0
+
+test -d /bin/ls; echo $?
+# 1
+
+test -d /path/to/non/existent/dir; echo $?
+# 1
+
+test -r /bin/ls; echo $?
+# 0
+
+test -w /bin/ls; echo $?
+# 1
+
+test -r /bin/ls -a -w /bin/ls; echo $?
+# 1
+
+test -r /bin/ls -o -w /bin/ls; echo $?
+# 0
+
+test ! -r /bin/ls; echo $?
+# 1
+
+test -n $HOSTNAME; echo $?
+# 0
+
+test -z $HOSTNAME; echo $?
+# 1
+
+test $(uname -s) = "Linux"; echo $?
+# 0
+
+test $(uname -m) != "x86_64"; echo $?
+# 1
 
 ## [ (1) - check file types and compare values
 
@@ -106,12 +160,23 @@ type -a '['
 # [ is a shell builtin
 # [ is /usr/bin/[
 
-[ -e /bin/ls ]; echo $?             # 0
-[ -e /bin/asd ]; echo $?            # 1
-[-e /bin/ls ]; echo $?              # /bin/bash: [-e: command not found
-[ -e /bin/ls]; echo $?              # /bin/bash: line 0: [: missing `]'
-[ $(uname -m)= "x86_64" ]; echo $?  # /bin/bash: line 0: [: x86_64=: unary operator expected
-[ $(uname -m) ="x86_64" ]; echo $?  # /bin/bash: line 0: [: x86_64: unary operator expected
+[ -e /bin/ls ]; echo $?
+# 0
+
+[ -e /bin/asd ]; echo $?
+# 1
+
+[-e /bin/ls ]; echo $?
+# /bin/bash: [-e: command not found
+
+[ -e /bin/ls]; echo $?
+# /bin/bash: line 0: [: missing `]'
+
+[ $(uname -m)= "x86_64" ]; echo $?
+# /bin/bash: line 0: [: x86_64=: unary operator expected
+
+[ $(uname -m) ="x86_64" ]; echo $?
+# /bin/bash: line 0: [: x86_64: unary operator expected
 
 ## if/elif/else/fi
 
@@ -150,6 +215,7 @@ fi
 ## while/until/done
 
 i=0
+
 while [ $i -lt 5 ]; do
     sleep 1
     i=$((i+1))
@@ -161,7 +227,6 @@ done
 # 4 second(s) have passed
 # 5 second(s) have passed
 
-i=0
 until [ $i -ge 5 ]; do
     sleep 1
     i=$((i+1))
@@ -226,23 +291,28 @@ done
 # VirtualBox
 # VMs
 
-# path name expansion automatically escapes whitespace
 for f in $HOME/*; do
-    echo $(basename "$f")
+    echo "$f"
 done
-# bin
-# Desktop
-# Documents
-# Downloads
-# Dropbox
-# examples.desktop
-# Music
-# Pictures
-# Public
-# src
-# Templates
-# Videos
-# VirtualBox VMs
+# /home/gokce/bin
+# /home/gokce/Desktop
+# /home/gokce/Documents
+# /home/gokce/Downloads
+# /home/gokce/Dropbox
+# /home/gokce/examples.desktop
+# /home/gokce/Music
+# /home/gokce/Pictures
+# /home/gokce/Public
+# /home/gokce/src
+# /home/gokce/Templates
+# /home/gokce/Videos
+# /home/gokce/VirtualBox VMs
+
+basename /path/to/file/name.txt
+# name.txt
+
+basename /path/to/file/name.txt .txt
+# name
 
 seq 5
 # 1

@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta http-equiv="content-type" content="text/html; charset=UTF-8">
-<title>~/Dropbox/workspace/web/sheets/text.sh.html</title>
+<title>~/Dropbox/workspace/web/linux/text.sh.html</title>
 <meta name="Generator" content="Vim/8.0">
 <meta name="plugin-version" content="vim7.4_v2">
 <meta name="syntax" content="sh">
@@ -33,7 +33,7 @@ body { font-family: monospace; color: #000000; background-color: #ffffff; }
 
 <span class="Comment">## tr (1) - translate or delete characters</span>
 
-<span class="Statement">echo</span><span class="Constant"> </span><span class="Statement">'</span><span class="Constant">hello world</span><span class="Statement">'</span><span class="Constant"> </span>| tr <span class="Special">-d</span> <span class="Statement">'</span><span class="Constant">l</span><span class="Statement">'</span>
+<span class="Statement">echo</span><span class="Constant"> </span><span class="Statement">'</span><span class="Constant">hello world</span><span class="Statement">'</span><span class="Constant"> </span>| tr <span class="Special">-d</span> l
 <span class="Comment"># heo word</span>
 
 <span class="Statement">echo</span><span class="Constant"> </span><span class="Statement">'</span><span class="Constant">hello world</span><span class="Statement">'</span><span class="Constant"> </span>| tr l x
@@ -55,7 +55,7 @@ body { font-family: monospace; color: #000000; background-color: #ffffff; }
 
 <span class="Comment">## cut (1) - remove sections from each line of files</span>
 
-head /etc/passwd | cut <span class="Special">-d</span><span class="Statement">'</span><span class="Constant">:</span><span class="Statement">'</span> <span class="Special">-f</span>1
+head /etc/passwd | cut <span class="Special">-d</span>: <span class="Special">-f</span>1
 <span class="Comment"># root</span>
 <span class="Comment"># daemon</span>
 <span class="Comment"># bin</span>
@@ -67,7 +67,7 @@ head /etc/passwd | cut <span class="Special">-d</span><span class="Statement">'<
 <span class="Comment"># mail</span>
 <span class="Comment"># news</span>
 
-head /etc/passwd | cut <span class="Special">-d</span><span class="Statement">'</span><span class="Constant">:</span><span class="Statement">'</span> <span class="Special">-f</span>1,<span class="Constant">7</span>
+head /etc/passwd | cut <span class="Special">-d</span>: <span class="Special">-f</span>1,<span class="Constant">7</span>
 <span class="Comment"># root:/bin/bash</span>
 <span class="Comment"># daemon:/usr/sbin/nologin</span>
 <span class="Comment"># bin:/usr/sbin/nologin</span>
@@ -81,33 +81,31 @@ head /etc/passwd | cut <span class="Special">-d</span><span class="Statement">'<
 
 <span class="Comment">## column (1) - columnate lists</span>
 
-<span class="Statement">echo</span><span class="Constant"> </span><span class="Statement">&quot;</span><span class="Constant">permission #hlink owner group size month day hh:mm fname</span><span class="Statement">&quot;</span>; ls <span class="Special">-l</span> /bin | tail <span class="Special">-n</span> +<span class="Constant">2</span> | head
-<span class="Comment"># permission #hlink owner group size month day hh:mm fname</span>
-<span class="Comment"># -rwxr-xr-x 1 root root 1037528 Jun 24 18:44 bash</span>
-<span class="Comment"># -rwxr-xr-x 1 root root   31288 May 20  2015 bunzip2</span>
-<span class="Comment"># -rwxr-xr-x 1 root root 1964536 Aug 19  2015 busybox</span>
-<span class="Comment"># -rwxr-xr-x 1 root root   31288 May 20  2015 bzcat</span>
-<span class="Comment"># lrwxrwxrwx 1 root root       6 Jul 19 14:14 bzcmp -&gt; bzdiff</span>
-<span class="Comment"># -rwxr-xr-x 1 root root    2140 May 20  2015 bzdiff</span>
-<span class="Comment"># lrwxrwxrwx 1 root root       6 Jul 19 14:14 bzegrep -&gt; bzgrep</span>
-<span class="Comment"># -rwxr-xr-x 1 root root    4877 May 20  2015 bzexe</span>
-<span class="Comment"># lrwxrwxrwx 1 root root       6 Jul 19 14:14 bzfgrep -&gt; bzgrep</span>
-<span class="Comment"># -rwxr-xr-x 1 root root    3642 May 20  2015 bzgrep</span>
+printf <span class="Statement">&quot;</span><span class="Constant">PERM LINKS OWNER GROUP SIZE MONTH DAY </span><span class="Statement">&quot;</span>; printf <span class="Statement">&quot;</span><span class="Constant">HH:MM/YEAR NAME</span><span class="Special">\n</span><span class="Statement">&quot;</span>; ls <span class="Special">-l</span> | sed 1d
+<span class="Comment"># PERM LINKS OWNER GROUP SIZE MONTH DAY HH:MM/YEAR NAME</span>
+<span class="Comment"># -rwxrwxr-x 1 gokce gokce  994 Oct  9 12:35 apache.sh</span>
+<span class="Comment"># drwxrwxr-x 2 gokce gokce 4096 Sep 21 00:20 awk</span>
+<span class="Comment"># drwxrwxr-x 4 gokce gokce 4096 Oct 15 14:55 basics</span>
+<span class="Comment"># drwxrwxr-x 2 gokce gokce 4096 Oct 15 15:00 psnotes</span>
+<span class="Comment"># drwxrwxr-x 2 gokce gokce 4096 Sep 21 00:20 python</span>
+<span class="Comment"># -rwxrwxr-x 1 gokce gokce 5214 Oct  9 12:19 regex.sh</span>
+<span class="Comment"># -rwxrwxr-x 1 gokce gokce 2076 Sep 21 00:20 sed.sh</span>
+<span class="Comment"># -rwxrwxr-x 1 gokce gokce 6314 Oct 15 15:32 shell.sh</span>
+<span class="Comment"># -rwxrwxr-x 1 gokce gokce 7834 Oct 15 17:14 text.sh</span>
 
-<span class="PreProc">(</span><span class="Statement">echo</span><span class="Constant"> </span><span class="Statement">&quot;</span><span class="Constant">permission #hlink owner group size month day hh:mm fname</span><span class="Statement">&quot;</span><span class="Statement">;</span><span class="Special"> ls -l /bin </span><span class="Statement">|</span><span class="Special"> tail -n +</span><span class="Constant">2</span><span class="Special"> </span><span class="Statement">|</span><span class="Special"> head</span><span class="PreProc">)</span> | column <span class="Special">-t</span>
-<span class="Comment"># permission  #hlink  owner  group  size     month  day  hh:mm  fname</span>
-<span class="Comment"># -rwxr-xr-x  1       root   root   1037528  Jun    24   18:44  bash</span>
-<span class="Comment"># -rwxr-xr-x  1       root   root   31288    May    20   2015   bunzip2</span>
-<span class="Comment"># -rwxr-xr-x  1       root   root   1964536  Aug    19   2015   busybox</span>
-<span class="Comment"># -rwxr-xr-x  1       root   root   31288    May    20   2015   bzcat</span>
-<span class="Comment"># lrwxrwxrwx  1       root   root   6        Jul    19   14:14  bzcmp    -&gt;  bzdiff</span>
-<span class="Comment"># -rwxr-xr-x  1       root   root   2140     May    20   2015   bzdiff</span>
-<span class="Comment"># lrwxrwxrwx  1       root   root   6        Jul    19   14:14  bzegrep  -&gt;  bzgrep</span>
-<span class="Comment"># -rwxr-xr-x  1       root   root   4877     May    20   2015   bzexe</span>
-<span class="Comment"># lrwxrwxrwx  1       root   root   6        Jul    19   14:14  bzfgrep  -&gt;  bzgrep</span>
-<span class="Comment"># -rwxr-xr-x  1       root   root   3642     May    20   2015   bzgrep</span>
+<span class="PreProc">(</span><span class="Special">printf </span><span class="Statement">&quot;</span><span class="Constant">PERM LINKS OWNER GROUP SIZE MONTH DAY </span><span class="Statement">&quot;</span><span class="Statement">;</span><span class="Special"> printf </span><span class="Statement">&quot;</span><span class="Constant">HH:MM/YEAR NAME</span><span class="Special">\n</span><span class="Statement">&quot;</span><span class="Statement">;</span><span class="Special"> ls -l </span><span class="Statement">|</span><span class="Special"> sed 1d</span><span class="PreProc">)</span> | column <span class="Special">-t</span>
+<span class="Comment"># PERM        LINKS  OWNER  GROUP  SIZE  MONTH  DAY  HH:MM/YEAR  NAME</span>
+<span class="Comment"># -rwxrwxr-x  1      gokce  gokce  994   Oct    9    12:35       apache.sh</span>
+<span class="Comment"># drwxrwxr-x  2      gokce  gokce  4096  Sep    21   00:20       awk</span>
+<span class="Comment"># drwxrwxr-x  4      gokce  gokce  4096  Oct    15   14:55       basics</span>
+<span class="Comment"># drwxrwxr-x  2      gokce  gokce  4096  Oct    15   15:00       psnotes</span>
+<span class="Comment"># drwxrwxr-x  2      gokce  gokce  4096  Sep    21   00:20       python</span>
+<span class="Comment"># -rwxrwxr-x  1      gokce  gokce  5214  Oct    9    12:19       regex.sh</span>
+<span class="Comment"># -rwxrwxr-x  1      gokce  gokce  2076  Sep    21   00:20       sed.sh</span>
+<span class="Comment"># -rwxrwxr-x  1      gokce  gokce  6314  Oct    15   15:32       shell.sh</span>
+<span class="Comment"># -rwxrwxr-x  1      gokce  gokce  7834  Oct    15   17:14       text.sh</span>
 
-head /etc/passwd | column <span class="Special">-t</span> <span class="Special">-s</span><span class="Statement">'</span><span class="Constant">:</span><span class="Statement">'</span>
+head /etc/passwd | column <span class="Special">-t</span> <span class="Special">-s</span>:
 <span class="Comment"># root    x  0  0      root    /root            /bin/bash</span>
 <span class="Comment"># daemon  x  1  1      daemon  /usr/sbin        /usr/sbin/nologin</span>
 <span class="Comment"># bin     x  2  2      bin     /bin             /usr/sbin/nologin</span>
@@ -175,7 +173,7 @@ du <span class="Special">-d</span>1 /usr <span class="Special">-h</span> | sort 
 <span class="Comment"># 4.9G    /usr/share</span>
 <span class="Comment"># 8.4G    /usr</span>
 
-cat /etc/passwd | cut <span class="Special">-d</span><span class="Statement">'</span><span class="Constant">:</span><span class="Statement">'</span> <span class="Special">-f</span>1,<span class="Constant">7</span> | column <span class="Special">-t</span> <span class="Special">-s</span><span class="Statement">'</span><span class="Constant">:</span><span class="Statement">'</span> | sort <span class="Special">-k</span>2
+cat /etc/passwd | cut <span class="Special">-d</span>: <span class="Special">-f</span>1,<span class="Constant">7</span> | column <span class="Special">-t</span> <span class="Special">-s</span>: | sort <span class="Special">-k</span>2
 <span class="Comment"># root               /bin/bash</span>
 <span class="Comment"># gokce              /bin/bash</span>
 <span class="Comment"># _apt               /bin/false</span>
@@ -192,19 +190,19 @@ cat /etc/passwd | cut <span class="Special">-d</span><span class="Statement">'</
 
 <span class="Comment">## uniq (1) - report or omit repeated lines</span>
 
-cat /etc/passwd | cut <span class="Special">-d</span><span class="Statement">'</span><span class="Constant">:</span><span class="Statement">'</span> <span class="Special">-f</span>7 | sort | uniq
+cat /etc/passwd | cut <span class="Special">-d</span>: <span class="Special">-f</span>7 | sort | uniq
 <span class="Comment"># /bin/bash</span>
 <span class="Comment"># /bin/false</span>
 <span class="Comment"># /bin/sync</span>
 <span class="Comment"># /usr/sbin/nologin</span>
 
-cat /etc/passwd | cut <span class="Special">-d</span><span class="Statement">'</span><span class="Constant">:</span><span class="Statement">'</span> <span class="Special">-f</span>7 | sort | uniq <span class="Special">-c</span>
+cat /etc/passwd | cut <span class="Special">-d</span>: <span class="Special">-f</span>7 | sort | uniq <span class="Special">-c</span>
 <span class="Comment">#       2 /bin/bash</span>
 <span class="Comment">#      22 /bin/false</span>
 <span class="Comment">#       1 /bin/sync</span>
 <span class="Comment">#      16 /usr/sbin/nologin</span>
 
-cat /etc/passwd | cut <span class="Special">-d</span><span class="Statement">'</span><span class="Constant">:</span><span class="Statement">'</span> <span class="Special">-f</span>7 | sort | uniq <span class="Special">-c</span> | sort <span class="Special">-rn</span>
+cat /etc/passwd | cut <span class="Special">-d</span>: <span class="Special">-f</span>7 | sort | uniq <span class="Special">-c</span> | sort <span class="Special">-rn</span>
 <span class="Comment">#      22 /bin/false</span>
 <span class="Comment">#      16 /usr/sbin/nologin</span>
 <span class="Comment">#       2 /bin/bash</span>

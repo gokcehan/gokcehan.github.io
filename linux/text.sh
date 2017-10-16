@@ -2,7 +2,7 @@
 
 ## tr (1) - translate or delete characters
 
-echo 'hello world' | tr -d 'l'
+echo 'hello world' | tr -d l
 # heo word
 
 echo 'hello world' | tr l x
@@ -24,7 +24,7 @@ echo 'hello world' | tr a-z n-za-m | tr a-z n-za-m
 
 ## cut (1) - remove sections from each line of files
 
-head /etc/passwd | cut -d':' -f1
+head /etc/passwd | cut -d: -f1
 # root
 # daemon
 # bin
@@ -36,7 +36,7 @@ head /etc/passwd | cut -d':' -f1
 # mail
 # news
 
-head /etc/passwd | cut -d':' -f1,7
+head /etc/passwd | cut -d: -f1,7
 # root:/bin/bash
 # daemon:/usr/sbin/nologin
 # bin:/usr/sbin/nologin
@@ -50,33 +50,31 @@ head /etc/passwd | cut -d':' -f1,7
 
 ## column (1) - columnate lists
 
-echo "permission #hlink owner group size month day hh:mm fname"; ls -l /bin | tail -n +2 | head
-# permission #hlink owner group size month day hh:mm fname
-# -rwxr-xr-x 1 root root 1037528 Jun 24 18:44 bash
-# -rwxr-xr-x 1 root root   31288 May 20  2015 bunzip2
-# -rwxr-xr-x 1 root root 1964536 Aug 19  2015 busybox
-# -rwxr-xr-x 1 root root   31288 May 20  2015 bzcat
-# lrwxrwxrwx 1 root root       6 Jul 19 14:14 bzcmp -> bzdiff
-# -rwxr-xr-x 1 root root    2140 May 20  2015 bzdiff
-# lrwxrwxrwx 1 root root       6 Jul 19 14:14 bzegrep -> bzgrep
-# -rwxr-xr-x 1 root root    4877 May 20  2015 bzexe
-# lrwxrwxrwx 1 root root       6 Jul 19 14:14 bzfgrep -> bzgrep
-# -rwxr-xr-x 1 root root    3642 May 20  2015 bzgrep
+printf "PERM LINKS OWNER GROUP SIZE MONTH DAY "; printf "HH:MM/YEAR NAME\n"; ls -l | sed 1d
+# PERM LINKS OWNER GROUP SIZE MONTH DAY HH:MM/YEAR NAME
+# -rwxrwxr-x 1 gokce gokce  994 Oct  9 12:35 apache.sh
+# drwxrwxr-x 2 gokce gokce 4096 Sep 21 00:20 awk
+# drwxrwxr-x 4 gokce gokce 4096 Oct 15 14:55 basics
+# drwxrwxr-x 2 gokce gokce 4096 Oct 15 15:00 psnotes
+# drwxrwxr-x 2 gokce gokce 4096 Sep 21 00:20 python
+# -rwxrwxr-x 1 gokce gokce 5214 Oct  9 12:19 regex.sh
+# -rwxrwxr-x 1 gokce gokce 2076 Sep 21 00:20 sed.sh
+# -rwxrwxr-x 1 gokce gokce 6314 Oct 15 15:32 shell.sh
+# -rwxrwxr-x 1 gokce gokce 7834 Oct 15 17:14 text.sh
 
-(echo "permission #hlink owner group size month day hh:mm fname"; ls -l /bin | tail -n +2 | head) | column -t
-# permission  #hlink  owner  group  size     month  day  hh:mm  fname
-# -rwxr-xr-x  1       root   root   1037528  Jun    24   18:44  bash
-# -rwxr-xr-x  1       root   root   31288    May    20   2015   bunzip2
-# -rwxr-xr-x  1       root   root   1964536  Aug    19   2015   busybox
-# -rwxr-xr-x  1       root   root   31288    May    20   2015   bzcat
-# lrwxrwxrwx  1       root   root   6        Jul    19   14:14  bzcmp    ->  bzdiff
-# -rwxr-xr-x  1       root   root   2140     May    20   2015   bzdiff
-# lrwxrwxrwx  1       root   root   6        Jul    19   14:14  bzegrep  ->  bzgrep
-# -rwxr-xr-x  1       root   root   4877     May    20   2015   bzexe
-# lrwxrwxrwx  1       root   root   6        Jul    19   14:14  bzfgrep  ->  bzgrep
-# -rwxr-xr-x  1       root   root   3642     May    20   2015   bzgrep
+(printf "PERM LINKS OWNER GROUP SIZE MONTH DAY "; printf "HH:MM/YEAR NAME\n"; ls -l | sed 1d) | column -t
+# PERM        LINKS  OWNER  GROUP  SIZE  MONTH  DAY  HH:MM/YEAR  NAME
+# -rwxrwxr-x  1      gokce  gokce  994   Oct    9    12:35       apache.sh
+# drwxrwxr-x  2      gokce  gokce  4096  Sep    21   00:20       awk
+# drwxrwxr-x  4      gokce  gokce  4096  Oct    15   14:55       basics
+# drwxrwxr-x  2      gokce  gokce  4096  Oct    15   15:00       psnotes
+# drwxrwxr-x  2      gokce  gokce  4096  Sep    21   00:20       python
+# -rwxrwxr-x  1      gokce  gokce  5214  Oct    9    12:19       regex.sh
+# -rwxrwxr-x  1      gokce  gokce  2076  Sep    21   00:20       sed.sh
+# -rwxrwxr-x  1      gokce  gokce  6314  Oct    15   15:32       shell.sh
+# -rwxrwxr-x  1      gokce  gokce  7834  Oct    15   17:14       text.sh
 
-head /etc/passwd | column -t -s':'
+head /etc/passwd | column -t -s:
 # root    x  0  0      root    /root            /bin/bash
 # daemon  x  1  1      daemon  /usr/sbin        /usr/sbin/nologin
 # bin     x  2  2      bin     /bin             /usr/sbin/nologin
@@ -144,7 +142,7 @@ du -d1 /usr -h | sort -h
 # 4.9G    /usr/share
 # 8.4G    /usr
 
-cat /etc/passwd | cut -d':' -f1,7 | column -t -s':' | sort -k2
+cat /etc/passwd | cut -d: -f1,7 | column -t -s: | sort -k2
 # root               /bin/bash
 # gokce              /bin/bash
 # _apt               /bin/false
@@ -161,19 +159,19 @@ cat /etc/passwd | cut -d':' -f1,7 | column -t -s':' | sort -k2
 
 ## uniq (1) - report or omit repeated lines
 
-cat /etc/passwd | cut -d':' -f7 | sort | uniq
+cat /etc/passwd | cut -d: -f7 | sort | uniq
 # /bin/bash
 # /bin/false
 # /bin/sync
 # /usr/sbin/nologin
 
-cat /etc/passwd | cut -d':' -f7 | sort | uniq -c
+cat /etc/passwd | cut -d: -f7 | sort | uniq -c
 #       2 /bin/bash
 #      22 /bin/false
 #       1 /bin/sync
 #      16 /usr/sbin/nologin
 
-cat /etc/passwd | cut -d':' -f7 | sort | uniq -c | sort -rn
+cat /etc/passwd | cut -d: -f7 | sort | uniq -c | sort -rn
 #      22 /bin/false
 #      16 /usr/sbin/nologin
 #       2 /bin/bash
