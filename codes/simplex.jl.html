@@ -1,0 +1,152 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+<title>~/Dropbox/workspace/web/codes/simplex.jl.html</title>
+<meta name="Generator" content="Vim/8.0">
+<meta name="plugin-version" content="vim7.4_v2">
+<meta name="syntax" content="julia">
+<meta name="settings" content="use_css,no_foldcolumn,expand_tabs,prevent_copy=">
+<meta name="colorscheme" content="none">
+<style type="text/css">
+<!--
+pre { font-family: monospace; color: #000000; background-color: #ffffff; }
+body { font-family: monospace; color: #000000; background-color: #ffffff; }
+* { font-size: 1em; }
+.Type { color: #008000; }
+.Comment { color: #0000c0; }
+.Constant { color: #c00000; }
+.Identifier { color: #008080; }
+.Statement { color: #af5f00; }
+-->
+</style>
+
+<script type='text/javascript'>
+<!--
+
+-->
+</script>
+</head>
+<body>
+<pre id='vimCodeElement'>
+<span class="Comment">#</span><span class="Comment">!/usr/bin/env julia</span>
+<span class="Comment">#</span>
+<span class="Comment">#</span><span class="Comment"> simplex.jl</span>
+<span class="Comment">#</span>
+<span class="Comment">#</span><span class="Comment"> Basic simplex and tableau implementations</span>
+<span class="Comment">#</span>
+
+<span class="Statement">function</span> simplex(A, b, c, bi)
+    m, n <span class="Statement">=</span> size(A)
+    inds <span class="Statement">=</span> <span class="Type">IntSet</span>(<span class="Constant">1</span> <span class="Statement">:</span> n)
+    ni <span class="Statement">=</span> setdiff(inds, bi)
+
+    <span class="Statement">while</span> <span class="Constant">true</span>
+        B <span class="Statement">=</span> A[<span class="Statement">:</span>, collect(bi)]
+        N <span class="Statement">=</span> A[<span class="Statement">:</span>, collect(ni)]
+        cb <span class="Statement">=</span> c[collect(bi), <span class="Statement">:</span>]
+        cn <span class="Statement">=</span> c[collect(ni), <span class="Statement">:</span>]
+        z_c <span class="Statement">=</span> zeros(n)
+
+        <span class="Comment">#</span><span class="Comment"> step 1</span>
+        xb <span class="Statement">=</span> B <span class="Statement">\</span> b
+        z <span class="Statement">=</span> cb<span class="Statement">'</span> <span class="Statement">*</span> xb
+
+        <span class="Comment">#</span><span class="Comment"> step 2</span>
+        w <span class="Statement">=</span> cb<span class="Statement">'</span> <span class="Statement">*</span> inv(B)
+        z_c[collect(ni)] <span class="Statement">=</span> w <span class="Statement">*</span> N <span class="Statement">-</span> cn<span class="Statement">'</span>
+
+        <span class="Statement">if</span> all(i <span class="Statement">-&gt;</span> i <span class="Statement">&lt;=</span> <span class="Constant">0</span>, z_c)
+            info(<span class="Constant">&quot;</span><span class="Constant">optimal solution is found</span><span class="Constant">&quot;</span>)
+            info(<span class="Constant">&quot;</span><span class="Constant">bi: </span><span class="Identifier">$bi</span><span class="Constant">&quot;</span>)
+            x <span class="Statement">=</span> zeros(n)
+            x[collect(bi)] <span class="Statement">=</span> xb
+            info(<span class="Constant">&quot;</span><span class="Constant">x: </span><span class="Identifier">$x</span><span class="Constant">&quot;</span>)
+            info(<span class="Constant">&quot;</span><span class="Constant">z: </span><span class="Identifier">$z</span><span class="Constant">&quot;</span>)
+            <span class="Statement">return</span>
+        <span class="Statement">end</span>
+
+        k <span class="Statement">=</span> indmax(z_c)
+
+        <span class="Comment">#</span><span class="Comment"> step 3</span>
+        yk <span class="Statement">=</span> inv(B) <span class="Statement">*</span> A[<span class="Statement">:</span>, k]
+
+        <span class="Statement">if</span> all(i <span class="Statement">-&gt;</span> i <span class="Statement">&lt;=</span> <span class="Constant">0</span>, yk)
+            info(<span class="Constant">&quot;</span><span class="Constant">optimal solution is unbounded</span><span class="Constant">&quot;</span>)
+            <span class="Statement">return</span>
+        <span class="Statement">end</span>
+
+        <span class="Comment">#</span><span class="Comment"> step 4</span>
+        rs <span class="Statement">=</span> fill(typemax(<span class="Type">Float64</span>), m)
+        pos <span class="Statement">=</span> find(i <span class="Statement">-&gt;</span> i <span class="Statement">&gt;</span> <span class="Constant">0</span>, yk)
+        rs[pos] <span class="Statement">=</span> xb[pos] <span class="Statement">./</span> yk[pos]
+        r <span class="Statement">=</span> indmin(rs)
+        br <span class="Statement">=</span> collect(bi)[r]
+
+        info(<span class="Constant">&quot;</span><span class="Constant">pivot: </span><span class="Identifier">$k</span><span class="Constant"> =&gt; </span><span class="Identifier">$br</span><span class="Constant">&quot;</span>)
+        push<span class="Statement">!</span>(bi, k)
+        push<span class="Statement">!</span>(ni, br)
+        pop<span class="Statement">!</span>(bi, br)
+        pop<span class="Statement">!</span>(ni, k)
+    <span class="Statement">end</span>
+<span class="Statement">end</span>
+
+<span class="Statement">function</span> simplex_tableau(A, b, c, bi)
+    m, n <span class="Statement">=</span> size(A)
+    T <span class="Statement">=</span> [<span class="Constant">1</span> <span class="Statement">-</span>c<span class="Statement">'</span> <span class="Constant">0</span>; zeros(length(bi)) A b]
+
+    <span class="Statement">while</span> <span class="Constant">true</span>
+        display(map(rationalize, T))
+        println()
+        println()
+
+        <span class="Comment">#</span><span class="Comment"> find entering variable k</span>
+        <span class="Statement">if</span> all(i <span class="Statement">-&gt;</span> i <span class="Statement">&lt;=</span> <span class="Constant">0</span>, T[<span class="Constant">1</span>, <span class="Constant">2</span> <span class="Statement">:</span> <span class="Constant">end</span> <span class="Statement">-</span> <span class="Constant">1</span>])
+            info(<span class="Constant">&quot;</span><span class="Constant">optimal solution is found</span><span class="Constant">&quot;</span>)
+            <span class="Statement">return</span>
+        <span class="Statement">end</span>
+        k <span class="Statement">=</span> indmax(T[<span class="Constant">1</span>, <span class="Constant">2</span> <span class="Statement">:</span> <span class="Constant">end</span> <span class="Statement">-</span> <span class="Constant">1</span>])
+
+        <span class="Comment">#</span><span class="Comment"> find leaving variable r</span>
+        <span class="Statement">if</span> all(i <span class="Statement">-&gt;</span> i <span class="Statement">&lt;=</span> <span class="Constant">0</span>, T[<span class="Constant">2</span> <span class="Statement">:</span> <span class="Constant">end</span>, k <span class="Statement">+</span> <span class="Constant">1</span>])
+            info(<span class="Constant">&quot;</span><span class="Constant">optimal solution is unbounded</span><span class="Constant">&quot;</span>)
+            <span class="Statement">return</span>
+        <span class="Statement">end</span>
+        rs <span class="Statement">=</span> fill(typemax(<span class="Type">Float64</span>), m)
+        pos <span class="Statement">=</span> find(i <span class="Statement">-&gt;</span> i <span class="Statement">&gt;</span> <span class="Constant">0</span>, T[<span class="Constant">2</span> <span class="Statement">:</span> <span class="Constant">end</span>, k <span class="Statement">+</span> <span class="Constant">1</span>])
+        rs[pos] <span class="Statement">=</span> T[pos, <span class="Constant">end</span>] <span class="Statement">./</span> T[pos, k <span class="Statement">+</span> <span class="Constant">1</span>]
+        r <span class="Statement">=</span> indmin(rs)
+
+        <span class="Comment">#</span><span class="Comment"> pivot k and r</span>
+        T[r <span class="Statement">+</span> <span class="Constant">1</span>, <span class="Statement">:</span>] <span class="Statement">/=</span> T[r <span class="Statement">+</span> <span class="Constant">1</span>, k <span class="Statement">+</span> <span class="Constant">1</span>]
+        <span class="Statement">for</span> i <span class="Statement">=</span> <span class="Constant">1</span> <span class="Statement">:</span> m <span class="Statement">+</span> <span class="Constant">1</span>
+            <span class="Statement">if</span> i <span class="Statement">==</span> r <span class="Statement">+</span> <span class="Constant">1</span>
+                <span class="Statement">continue</span>
+            <span class="Statement">end</span>
+            T[i, <span class="Statement">:</span>] <span class="Statement">-=</span> T[i, k <span class="Statement">+</span> <span class="Constant">1</span>] <span class="Statement">*</span> T[r <span class="Statement">+</span> <span class="Constant">1</span>, <span class="Statement">:</span>]
+        <span class="Statement">end</span>
+
+        info(<span class="Constant">&quot;</span><span class="Constant">pivot: </span><span class="Identifier">$k</span><span class="Constant"> =&gt; </span><span class="Identifier">$r</span><span class="Constant">&quot;</span>)
+        println()
+    <span class="Statement">end</span>
+<span class="Statement">end</span>
+
+<span class="Statement">using</span> Base.Test
+
+A <span class="Statement">=</span> [<span class="Constant">2</span> <span class="Constant">3</span> <span class="Constant">1</span> <span class="Constant">0</span>; <span class="Statement">-</span><span class="Constant">1</span> <span class="Constant">1</span> <span class="Constant">0</span> <span class="Constant">1</span>]
+b <span class="Statement">=</span> [<span class="Constant">6</span> <span class="Constant">1</span>]<span class="Statement">'</span>
+c <span class="Statement">=</span> [<span class="Statement">-</span><span class="Constant">1</span> <span class="Statement">-</span><span class="Constant">3</span> <span class="Constant">0</span> <span class="Constant">0</span>]<span class="Statement">'</span>
+bi <span class="Statement">=</span> <span class="Type">IntSet</span>([<span class="Constant">3</span>, <span class="Constant">4</span>])
+
+simplex(A, b, c, bi)
+
+A <span class="Statement">=</span> [<span class="Constant">1</span> <span class="Constant">1</span> <span class="Constant">2</span> <span class="Constant">1</span> <span class="Constant">0</span> <span class="Constant">0</span>; <span class="Constant">1</span> <span class="Constant">1</span> <span class="Statement">-</span><span class="Constant">1</span> <span class="Constant">0</span> <span class="Constant">1</span> <span class="Constant">0</span>; <span class="Statement">-</span><span class="Constant">1</span> <span class="Constant">1</span> <span class="Constant">1</span> <span class="Constant">0</span> <span class="Constant">0</span> <span class="Constant">1</span>]
+b <span class="Statement">=</span> [<span class="Constant">9</span> <span class="Constant">2</span> <span class="Constant">4</span>]<span class="Statement">'</span>
+c <span class="Statement">=</span> [<span class="Constant">1</span> <span class="Constant">1</span> <span class="Statement">-</span><span class="Constant">4</span> <span class="Constant">0</span> <span class="Constant">0</span> <span class="Constant">0</span>]<span class="Statement">'</span>
+bi <span class="Statement">=</span> <span class="Type">IntSet</span>([<span class="Constant">4</span>, <span class="Constant">5</span>, <span class="Constant">6</span>])
+
+simplex_tableau(A, b, c, bi)
+</pre>
+</body>
+</html>
+<!-- vim: set foldmethod=manual : -->
