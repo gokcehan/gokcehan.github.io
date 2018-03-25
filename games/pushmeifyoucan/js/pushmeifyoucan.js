@@ -37,7 +37,7 @@ function tick () {
   for (i = 0; i < rows; i++) {
     for (j = 0; j < cols; j++) {
       if (colors[i][j] >= 0) {
-        colors[i][j] += 5
+        colors[i][j] += 5 + Math.floor(speed * 0.001)
         circles[i][j].style.fill = 'rgb(' + colors[i][j] + ',' +
                                    127 + ',' +
                                    (255 - colors[i][j]) + ')'
@@ -122,7 +122,8 @@ function init () {
     for (j = 0; j < cols; j++) {
       colors[i][j] = -1
       circles[i][j] = document.getElementById('circle-' + i + '-' + j)
-      circles[i][j].onclick = click(i, j)
+      circles[i][j].onmousedown = click(i, j)
+      circles[i][j].ontouchstart = click(i, j)
     }
   }
 

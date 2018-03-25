@@ -104,8 +104,7 @@
         navigator.serviceWorker.register('sw.js')
       }
       document.addEventListener('DOMContentLoaded', function(event) {
-        var svg = document.getElementById('svg')
-        svg.style.visibility = 'visible'
+        document.getElementById('svg').style.visibility = 'visible'
       })
       init()
     </script>
