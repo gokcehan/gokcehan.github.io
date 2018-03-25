@@ -1,7 +1,21 @@
 {
   "name": "Push Me If You Can",
-  "short_name": "Push Me If You Can",
+  "short_name": "Push Me",
+  "icons": [
+    {
+      "src": "icons/192.png",
+      "type": "image/png",
+      "sizes": "192x192"
+    },
+    {
+      "src": "icons/512.png",
+      "type": "image/png",
+      "sizes": "512x512"
+    }
+  ],
   "start_url": "index.html",
   "display": "fullscreen",
-  "orientation": "portrait"
+  "orientation": "portrait",
+  "background_color": "black",
+  "theme_color": "black"
 }
