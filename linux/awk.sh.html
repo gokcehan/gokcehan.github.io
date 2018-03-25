@@ -13,11 +13,11 @@
 pre { font-family: monospace; color: #000000; background-color: #ffffff; }
 body { font-family: monospace; color: #000000; background-color: #ffffff; }
 * { font-size: 1em; }
-.Identifier { color: #008080; }
-.Statement { color: #af5f00; }
 .Comment { color: #0000c0; }
 .Constant { color: #c00000; }
 .Special { color: #c000c0; }
+.Identifier { color: #008080; }
+.Statement { color: #af5f00; }
 -->
 </style>
 
@@ -239,12 +239,12 @@ seq <span class="Constant">100</span> | shuf | head | mean
 
 <span class="Comment"># stdev</span>
 seq <span class="Constant">100</span> | shuf | head | awk <span class="Statement">'</span>
-<span class="Constant">{ sum += $0; sumsq += $0^2 }</span>
-<span class="Constant">END { print sqrt(NR * sumsq - sum^2) / NR; }</span><span class="Statement">'</span>
+<span class="Constant">{ sum += $0; sqs += $0^2 }</span>
+<span class="Constant">END { print sqrt(NR * sqs - sum^2) / NR }</span><span class="Statement">'</span>
 <span class="Comment"># 29.3966</span>
 
 <span class="Comment"># escape '$' characters inside double quotes for aliasing</span>
-alias <span class="Identifier">stdev</span>=<span class="Statement">&quot;</span><span class="Constant">awk '{ sum += </span><span class="Special">\$</span><span class="Constant">0; sumsq += </span><span class="Special">\$</span><span class="Constant">0^2 } END { print sqrt(NR * sumsq - sum^2) / NR; }'</span><span class="Statement">&quot;</span>
+alias <span class="Identifier">stdev</span>=<span class="Statement">&quot;</span><span class="Constant">awk '{ sum += </span><span class="Special">\$</span><span class="Constant">0; sqs += </span><span class="Special">\$</span><span class="Constant">0^2 } END { print sqrt(NR * sqs - sum^2) / NR }'</span><span class="Statement">&quot;</span>
 
 seq <span class="Constant">100</span> | shuf | head | stdev
 <span class="Comment"># 27.7027</span>

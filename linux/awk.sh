@@ -208,12 +208,12 @@ seq 100 | shuf | head | mean
 
 # stdev
 seq 100 | shuf | head | awk '
-{ sum += $0; sumsq += $0^2 }
-END { print sqrt(NR * sumsq - sum^2) / NR; }'
+{ sum += $0; sqs += $0^2 }
+END { print sqrt(NR * sqs - sum^2) / NR }'
 # 29.3966
 
 # escape '$' characters inside double quotes for aliasing
-alias stdev="awk '{ sum += \$0; sumsq += \$0^2 } END { print sqrt(NR * sumsq - sum^2) / NR; }'"
+alias stdev="awk '{ sum += \$0; sqs += \$0^2 } END { print sqrt(NR * sqs - sum^2) / NR }'"
 
 seq 100 | shuf | head | stdev
 # 27.7027
