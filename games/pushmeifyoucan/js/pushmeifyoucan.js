@@ -39,12 +39,12 @@ function tick () {
       if (colors[i][j] >= 0) {
         colors[i][j] += 5
         circles[i][j].style.fill = 'rgb(' + colors[i][j] + ',' +
-                                   128 + ',' +
-                                   (256 - colors[i][j]) + ')'
+                                   127 + ',' +
+                                   (255 - colors[i][j]) + ')'
       } else {
         circles[i][j].style.fill = 'black'
       }
-      if (colors[i][j] >= 256) {
+      if (colors[i][j] >= 255) {
         clearInterval(ticking)
         circles[i][j].style.fill = '#cc3333'
         if (window.localStorage.bestScore === undefined ||

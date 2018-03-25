@@ -1,0 +1,6 @@
+<svg id='svg' preserveAspectRatio='xMidYMid meet' viewBox='0 0 512 512'>
+  <circle style='fill: #3377cc' id='circle-0-0' r='128' cy='128' cx='128'></circle>
+  <circle style='fill: #cc7733' id='circle-1-0' r='128' cy='384' cx='128'></circle>
+  <circle style='fill: #cc7733' id='circle-0-1' r='128' cy='128' cx='384'></circle>
+  <circle style='fill: #3377cc' id='circle-1-1' r='128' cy='384' cx='384'></circle>
+</svg>
