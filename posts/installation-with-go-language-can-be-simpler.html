@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Installation with Go Language can be Simpler</title>
+  <link rel="stylesheet" type="text/css" href="../style.css">
+</head>
+
+<body>
+<div class="content">
+
+<h1>Installation with Go Language can be Simpler</h1>
+
+<time>2018-05-01</time>
+
+<p>
+I have been working on a hobby project written in Go for almost two years.
+It is a file manager called <a href="https://github.com/gokcehan/lf">lf</a> that runs inside the terminal.
+In this post, I would like to mention a few minor issues and some possibilities to simplify the installation of such command line tools.
+</p>
+
+<h2>Go does not always use static linking</h2>
+
+<p>
+Go normally uses static linking by default which is nice for command line applications.
+However, importing some packages seems to change this default to dynamic linking instead.
+A well known example is the <a href="https://golang.org/pkg/net/">net</a> package which uses C library routines to resolve names when cgo is enabled.
+There is also a pure Go resolver implemented in the package which is used when cgo is disabled or the package is compiled for another platform.
+It is easy to override this behavior by disabling cgo using the <code>CGO_ENABLED</code> environmental variable:
+</p>
+
+<pre>
+env CGO_ENABLED=0 go build
+</pre>
+
+<p>
+Unfortunately, there is no way to specify this within the source code where I think this information really belongs.
+Many people use makefiles or shell scripts to iron out these details but then you can not simply use <code>go get</code> to install the package anymore.
+The best recommendation I get was to simply put the installation instruction with <code>CGO_ENABLED</code> as such:
+</p>
+
+<pre>
+env CGO_ENABLED=0 go get -u github.com/gokcehan/lf
+</pre>
+
+<p>
+This works more or less though it is a bit longer than it should be and it does not work in windows.
+It would be nice if there was a way to disable cgo using compiler pragma comments.
+</p>
+
+<h2>Go does not strip binaries by default</h2>
+
+<p>
+This is very similar to the previous issue.
+Go compiler includes debug symbols by default which increases binary sizes significantly.
+In order to avoid this, you can either pass <code>-s</code> and <code>-w</code> flags during compilation or <code>strip</code> the binary after compilation.
+Now the combined installation instruction looks as such:
+</p>
+
+<pre>
+env CGO_ENABLED=0 go get -u -ldflags="-s -w" github.com/gokcehan/lf
+</pre>
+
+<p>
+Compiler optimizations such as inlining and escape analysis are performed by default which can already make debugging tricky.
+Furthermore, race detection is disabled by default, so it is not possible to debug concurrency problems without a new build.
+With these in mind, the choice of including debug symbols by default seems arbitrary to me.
+Note that you still have your call stack to show up for runtime panics without debug symbols which is enough for most users.
+Hence, it would make more sense to not have debug symbols by default.
+At the very least, it would be nice if there was a way to exclude debug symbols somehow by setting ldflags using compiler pragma comments.
+</p>
+
+<h2>Go does not have versions in binaries</h2>
+
+<p>
+Long story short, the usual practice to have version numbers in the binary is to use an empty global varible for version in the code and pass the appropriate value during compilation.
+So a complete source install instruction should now look something like this:
+</p>
+
+<pre>
+env CGO_ENABLED=0 go get -u -ldflags="-s -w -X main.gVersion=$(git -C $GOPATH/src/github.com/gokcehan/lf describe --tags)" github.com/gokcehan/lf
+</pre>
+
+<p>
+If compiler pragma comments are to be added to set ldflags for the previous issue, this issue can be solved by adding a capability to run shell commands within these compiler pragmas.
+</p>
+
+<h2>GOOS/GOARCH and uname are different</h2>
+
+<p>
+POSIX systems have a standard <code>uname</code> system call and a corresponding command to get information about the current system.
+Among the information provided, there are kernel names with <code>-s</code> flag and machine hardware with <code>-m</code> flag that semantically corresponds to <code>GOOS</code> and <code>GOARCH</code> environmental variables respectively.
+Unfortunately, values used by <code>uname</code> are different from those used in Go.
+For example, on my machine, <code>uname -s</code> returns <code>Linux</code> but <code>GOOS</code> is set to <code>linux</code>.
+Similarly, <code>uname -m</code> returns <code>x86_64</code> but <code>GOARCH</code> is set to <code>amd64</code>.
+</p>
+
+<p>
+When binaries are cross built for various systems, natural tendency of most Go developers is to use the the values of <code>GOOS</code> and <code>GOARCH</code> variables in file names.
+Users then need to find the file from the list that is appropriate for their system.
+This process is sometimes automatized using a shell script that basically matches values returned from <code>uname</code> using a case statement.
+If same values were to be used for both <code>uname</code> and Go environmental variables, the corresponding file name would simply be something like:
+</p>
+
+<pre>
+lf-$(uname -s)-$(uname -m).tar.gz
+</pre>
+
+<p>
+This can eliminate the need for an installation script to have one-liner installation instructions instead.
+For example, a pre-built binary from a github release can be installed with a command like the following:
+</p>
+
+<pre>
+curl https://github.com/gokcehan/lf/releases/download/r1/lf-$(uname -s)-$(uname -m).tar.gz | tar xzC ~/.local/bin
+</pre>
+
+<p>
+Of course when you think about it, there is no actual issue here.
+You can always name your binaries using values returned by <code>uname</code> instead.
+The problem is that POSIX standard does not provide these names so one needs to hunt down these values.
+If values used by Go can not be changed at this point, maybe corresponding <code>uname</code> values can be given in the documentation or somewhere similar.
+</p>
+
+<h2>Github does not support download latest</h2>
+
+<p>
+This bonus issue is not Go related but it is the last piece of the puzzle.
+In the above installation instruction, you need to be explicit about the release tag you want to download.
+The reason is that, even though github provides an url to view the latest tag, it does not have something similar for downloads.
+So the following url shows you the latest release in your project:
+</p>
+
+<pre>
+https://github.com/gokcehan/lf/releases/latest
+</pre>
+
+<p>
+But the following download url does not exists:
+</p>
+
+<pre>
+https://github.com/gokcehan/lf/releases/download/latest/lf-linux-amd64.tar.gz
+</pre>
+
+<p>
+If you want to download the latest release, you need to use the Github API to find out the latest release version first, and then you can download the file you want in a second request.
+If anyone from Github is reading this, this is something that would make lives easier.
+</p>
+
+<h2>Conclusions</h2>
+
+<p>
+I am generally quite happy with the build system in Go.
+Compilation is fast and cross compilation is a breeze.
+It is easy to setup a deployment system to have automatic cloud builds for all supported systems.
+Nowadays, I only need to push a git tag to have a new release.
+Things I mention here are just a few ideas which can make things even smoother.
+</p>
+
+<p>
+In an ideal world, I would want to have two simple instructions for installation and upgrading.
+For a source install you may have the following:
+</p>
+
+<pre>
+go get -u github.com/gokcehan/lf
+</pre>
+
+<p>
+For a pre-built binary install, you may have the following:
+</p>
+
+<pre>
+curl https://github.com/gokcehan/lf/releases/download/latest/lf-$(uname -s)-$(uname -m).tar.gz | tar xzC ~/.local/bin
+</pre>
+
+<p>
+This may put an end to the endless curl-pipe-shell idiom discussion.
+</p>
+
+<hr>
+
+<footer>
+<a href="/">home</a> &middot; <a href="https://github.com/gokcehan">github</a> &middot; gokcehankara (at) gmail (dot) com 
+</footer>
+
+</div>
+</body>
+
+</html>
