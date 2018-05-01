@@ -2,6 +2,10 @@ h1 {
     text-align: center;
 }
 
+time {
+    text-decoration: underline dotted;
+}
+
 body {
     margin: auto;
     padding: 10px;
