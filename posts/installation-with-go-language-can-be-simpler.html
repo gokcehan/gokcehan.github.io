@@ -80,7 +80,9 @@ So a complete source install instruction should now look something like this:
 </p>
 
 <pre>
-env CGO_ENABLED=0 go get -u -ldflags="-s -w -X main.gVersion=$(git -C $GOPATH/src/github.com/gokcehan/lf describe --tags)" github.com/gokcehan/lf
+go get -u github.com/gokcehan/lf
+version=$(git -C $GOPATH/src/github.com/gokcehan/lf describe --tags)
+env CGO_ENABLED=0 go get -u -ldflags="-s -w -X main.gVersion=$version" github.com/gokcehan/lf
 </pre>
 
 <p>
@@ -114,7 +116,7 @@ For example, a pre-built binary from a github release can be installed with a co
 </p>
 
 <pre>
-curl https://github.com/gokcehan/lf/releases/download/r1/lf-$(uname -s)-$(uname -m).tar.gz | tar xzC ~/.local/bin
+curl -L https://github.com/gokcehan/lf/releases/download/r1/lf-$(uname -s)-$(uname -m).tar.gz | tar xzC ~/.local/bin
 </pre>
 
 <p>
@@ -124,7 +126,11 @@ The problem is that POSIX standard does not provide these names so one needs to 
 If values used by Go can not be changed at this point, maybe corresponding <code>uname</code> values can be given in the documentation or somewhere similar.
 </p>
 
-<h2>Github does not support download latest</h2>
+<h2 style="text-decoration: line-through;">Github does not support download latest</h2>
+
+<p>
+<b>Update:</b> This is now available.
+</p>
 
 <p>
 This bonus issue is not Go related but it is the last piece of the puzzle.
@@ -174,7 +180,7 @@ For a pre-built binary install, you may have the following:
 </p>
 
 <pre>
-curl https://github.com/gokcehan/lf/releases/download/latest/lf-$(uname -s)-$(uname -m).tar.gz | tar xzC ~/.local/bin
+curl -L https://github.com/gokcehan/lf/releases/download/latest/lf-$(uname -s)-$(uname -m).tar.gz | tar xzC ~/.local/bin
 </pre>
 
 <p>

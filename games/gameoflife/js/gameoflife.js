@@ -1,7 +1,7 @@
 //
 // gameoflife.js
 //
-// First rule of hacker club is you do talk about game of life
+// First rule of hack club is you do talk about game of life
 //
 // Authors : Gokcehan Kara <gokcehankara@gmail.com>
 // License : This file is placed in the public domain.
