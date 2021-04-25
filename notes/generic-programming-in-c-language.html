@@ -35,7 +35,7 @@ To avoid duplication of the logic, we can make use of the preprocessor to genera
 Specifically we use token concatenation feature to add a suffix to names:
 </p>
 
-<pre>
+<pre class="hl">
 <span class="hl ppc">#define ARR_INIT_CAP 2</span>
 <span class="hl ppc">#define ARR_GROW_RAT 2</span>
 
@@ -52,7 +52,7 @@ Specifically we use token concatenation feature to add a suffix to names:
 For allocation and freeing we provide the necessary functions as follows:
 </p>
 
-<pre>
+<pre class="hl">
 <span class="hl kwc">inline</span> <span class="hl kwb">struct</span> arr_<span class="hl ppc">##TAIL *                                                     \</span>
 <span class="hl ppc">arrnew_##TAIL(void)                                                            \</span>
 <span class="hl ppc">{                                                                              \</span>
@@ -91,7 +91,7 @@ For allocation and freeing we provide the necessary functions as follows:
 Similarly for appending and removing elements we have:
 </p>
 
-<pre>
+<pre class="hl">
 <span class="hl kwc">inline</span> <span class="hl kwb">int</span>                                                                     \
 arrappend_<span class="hl ppc">##TAIL(struct arr_##TAIL *arr, TYPE val)                             \</span>
 <span class="hl ppc">{                                                                              \</span>
@@ -131,7 +131,7 @@ arrappend_<span class="hl ppc">##TAIL(struct arr_##TAIL *arr, TYPE val)         
 In order to generate an implementation for a new type, we need to provide the type and an appropriate suffix for that type:
 </p>
 
-<pre>
+<pre class="hl">
 <span class="hl kwd">DEFINE_ARR</span><span class="hl opt">(</span><span class="hl kwb">int</span><span class="hl opt">,</span> <span class="hl kwb">int</span><span class="hl opt">)</span>
 <span class="hl kwd">DEFINE_ARR</span><span class="hl opt">(</span><span class="hl kwb">char</span> <span class="hl opt">*,</span> charp<span class="hl opt">)</span>
 </pre>
@@ -140,7 +140,7 @@ In order to generate an implementation for a new type, we need to provide the ty
 An example scenario for integer arrays now works as below:
 </p>
 
-<pre>
+<pre class="hl">
 <span class="hl kwb">struct</span> arr_int <span class="hl opt">*</span>arr <span class="hl opt">=</span> <span class="hl kwd">arrnew_int</span><span class="hl opt">();</span>
 
 <span class="hl kwa">while</span> <span class="hl opt">((</span>num <span class="hl opt">=</span> <span class="hl kwd">get</span><span class="hl opt">()) &lt;</span> limit<span class="hl opt">) {</span>
@@ -166,7 +166,7 @@ An example scenario for integer arrays now works as below:
 Similarly for char pointer arrays we have:
 </p>
 
-<pre>
+<pre class="hl">
 <span class="hl kwb">struct</span> arr_charp <span class="hl opt">*</span>words <span class="hl opt">=</span> <span class="hl kwd">arrnew_charp</span><span class="hl opt">();</span>
 
 <span class="hl kwd">arrappend_charp</span><span class="hl opt">(</span>words<span class="hl opt">,</span> <span class="hl str">&quot;one&quot;</span><span class="hl opt">);</span>
@@ -194,7 +194,7 @@ We can avoid defining new structs and functions for each type by having type par
 For this purpose, we make use of unnamed structs to expand the definition according to the given type:
 </p>
 
-<pre>
+<pre class="hl">
 <span class="hl ppc">#define arr(type) struct {                                                     \</span>
 <span class="hl ppc">    type *buf;                                                                 \</span>
 <span class="hl ppc">    int   len;                                                                 \</span>
@@ -209,7 +209,7 @@ It is still possible to handle errors but it is not very straightforward.
 Allocation and freeing operations are given as follows:
 </p>
 
-<pre>
+<pre class="hl">
 <span class="hl ppc">#define ARR_INIT_CAP 2</span>
 
 <span class="hl ppc">#define arrnew(arr) arrnewcap(arr, ARR_INIT_CAP)</span>
@@ -229,7 +229,7 @@ Allocation and freeing operations are given as follows:
 Similarly, adding and removing elements is achieved with following macros:
 </p>
 
-<pre>
+<pre class="hl">
 <span class="hl ppc">#define ARR_GROW_RAT 2</span>
 
 <span class="hl ppc">#define arrappend(arr, val) do {                                               \</span>
@@ -251,7 +251,7 @@ Similarly, adding and removing elements is achieved with following macros:
 With this implementation, previous scenario now looks as follows:
 </p>
 
-<pre>
+<pre class="hl">
 <span class="hl kwd">arr</span><span class="hl opt">(</span><span class="hl kwb">int</span><span class="hl opt">)</span> arr<span class="hl opt">;</span>
 
 <span class="hl kwd">arrnew</span><span class="hl opt">(</span>arr<span class="hl opt">);</span>
@@ -279,7 +279,7 @@ With this implementation, previous scenario now looks as follows:
 Similarly for char pointer arrays we have:
 </p>
 
-<pre>
+<pre class="hl">
 <span class="hl kwd">arr</span><span class="hl opt">(</span><span class="hl kwb">char</span> <span class="hl opt">*)</span> words<span class="hl opt">;</span>
 
 <span class="hl kwd">arrnew</span><span class="hl opt">(</span>words<span class="hl opt">);</span>

@@ -52,7 +52,7 @@ It was leaking memory at early returns.
 High level conceptual overview of the function looks like this:
 </p>
 
-<pre>
+<pre class="hl">
 <span class="hl kwb">static int</span>
 <span class="hl kwd">dosprintf</span><span class="hl opt">(..)</span>
 <span class="hl opt">{</span>
@@ -82,7 +82,7 @@ Since the bug wasn't touched for about 2 months, I started working on it without
 My first attempt looked like this:
 </p> 
 
-<pre>
+<pre class="hl">
 <span class="hl kwb">struct</span> ResourceHandler
 <span class="hl opt">{</span>
     Resource<span class="hl opt">*</span> resource<span class="hl opt">;</span>
@@ -177,7 +177,7 @@ For this case, the compiler would have to copy the vector before the function re
 My mentor sent a review immediately afterwards in which he told me to pass the resource vector as an out parameter instead, so in the end my updated patch looked something like this:
 </p>
 
-<pre>
+<pre class="hl">
 <span class="hl kwc">typedef</span> Vector<span class="hl opt">&lt;</span>Resource<span class="hl opt">,</span> NAS_DEFAULT_NUM<span class="hl opt">,</span> SystemAllocPolicy<span class="hl opt">&gt;</span> ResourceVector<span class="hl opt">;</span>
 
 <span class="hl slc">// ..</span>

@@ -131,7 +131,7 @@ First thing to do before parsing is to get the input from the user.
 For this purpose, we use a scanning routine that will read a single line from stdin discarding all the whitespace:
 </p>
 
-<pre>
+<pre class="hl">
 <span class="hl kwb">int</span> <span class="hl kwd">scan</span><span class="hl opt">(</span><span class="hl kwb">char</span> <span class="hl opt">*</span>s<span class="hl opt">,</span> <span class="hl kwb">int</span> lim<span class="hl opt">)</span>
 <span class="hl opt">{</span>
     <span class="hl kwb">int</span> i<span class="hl opt">,</span> c<span class="hl opt">;</span>
@@ -161,7 +161,7 @@ The only thing required for tokenization is to parse consecutive digits as a sin
 Main routine consists of a loop for reading the input, evaluating the expression, and printing the result, which is usually referred as Read-Eval-Print Loop (REPL):
 </p>
 
-<pre>
+<pre class="hl">
 <span class="hl ppc">#define MAXLINE 1000</span>
 
 <span class="hl kwb">char</span> <span class="hl opt">*</span>curr<span class="hl opt">;</span>
@@ -189,7 +189,7 @@ The current input char <code>*curr</code> is held as a global variable to be sha
 Expression parsing rule is pretty straightforward to implement:
 </p>
 
-<pre>
+<pre class="hl">
 <span class="hl slc">// E ::= T {+ T}</span>
 <span class="hl kwb">int</span> <span class="hl kwd">expr</span><span class="hl opt">(</span><span class="hl kwb">void</span><span class="hl opt">)</span>
 <span class="hl opt">{</span>
@@ -214,7 +214,7 @@ This repetition is implemented with a simple loop.
 Term parsing rule is almost the same as the expression rule:
 </p>
 
-<pre>
+<pre class="hl">
 <span class="hl slc">// T ::= F {* F}</span>
 <span class="hl kwb">int</span> <span class="hl kwd">term</span><span class="hl opt">(</span><span class="hl kwb">void</span><span class="hl opt">)</span>
 <span class="hl opt">{</span>
@@ -237,7 +237,7 @@ Since term parsing is done while parsing expressions, precedence of <code>*</cod
 Factor parsing is the most complicated of the three:
 </p>
 
-<pre>
+<pre class="hl">
 <span class="hl slc">// F ::= ( E ) | Int</span>
 <span class="hl kwb">int</span> <span class="hl kwd">fact</span><span class="hl opt">(</span><span class="hl kwb">void</span><span class="hl opt">)</span>
 <span class="hl opt">{</span>
