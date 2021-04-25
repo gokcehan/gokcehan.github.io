@@ -6,6 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Recursive Descent Parsing</title>
   <link rel="stylesheet" type="text/css" href="../style.css">
+  <link rel="stylesheet" type="text/css" href="../highlight.css">
 </head>
 
 <body>
@@ -131,22 +132,22 @@ For this purpose, we use a scanning routine that will read a single line from st
 </p>
 
 <pre>
-int scan(char *s, int lim)
-{
-    int i, c;
+<span class="hl kwb">int</span> <span class="hl kwd">scan</span><span class="hl opt">(</span><span class="hl kwb">char</span> <span class="hl opt">*</span>s<span class="hl opt">,</span> <span class="hl kwb">int</span> lim<span class="hl opt">)</span>
+<span class="hl opt">{</span>
+    <span class="hl kwb">int</span> i<span class="hl opt">,</span> c<span class="hl opt">;</span>
 
-    i = 0;
-    while (--lim > 0 && (c = getchar()) != EOF && c != '\n') {
-        if (!isspace(c)) {
-            s[i++] = c;
-        }
-    }
-    if (c == '\n') {
-        s[i++] = c;
-    }
-    s[i] = '\0';
-    return i;
-}
+    i <span class="hl opt">=</span> <span class="hl num">0</span><span class="hl opt">;</span>
+    <span class="hl kwa">while</span> <span class="hl opt">(--</span>lim <span class="hl opt">&gt;</span> <span class="hl num">0</span> <span class="hl opt">&amp;&amp; (</span>c <span class="hl opt">=</span> <span class="hl kwd">getchar</span><span class="hl opt">()) !=</span> EOF <span class="hl opt">&amp;&amp;</span> c <span class="hl opt">!=</span> <span class="hl str">&#39;</span><span class="hl esc">\n</span><span class="hl str">&#39;</span><span class="hl opt">) {</span>
+        <span class="hl kwa">if</span> <span class="hl opt">(!</span><span class="hl kwd">isspace</span><span class="hl opt">(</span>c<span class="hl opt">)) {</span>
+            s<span class="hl opt">[</span>i<span class="hl opt">++] =</span> c<span class="hl opt">;</span>
+        <span class="hl opt">}</span>
+    <span class="hl opt">}</span>
+    <span class="hl kwa">if</span> <span class="hl opt">(</span>c <span class="hl opt">==</span> <span class="hl str">&#39;</span><span class="hl esc">\n</span><span class="hl str">&#39;</span><span class="hl opt">) {</span>
+        s<span class="hl opt">[</span>i<span class="hl opt">++] =</span> c<span class="hl opt">;</span>
+    <span class="hl opt">}</span>
+    s<span class="hl opt">[</span>i<span class="hl opt">] =</span> <span class="hl str">&#39;\0&#39;</span><span class="hl opt">;</span>
+    <span class="hl kwa">return</span> i<span class="hl opt">;</span>
+<span class="hl opt">}</span>
 </pre>
 
 <p>
@@ -161,21 +162,21 @@ Main routine consists of a loop for reading the input, evaluating the expression
 </p>
 
 <pre>
-#define MAXLINE 1000
+<span class="hl ppc">#define MAXLINE 1000</span>
 
-char *curr;
+<span class="hl kwb">char</span> <span class="hl opt">*</span>curr<span class="hl opt">;</span>
 
-int main(void)
-{
-    char line[MAXLINE];
+<span class="hl kwb">int</span> <span class="hl kwd">main</span><span class="hl opt">(</span><span class="hl kwb">void</span><span class="hl opt">)</span>
+<span class="hl opt">{</span>
+    <span class="hl kwb">char</span> line<span class="hl opt">[</span>MAXLINE<span class="hl opt">];</span>
 
-    printf("> ");
-    while (scan(line, MAXLINE)) {
-        curr = line;
-        printf("= %d\n> ", expr());
-    }
-    return 0;
-}
+    <span class="hl kwd">printf</span><span class="hl opt">(</span><span class="hl str">&quot;&gt; &quot;</span><span class="hl opt">);</span>
+    <span class="hl kwa">while</span> <span class="hl opt">(</span><span class="hl kwd">scan</span><span class="hl opt">(</span>line<span class="hl opt">,</span> MAXLINE<span class="hl opt">)) {</span>
+        curr <span class="hl opt">=</span> line<span class="hl opt">;</span>
+        <span class="hl kwd">printf</span><span class="hl opt">(</span><span class="hl str">&quot;=</span> <span class="hl ipl">%d</span><span class="hl str"></span><span class="hl esc">\n</span><span class="hl str">&gt; &quot;</span><span class="hl opt">,</span> <span class="hl kwd">expr</span><span class="hl opt">());</span>
+    <span class="hl opt">}</span>
+    <span class="hl kwa">return</span> <span class="hl num">0</span><span class="hl opt">;</span>
+<span class="hl opt">}</span>
 </pre>
 
 <p>
@@ -189,16 +190,16 @@ Expression parsing rule is pretty straightforward to implement:
 </p>
 
 <pre>
-// E ::= T {+ T}
-int expr(void)
-{
-    int result = term();
-    while (*curr == '+') {
-        ++curr;
-        result += term();
-    }
-    return result;
-}
+<span class="hl slc">// E ::= T {+ T}</span>
+<span class="hl kwb">int</span> <span class="hl kwd">expr</span><span class="hl opt">(</span><span class="hl kwb">void</span><span class="hl opt">)</span>
+<span class="hl opt">{</span>
+    <span class="hl kwb">int</span> result <span class="hl opt">=</span> <span class="hl kwd">term</span><span class="hl opt">();</span>
+    <span class="hl kwa">while</span> <span class="hl opt">(*</span>curr <span class="hl opt">==</span> <span class="hl str">&#39;+&#39;</span><span class="hl opt">) {</span>
+        <span class="hl opt">++</span>curr<span class="hl opt">;</span>
+        result <span class="hl opt">+=</span> <span class="hl kwd">term</span><span class="hl opt">();</span>
+    <span class="hl opt">}</span>
+    <span class="hl kwa">return</span> result<span class="hl opt">;</span>
+<span class="hl opt">}</span>
 </pre>
 
 <p>
@@ -214,16 +215,16 @@ Term parsing rule is almost the same as the expression rule:
 </p>
 
 <pre>
-// T ::= F {* F}
-int term(void)
-{
-    int result = fact();
-    while (*curr == '*') {
-        ++curr;
-        result *= fact();
-    }
-    return result;
-}
+<span class="hl slc">// T ::= F {* F}</span>
+<span class="hl kwb">int</span> <span class="hl kwd">term</span><span class="hl opt">(</span><span class="hl kwb">void</span><span class="hl opt">)</span>
+<span class="hl opt">{</span>
+    <span class="hl kwb">int</span> result <span class="hl opt">=</span> <span class="hl kwd">fact</span><span class="hl opt">();</span>
+    <span class="hl kwa">while</span> <span class="hl opt">(*</span>curr <span class="hl opt">==</span> <span class="hl str">&#39;*&#39;</span><span class="hl opt">) {</span>
+        <span class="hl opt">++</span>curr<span class="hl opt">;</span>
+        result <span class="hl opt">*=</span> <span class="hl kwd">fact</span><span class="hl opt">();</span>
+    <span class="hl opt">}</span>
+    <span class="hl kwa">return</span> result<span class="hl opt">;</span>
+<span class="hl opt">}</span>
 </pre>
 
 <p>
@@ -237,34 +238,34 @@ Factor parsing is the most complicated of the three:
 </p>
 
 <pre>
-// F ::= ( E ) | Int
-int fact(void)
-{
-    int result;
+<span class="hl slc">// F ::= ( E ) | Int</span>
+<span class="hl kwb">int</span> <span class="hl kwd">fact</span><span class="hl opt">(</span><span class="hl kwb">void</span><span class="hl opt">)</span>
+<span class="hl opt">{</span>
+    <span class="hl kwb">int</span> result<span class="hl opt">;</span>
 
-    if (*curr == '(') {
-        ++curr;
-        result = expr();
-        if (*curr == ')') {
-            ++curr;
-        } else {
-            printf("error: expected ')'\n");
-            return 0;
-        }
-        return result;
-    } else if (isdigit(*curr)) {
-        result = *curr - '0';
-        ++curr;
-        while (isdigit(*curr)) {
-            result = result * 10 + (*curr - '0');
-            ++curr;
-        }
-        return result;
-    } else {
-        printf("error: expected a parenthesis or a number at: %c\n", *curr);
-        return 0;
-    }
-}
+    <span class="hl kwa">if</span> <span class="hl opt">(*</span>curr <span class="hl opt">==</span> <span class="hl str">&#39;(&#39;</span><span class="hl opt">) {</span>
+        <span class="hl opt">++</span>curr<span class="hl opt">;</span>
+        result <span class="hl opt">=</span> <span class="hl kwd">expr</span><span class="hl opt">();</span>
+        <span class="hl kwa">if</span> <span class="hl opt">(*</span>curr <span class="hl opt">==</span> <span class="hl str">&#39;)&#39;</span><span class="hl opt">) {</span>
+            <span class="hl opt">++</span>curr<span class="hl opt">;</span>
+        <span class="hl opt">}</span> <span class="hl kwa">else</span> <span class="hl opt">{</span>
+            <span class="hl kwd">printf</span><span class="hl opt">(</span><span class="hl str">&quot;error: expected &#39;)&#39;</span><span class="hl esc">\n</span><span class="hl str">&quot;</span><span class="hl opt">);</span>
+            <span class="hl kwa">return</span> <span class="hl num">0</span><span class="hl opt">;</span>
+        <span class="hl opt">}</span>
+        <span class="hl kwa">return</span> result<span class="hl opt">;</span>
+    <span class="hl opt">}</span> <span class="hl kwa">else if</span> <span class="hl opt">(</span><span class="hl kwd">isdigit</span><span class="hl opt">(*</span>curr<span class="hl opt">)) {</span>
+        result <span class="hl opt">= *</span>curr <span class="hl opt">-</span> <span class="hl str">&#39;0&#39;</span><span class="hl opt">;</span>
+        <span class="hl opt">++</span>curr<span class="hl opt">;</span>
+        <span class="hl kwa">while</span> <span class="hl opt">(</span><span class="hl kwd">isdigit</span><span class="hl opt">(*</span>curr<span class="hl opt">)) {</span>
+            result <span class="hl opt">=</span> result <span class="hl opt">*</span> <span class="hl num">10</span> <span class="hl opt">+ (*</span>curr <span class="hl opt">-</span> <span class="hl str">&#39;0&#39;</span><span class="hl opt">);</span>
+            <span class="hl opt">++</span>curr<span class="hl opt">;</span>
+        <span class="hl opt">}</span>
+        <span class="hl kwa">return</span> result<span class="hl opt">;</span>
+    <span class="hl opt">}</span> <span class="hl kwa">else</span> <span class="hl opt">{</span>
+        <span class="hl kwd">printf</span><span class="hl opt">(</span><span class="hl str">&quot;error: expected a parenthesis or a number at:</span> <span class="hl ipl">%c</span><span class="hl str"></span><span class="hl esc">\n</span><span class="hl str">&quot;</span><span class="hl opt">, *</span>curr<span class="hl opt">);</span>
+        <span class="hl kwa">return</span> <span class="hl num">0</span><span class="hl opt">;</span>
+    <span class="hl opt">}</span>
+<span class="hl opt">}</span>
 </pre>
 
 <p>
