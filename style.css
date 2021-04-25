@@ -10,6 +10,12 @@ time {
   font-weight: bold;
 }
 
+code {
+  padding: 5px;
+  border-radius: 5px;
+  background: #eee;
+}
+
 pre {
   padding: 15px;
   border-radius: 5px;
@@ -47,6 +53,9 @@ blockquote p::after {
     color:#ccf;
   }
   blockquote p {
+    background: #333;
+  }
+  code {
     background: #333;
   }
   pre {
