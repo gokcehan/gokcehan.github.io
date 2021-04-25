@@ -1,96 +1,73 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
-<html>
+<!DOCTYPE html>
+<html lang="en">
 <head>
-<meta http-equiv="content-type" content="text/html; charset=UTF-8">
-<title>~/Dropbox/workspace/web/codes/plain_arr.c.html</title>
-<meta name="Generator" content="Vim/8.0">
-<meta name="plugin-version" content="vim7.4_v2">
-<meta name="syntax" content="c">
-<meta name="settings" content="use_css,no_foldcolumn,expand_tabs,prevent_copy=">
-<meta name="colorscheme" content="none">
-<style type="text/css">
-<!--
-pre { font-family: monospace; color: #000000; background-color: #ffffff; }
-body { font-family: monospace; color: #000000; background-color: #ffffff; }
-* { font-size: 1em; }
-.PreProc { color: #c000c0; }
-.Type { color: #008000; }
-.Statement { color: #af5f00; }
-.Comment { color: #0000c0; }
-.Constant { color: #c00000; }
-.Special { color: #c000c0; }
--->
-</style>
-
-<script type='text/javascript'>
-<!--
-
--->
-</script>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>plain_arr.c</title>
+<link rel="stylesheet" type="text/css" href="../highlight.css">
 </head>
-<body>
-<pre id='vimCodeElement'>
-<span class="Comment">//</span>
-<span class="Comment">// plain_arr.c</span>
-<span class="Comment">//</span>
-<span class="Comment">// Plain array</span>
-<span class="Comment">//</span>
+<body class="hl">
+<pre class="hl"><span class="hl slc">//</span>
+<span class="hl slc">// plain_arr.c</span>
+<span class="hl slc">//</span>
+<span class="hl slc">// Plain array</span>
+<span class="hl slc">//</span>
 
-<span class="PreProc">#include </span><span class="Constant">&lt;stdio.h&gt;</span>
-<span class="PreProc">#include </span><span class="Constant">&lt;stdlib.h&gt;</span>
+<span class="hl ppc">#include &lt;stdio.h&gt;</span>
+<span class="hl ppc">#include &lt;stdlib.h&gt;</span>
 
-<span class="PreProc">#define LIMIT </span><span class="Constant">100</span>
+<span class="hl ppc">#define LIMIT 100</span>
 
-<span class="Type">int</span> a = <span class="Constant">0</span>;
-<span class="Type">int</span> b = <span class="Constant">1</span>;
+<span class="hl kwb">int</span> a <span class="hl opt">=</span> <span class="hl num">0</span><span class="hl opt">;</span>
+<span class="hl kwb">int</span> b <span class="hl opt">=</span> <span class="hl num">1</span><span class="hl opt">;</span>
 
-<span class="Type">int</span> get(<span class="Type">void</span>)
-{
-    <span class="Type">int</span> tmp = a;
-    a = b;
-    b = tmp + b;
-    <span class="Statement">return</span> tmp;
-}
+<span class="hl kwb">int</span> <span class="hl kwd">get</span><span class="hl opt">(</span><span class="hl kwb">void</span><span class="hl opt">)</span>
+<span class="hl opt">{</span>
+    <span class="hl kwb">int</span> tmp <span class="hl opt">=</span> a<span class="hl opt">;</span>
+    a <span class="hl opt">=</span> b<span class="hl opt">;</span>
+    b <span class="hl opt">=</span> tmp <span class="hl opt">+</span> b<span class="hl opt">;</span>
+    <span class="hl kwa">return</span> tmp<span class="hl opt">;</span>
+<span class="hl opt">}</span>
 
-<span class="Type">void</span> process(<span class="Type">int</span> i)
-{
-    printf(<span class="Constant">&quot;</span><span class="Special">%d</span><span class="Special">\n</span><span class="Constant">&quot;</span>, i);
-}
+<span class="hl kwb">void</span> <span class="hl kwd">process</span><span class="hl opt">(</span><span class="hl kwb">int</span> i<span class="hl opt">)</span>
+<span class="hl opt">{</span>
+    <span class="hl kwd">printf</span><span class="hl opt">(</span><span class="hl str">&quot;</span><span class="hl ipl">%d</span><span class="hl str"></span><span class="hl esc">\n</span><span class="hl str">&quot;</span><span class="hl opt">,</span> i<span class="hl opt">);</span>
+<span class="hl opt">}</span>
 
-<span class="Type">int</span> main(<span class="Type">int</span> argc, <span class="Type">char</span> *argv[])
-{
-    <span class="Type">int</span> i, num;
+<span class="hl kwb">int</span> <span class="hl kwd">main</span><span class="hl opt">(</span><span class="hl kwb">int</span> argc<span class="hl opt">,</span> <span class="hl kwb">char</span> <span class="hl opt">*</span>argv<span class="hl opt">[])</span>
+<span class="hl opt">{</span>
+    <span class="hl kwb">int</span> i<span class="hl opt">,</span> num<span class="hl opt">;</span>
 
-    <span class="Type">int</span> limit = argc &lt; <span class="Constant">2</span> ? LIMIT : atoi(argv[<span class="Constant">1</span>]);
+    <span class="hl kwb">int</span> limit <span class="hl opt">=</span> argc <span class="hl opt">&lt;</span> <span class="hl num">2</span> <span class="hl opt">?</span> LIMIT <span class="hl opt">:</span> <span class="hl kwd">atoi</span><span class="hl opt">(</span>argv<span class="hl opt">[</span><span class="hl num">1</span><span class="hl opt">]);</span>
 
-    <span class="Type">int</span> len = <span class="Constant">0</span>;
-    <span class="Type">int</span> cap = <span class="Constant">2</span>;
-    <span class="Type">int</span> *buf = malloc(cap * <span class="Statement">sizeof</span>(<span class="Type">int</span>));
+    <span class="hl kwb">int</span> len <span class="hl opt">=</span> <span class="hl num">0</span><span class="hl opt">;</span>
+    <span class="hl kwb">int</span> cap <span class="hl opt">=</span> <span class="hl num">2</span><span class="hl opt">;</span>
+    <span class="hl kwb">int</span> <span class="hl opt">*</span>buf <span class="hl opt">=</span> <span class="hl kwd">malloc</span><span class="hl opt">(</span>cap <span class="hl opt">*</span> <span class="hl kwa">sizeof</span><span class="hl opt">(</span><span class="hl kwb">int</span><span class="hl opt">));</span>
 
-    <span class="Statement">while</span> ((num = get()) &lt; limit) {
-        <span class="Statement">if</span> (cap &lt;= len) {
-            buf = realloc(buf, (cap *= <span class="Constant">2</span>) * <span class="Statement">sizeof</span>(<span class="Type">int</span>));
-        }
-        buf[len++] = num;
-    }
+    <span class="hl kwa">while</span> <span class="hl opt">((</span>num <span class="hl opt">=</span> <span class="hl kwd">get</span><span class="hl opt">()) &lt;</span> limit<span class="hl opt">) {</span>
+        <span class="hl kwa">if</span> <span class="hl opt">(</span>cap <span class="hl opt">&lt;=</span> len<span class="hl opt">) {</span>
+            buf <span class="hl opt">=</span> <span class="hl kwd">realloc</span><span class="hl opt">(</span>buf<span class="hl opt">, (</span>cap <span class="hl opt">*=</span> <span class="hl num">2</span><span class="hl opt">) *</span> <span class="hl kwa">sizeof</span><span class="hl opt">(</span><span class="hl kwb">int</span><span class="hl opt">));</span>
+        <span class="hl opt">}</span>
+        buf<span class="hl opt">[</span>len<span class="hl opt">++] =</span> num<span class="hl opt">;</span>
+    <span class="hl opt">}</span>
 
-    <span class="Statement">for</span> (i = <span class="Constant">0</span>; i &lt; len; ++i) {
-        process(buf[i]);
-    }
+    <span class="hl kwa">for</span> <span class="hl opt">(</span>i <span class="hl opt">=</span> <span class="hl num">0</span><span class="hl opt">;</span> i <span class="hl opt">&lt;</span> len<span class="hl opt">; ++</span>i<span class="hl opt">) {</span>
+        <span class="hl kwd">process</span><span class="hl opt">(</span>buf<span class="hl opt">[</span>i<span class="hl opt">]);</span>
+    <span class="hl opt">}</span>
 
-    <span class="Statement">for</span> (i = len-<span class="Constant">1</span>; i &gt; <span class="Constant">0</span>; --i) {
-        buf[i] -= buf[i-<span class="Constant">1</span>];
-    }
+    <span class="hl kwa">for</span> <span class="hl opt">(</span>i <span class="hl opt">=</span> len<span class="hl opt">-</span><span class="hl num">1</span><span class="hl opt">;</span> i <span class="hl opt">&gt;</span> <span class="hl num">0</span><span class="hl opt">; --</span>i<span class="hl opt">) {</span>
+        buf<span class="hl opt">[</span>i<span class="hl opt">] -=</span> buf<span class="hl opt">[</span>i<span class="hl opt">-</span><span class="hl num">1</span><span class="hl opt">];</span>
+    <span class="hl opt">}</span>
 
-    <span class="Statement">for</span> (i = len-<span class="Constant">1</span>; i &gt;= <span class="Constant">0</span>; --i) {
-        process(buf[--len]);
-    }
+    <span class="hl kwa">for</span> <span class="hl opt">(</span>i <span class="hl opt">=</span> len<span class="hl opt">-</span><span class="hl num">1</span><span class="hl opt">;</span> i <span class="hl opt">&gt;=</span> <span class="hl num">0</span><span class="hl opt">; --</span>i<span class="hl opt">) {</span>
+        <span class="hl kwd">process</span><span class="hl opt">(</span>buf<span class="hl opt">[--</span>len<span class="hl opt">]);</span>
+    <span class="hl opt">}</span>
 
-    free(buf);
+    <span class="hl kwd">free</span><span class="hl opt">(</span>buf<span class="hl opt">);</span>
 
-    <span class="Statement">return</span> <span class="Constant">0</span>;
-}
+    <span class="hl kwa">return</span> <span class="hl num">0</span><span class="hl opt">;</span>
+<span class="hl opt">}</span>
 </pre>
 </body>
 </html>
-<!-- vim: set foldmethod=manual : -->
+<!--HTML generated by highlight 3.62, http://www.andre-simon.de/-->

@@ -1,141 +1,118 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
-<html>
+<!DOCTYPE html>
+<html lang="en">
 <head>
-<meta http-equiv="content-type" content="text/html; charset=UTF-8">
-<title>~/Dropbox/workspace/web/codes/calc.c.html</title>
-<meta name="Generator" content="Vim/8.0">
-<meta name="plugin-version" content="vim7.4_v2">
-<meta name="syntax" content="c">
-<meta name="settings" content="use_css,no_foldcolumn,expand_tabs,prevent_copy=">
-<meta name="colorscheme" content="none">
-<style type="text/css">
-<!--
-pre { font-family: monospace; color: #000000; background-color: #ffffff; }
-body { font-family: monospace; color: #000000; background-color: #ffffff; }
-* { font-size: 1em; }
-.PreProc { color: #c000c0; }
-.Type { color: #008000; }
-.Statement { color: #af5f00; }
-.Comment { color: #0000c0; }
-.Constant { color: #c00000; }
-.Special { color: #c000c0; }
--->
-</style>
-
-<script type='text/javascript'>
-<!--
-
--->
-</script>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>calc.c</title>
+<link rel="stylesheet" type="text/css" href="../highlight.css">
 </head>
-<body>
-<pre id='vimCodeElement'>
-<span class="Comment">//</span>
-<span class="Comment">// calc.c</span>
-<span class="Comment">//</span>
-<span class="Comment">// Calculator for simple expressions</span>
-<span class="Comment">//</span>
-<span class="Comment">// The expression grammar is as follows:</span>
-<span class="Comment">//</span>
-<span class="Comment">//     E ::= T {+ T}</span>
-<span class="Comment">//     T ::= F {* F}</span>
-<span class="Comment">//     F ::= ( E ) | Int</span>
-<span class="Comment">//</span>
-<span class="Comment">// Expressions are parsed and evaluated on the fly.</span>
-<span class="Comment">//</span>
+<body class="hl">
+<pre class="hl"><span class="hl slc">//</span>
+<span class="hl slc">// calc.c</span>
+<span class="hl slc">//</span>
+<span class="hl slc">// Calculator for simple expressions</span>
+<span class="hl slc">//</span>
+<span class="hl slc">// The expression grammar is as follows:</span>
+<span class="hl slc">//</span>
+<span class="hl slc">//     E ::= T {+ T}</span>
+<span class="hl slc">//     T ::= F {* F}</span>
+<span class="hl slc">//     F ::= ( E ) | Int</span>
+<span class="hl slc">//</span>
+<span class="hl slc">// Expressions are parsed and evaluated on the fly.</span>
+<span class="hl slc">//</span>
 
-<span class="PreProc">#include </span><span class="Constant">&lt;stdio.h&gt;</span>
-<span class="PreProc">#include </span><span class="Constant">&lt;ctype.h&gt;</span>
+<span class="hl ppc">#include &lt;stdio.h&gt;</span>
+<span class="hl ppc">#include &lt;ctype.h&gt;</span>
 
-<span class="PreProc">#define MAXLINE </span><span class="Constant">1000</span>
+<span class="hl ppc">#define MAXLINE 1000</span>
 
-<span class="Type">int</span> expr(<span class="Type">void</span>);
-<span class="Type">int</span> term(<span class="Type">void</span>);
-<span class="Type">int</span> fact(<span class="Type">void</span>);
-<span class="Type">int</span> scan(<span class="Type">char</span> *s, <span class="Type">int</span> lim);
+<span class="hl kwb">int</span> <span class="hl kwd">expr</span><span class="hl opt">(</span><span class="hl kwb">void</span><span class="hl opt">);</span>
+<span class="hl kwb">int</span> <span class="hl kwd">term</span><span class="hl opt">(</span><span class="hl kwb">void</span><span class="hl opt">);</span>
+<span class="hl kwb">int</span> <span class="hl kwd">fact</span><span class="hl opt">(</span><span class="hl kwb">void</span><span class="hl opt">);</span>
+<span class="hl kwb">int</span> <span class="hl kwd">scan</span><span class="hl opt">(</span><span class="hl kwb">char</span> <span class="hl opt">*</span>s<span class="hl opt">,</span> <span class="hl kwb">int</span> lim<span class="hl opt">);</span>
 
-<span class="Type">char</span> *curr;
+<span class="hl kwb">char</span> <span class="hl opt">*</span>curr<span class="hl opt">;</span>
 
-<span class="Comment">// E ::= T {+ T}</span>
-<span class="Type">int</span> expr(<span class="Type">void</span>)
-{
-    <span class="Type">int</span> result = term();
-    <span class="Statement">while</span> (*curr == <span class="Constant">'+'</span>) {
-        ++curr;
-        result += term();
-    }
-    <span class="Statement">return</span> result;
-}
+<span class="hl slc">// E ::= T {+ T}</span>
+<span class="hl kwb">int</span> <span class="hl kwd">expr</span><span class="hl opt">(</span><span class="hl kwb">void</span><span class="hl opt">)</span>
+<span class="hl opt">{</span>
+    <span class="hl kwb">int</span> result <span class="hl opt">=</span> <span class="hl kwd">term</span><span class="hl opt">();</span>
+    <span class="hl kwa">while</span> <span class="hl opt">(*</span>curr <span class="hl opt">==</span> <span class="hl str">&#39;+&#39;</span><span class="hl opt">) {</span>
+        <span class="hl opt">++</span>curr<span class="hl opt">;</span>
+        result <span class="hl opt">+=</span> <span class="hl kwd">term</span><span class="hl opt">();</span>
+    <span class="hl opt">}</span>
+    <span class="hl kwa">return</span> result<span class="hl opt">;</span>
+<span class="hl opt">}</span>
 
-<span class="Comment">// T ::= F {* F}</span>
-<span class="Type">int</span> term(<span class="Type">void</span>)
-{
-    <span class="Type">int</span> result = fact();
-    <span class="Statement">while</span> (*curr == <span class="Constant">'*'</span>) {
-        ++curr;
-        result *= fact();
-    }
-    <span class="Statement">return</span> result;
-}
+<span class="hl slc">// T ::= F {* F}</span>
+<span class="hl kwb">int</span> <span class="hl kwd">term</span><span class="hl opt">(</span><span class="hl kwb">void</span><span class="hl opt">)</span>
+<span class="hl opt">{</span>
+    <span class="hl kwb">int</span> result <span class="hl opt">=</span> <span class="hl kwd">fact</span><span class="hl opt">();</span>
+    <span class="hl kwa">while</span> <span class="hl opt">(*</span>curr <span class="hl opt">==</span> <span class="hl str">&#39;*&#39;</span><span class="hl opt">) {</span>
+        <span class="hl opt">++</span>curr<span class="hl opt">;</span>
+        result <span class="hl opt">*=</span> <span class="hl kwd">fact</span><span class="hl opt">();</span>
+    <span class="hl opt">}</span>
+    <span class="hl kwa">return</span> result<span class="hl opt">;</span>
+<span class="hl opt">}</span>
 
-<span class="Comment">// F ::= ( E ) | Int</span>
-<span class="Type">int</span> fact(<span class="Type">void</span>)
-{
-    <span class="Type">int</span> result;
+<span class="hl slc">// F ::= ( E ) | Int</span>
+<span class="hl kwb">int</span> <span class="hl kwd">fact</span><span class="hl opt">(</span><span class="hl kwb">void</span><span class="hl opt">)</span>
+<span class="hl opt">{</span>
+    <span class="hl kwb">int</span> result<span class="hl opt">;</span>
 
-    <span class="Statement">if</span> (*curr == <span class="Constant">'('</span>) {
-        ++curr;
-        result = expr();
-        <span class="Statement">if</span> (*curr == <span class="Constant">')'</span>) {
-            ++curr;
-        } <span class="Statement">else</span> {
-            printf(<span class="Constant">&quot;error: expected ')'</span><span class="Special">\n</span><span class="Constant">&quot;</span>);
-            <span class="Statement">return</span> <span class="Constant">0</span>;
-        }
-        <span class="Statement">return</span> result;
-    } <span class="Statement">else</span> <span class="Statement">if</span> (isdigit(*curr)) {
-        result = *curr - <span class="Constant">'0'</span>;
-        ++curr;
-        <span class="Statement">while</span> (isdigit(*curr)) {
-            result = result * <span class="Constant">10</span> + (*curr - <span class="Constant">'0'</span>);
-            ++curr;
-        }
-        <span class="Statement">return</span> result;
-    } <span class="Statement">else</span> {
-        printf(<span class="Constant">&quot;error: expected a parenthesis or a number at: </span><span class="Special">%c</span><span class="Special">\n</span><span class="Constant">&quot;</span>, *curr);
-        <span class="Statement">return</span> <span class="Constant">0</span>;
-    }
-}
+    <span class="hl kwa">if</span> <span class="hl opt">(*</span>curr <span class="hl opt">==</span> <span class="hl str">&#39;(&#39;</span><span class="hl opt">) {</span>
+        <span class="hl opt">++</span>curr<span class="hl opt">;</span>
+        result <span class="hl opt">=</span> <span class="hl kwd">expr</span><span class="hl opt">();</span>
+        <span class="hl kwa">if</span> <span class="hl opt">(*</span>curr <span class="hl opt">==</span> <span class="hl str">&#39;)&#39;</span><span class="hl opt">) {</span>
+            <span class="hl opt">++</span>curr<span class="hl opt">;</span>
+        <span class="hl opt">}</span> <span class="hl kwa">else</span> <span class="hl opt">{</span>
+            <span class="hl kwd">printf</span><span class="hl opt">(</span><span class="hl str">&quot;error: expected &#39;)&#39;</span><span class="hl esc">\n</span><span class="hl str">&quot;</span><span class="hl opt">);</span>
+            <span class="hl kwa">return</span> <span class="hl num">0</span><span class="hl opt">;</span>
+        <span class="hl opt">}</span>
+        <span class="hl kwa">return</span> result<span class="hl opt">;</span>
+    <span class="hl opt">}</span> <span class="hl kwa">else if</span> <span class="hl opt">(</span><span class="hl kwd">isdigit</span><span class="hl opt">(*</span>curr<span class="hl opt">)) {</span>
+        result <span class="hl opt">= *</span>curr <span class="hl opt">-</span> <span class="hl str">&#39;0&#39;</span><span class="hl opt">;</span>
+        <span class="hl opt">++</span>curr<span class="hl opt">;</span>
+        <span class="hl kwa">while</span> <span class="hl opt">(</span><span class="hl kwd">isdigit</span><span class="hl opt">(*</span>curr<span class="hl opt">)) {</span>
+            result <span class="hl opt">=</span> result <span class="hl opt">*</span> <span class="hl num">10</span> <span class="hl opt">+ (*</span>curr <span class="hl opt">-</span> <span class="hl str">&#39;0&#39;</span><span class="hl opt">);</span>
+            <span class="hl opt">++</span>curr<span class="hl opt">;</span>
+        <span class="hl opt">}</span>
+        <span class="hl kwa">return</span> result<span class="hl opt">;</span>
+    <span class="hl opt">}</span> <span class="hl kwa">else</span> <span class="hl opt">{</span>
+        <span class="hl kwd">printf</span><span class="hl opt">(</span><span class="hl str">&quot;error: expected a parenthesis or a number at:</span> <span class="hl ipl">%c</span><span class="hl str"></span><span class="hl esc">\n</span><span class="hl str">&quot;</span><span class="hl opt">, *</span>curr<span class="hl opt">);</span>
+        <span class="hl kwa">return</span> <span class="hl num">0</span><span class="hl opt">;</span>
+    <span class="hl opt">}</span>
+<span class="hl opt">}</span>
 
-<span class="Type">int</span> scan(<span class="Type">char</span> *s, <span class="Type">int</span> lim)
-{
-    <span class="Type">int</span> i, c;
+<span class="hl kwb">int</span> <span class="hl kwd">scan</span><span class="hl opt">(</span><span class="hl kwb">char</span> <span class="hl opt">*</span>s<span class="hl opt">,</span> <span class="hl kwb">int</span> lim<span class="hl opt">)</span>
+<span class="hl opt">{</span>
+    <span class="hl kwb">int</span> i<span class="hl opt">,</span> c<span class="hl opt">;</span>
 
-    i = <span class="Constant">0</span>;
-    <span class="Statement">while</span> (--lim &gt; <span class="Constant">0</span> &amp;&amp; (c = getchar()) != <span class="Constant">EOF</span> &amp;&amp; c != <span class="Special">'\n'</span>) {
-        <span class="Statement">if</span> (!isspace(c)) {
-            s[i++] = c;
-        }
-    }
-    <span class="Statement">if</span> (c == <span class="Special">'\n'</span>) {
-        s[i++] = c;
-    }
-    s[i] = <span class="Special">'\0'</span>;
-    <span class="Statement">return</span> i;
-}
+    i <span class="hl opt">=</span> <span class="hl num">0</span><span class="hl opt">;</span>
+    <span class="hl kwa">while</span> <span class="hl opt">(--</span>lim <span class="hl opt">&gt;</span> <span class="hl num">0</span> <span class="hl opt">&amp;&amp; (</span>c <span class="hl opt">=</span> <span class="hl kwd">getchar</span><span class="hl opt">()) !=</span> EOF <span class="hl opt">&amp;&amp;</span> c <span class="hl opt">!=</span> <span class="hl str">&#39;</span><span class="hl esc">\n</span><span class="hl str">&#39;</span><span class="hl opt">) {</span>
+        <span class="hl kwa">if</span> <span class="hl opt">(!</span><span class="hl kwd">isspace</span><span class="hl opt">(</span>c<span class="hl opt">)) {</span>
+            s<span class="hl opt">[</span>i<span class="hl opt">++] =</span> c<span class="hl opt">;</span>
+        <span class="hl opt">}</span>
+    <span class="hl opt">}</span>
+    <span class="hl kwa">if</span> <span class="hl opt">(</span>c <span class="hl opt">==</span> <span class="hl str">&#39;</span><span class="hl esc">\n</span><span class="hl str">&#39;</span><span class="hl opt">) {</span>
+        s<span class="hl opt">[</span>i<span class="hl opt">++] =</span> c<span class="hl opt">;</span>
+    <span class="hl opt">}</span>
+    s<span class="hl opt">[</span>i<span class="hl opt">] =</span> <span class="hl str">&#39;\0&#39;</span><span class="hl opt">;</span>
+    <span class="hl kwa">return</span> i<span class="hl opt">;</span>
+<span class="hl opt">}</span>
 
-<span class="Type">int</span> main(<span class="Type">void</span>)
-{
-    <span class="Type">char</span> line[MAXLINE];
+<span class="hl kwb">int</span> <span class="hl kwd">main</span><span class="hl opt">(</span><span class="hl kwb">void</span><span class="hl opt">)</span>
+<span class="hl opt">{</span>
+    <span class="hl kwb">char</span> line<span class="hl opt">[</span>MAXLINE<span class="hl opt">];</span>
 
-    printf(<span class="Constant">&quot;&gt; &quot;</span>);
-    <span class="Statement">while</span> (scan(line, MAXLINE)) {
-        curr = line;
-        printf(<span class="Constant">&quot;= </span><span class="Special">%d</span><span class="Special">\n</span><span class="Constant">&gt; &quot;</span>, expr());
-    }
-    <span class="Statement">return</span> <span class="Constant">0</span>;
-}
+    <span class="hl kwd">printf</span><span class="hl opt">(</span><span class="hl str">&quot;&gt; &quot;</span><span class="hl opt">);</span>
+    <span class="hl kwa">while</span> <span class="hl opt">(</span><span class="hl kwd">scan</span><span class="hl opt">(</span>line<span class="hl opt">,</span> MAXLINE<span class="hl opt">)) {</span>
+        curr <span class="hl opt">=</span> line<span class="hl opt">;</span>
+        <span class="hl kwd">printf</span><span class="hl opt">(</span><span class="hl str">&quot;=</span> <span class="hl ipl">%d</span><span class="hl str"></span><span class="hl esc">\n</span><span class="hl str">&gt; &quot;</span><span class="hl opt">,</span> <span class="hl kwd">expr</span><span class="hl opt">());</span>
+    <span class="hl opt">}</span>
+    <span class="hl kwa">return</span> <span class="hl num">0</span><span class="hl opt">;</span>
+<span class="hl opt">}</span>
 </pre>
 </body>
 </html>
-<!-- vim: set foldmethod=manual : -->
+<!--HTML generated by highlight 3.62, http://www.andre-simon.de/-->

@@ -1,140 +1,118 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
-<html>
+<!DOCTYPE html>
+<html lang="en">
 <head>
-<meta http-equiv="content-type" content="text/html; charset=UTF-8">
-<title>~/Dropbox/workspace/web/codes/rsa.py.html</title>
-<meta name="Generator" content="Vim/8.0">
-<meta name="plugin-version" content="vim7.4_v2">
-<meta name="syntax" content="python">
-<meta name="settings" content="use_css,no_foldcolumn,expand_tabs,prevent_copy=">
-<meta name="colorscheme" content="none">
-<style type="text/css">
-<!--
-pre { font-family: monospace; color: #000000; background-color: #ffffff; }
-body { font-family: monospace; color: #000000; background-color: #ffffff; }
-* { font-size: 1em; }
-.PreProc { color: #c000c0; }
-.Comment { color: #0000c0; }
-.Constant { color: #c00000; }
-.Identifier { color: #008080; }
-.Statement { color: #af5f00; }
--->
-</style>
-
-<script type='text/javascript'>
-<!--
-
--->
-</script>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>rsa.py</title>
+<link rel="stylesheet" type="text/css" href="../highlight.css">
 </head>
-<body>
-<pre id='vimCodeElement'>
-<span class="Comment">#!/usr/bin/env python</span>
-<span class="Comment">#</span>
-<span class="Comment"># rsa.py</span>
-<span class="Comment">#</span>
-<span class="Comment"># Simple RSA cryptosystem implementation</span>
-<span class="Comment">#</span>
-<span class="Comment"># RSA is a common public key cryptosystem. Asymmetric property relies on the</span>
-<span class="Comment"># computational difficulty of factorization when a number is a product of two</span>
-<span class="Comment"># large prime numbers. Encryption and decryption is performed using modular</span>
-<span class="Comment"># exponentiation.</span>
-<span class="Comment">#</span>
-<span class="Comment"># Following numbers are computed during key generation:</span>
-<span class="Comment">#</span>
-<span class="Comment">#     n = pq where p and q are random large primes</span>
-<span class="Comment">#     t = lcm(p-1, q-1)</span>
-<span class="Comment">#     e is a random coprime of t</span>
-<span class="Comment">#     d is the modular inverse of e (mod t)</span>
-<span class="Comment">#</span>
-<span class="Comment"># With these numbers, following keys are provided:</span>
-<span class="Comment">#</span>
-<span class="Comment">#     (n, e) is the encryption key (public)</span>
-<span class="Comment">#     (n, d) is the decryption key (private)</span>
-<span class="Comment">#</span>
-<span class="Comment"># Using these keys, following operations are performed:</span>
-<span class="Comment">#</span>
-<span class="Comment">#     c = m^e (mod n) (encryption)</span>
-<span class="Comment">#     m = c^d (mod n) (decryption)</span>
-<span class="Comment">#</span>
-<span class="Comment"># Implementation given here is neither fast nor secure enough to be of any</span>
-<span class="Comment"># practical use besides educational purposes.</span>
+<body class="hl">
+<pre class="hl"><span class="hl slc">#!/usr/bin/env python</span>
+<span class="hl slc">#</span>
+<span class="hl slc"># rsa.py</span>
+<span class="hl slc">#</span>
+<span class="hl slc"># Simple RSA cryptosystem implementation</span>
+<span class="hl slc">#</span>
+<span class="hl slc"># RSA is a common public key cryptosystem. Asymmetric property relies on the</span>
+<span class="hl slc"># computational difficulty of factorization when a number is a product of two</span>
+<span class="hl slc"># large prime numbers. Encryption and decryption is performed using modular</span>
+<span class="hl slc"># exponentiation.</span>
+<span class="hl slc">#</span>
+<span class="hl slc"># Following numbers are computed during key generation:</span>
+<span class="hl slc">#</span>
+<span class="hl slc">#     n = pq where p and q are random large primes</span>
+<span class="hl slc">#     t = lcm(p-1, q-1)</span>
+<span class="hl slc">#     e is a random coprime of t</span>
+<span class="hl slc">#     d is the modular inverse of e (mod t)</span>
+<span class="hl slc">#</span>
+<span class="hl slc"># With these numbers, following keys are provided:</span>
+<span class="hl slc">#</span>
+<span class="hl slc">#     (n, e) is the encryption key (public)</span>
+<span class="hl slc">#     (n, d) is the decryption key (private)</span>
+<span class="hl slc">#</span>
+<span class="hl slc"># Using these keys, following operations are performed:</span>
+<span class="hl slc">#</span>
+<span class="hl slc">#     c = m^e (mod n) (encryption)</span>
+<span class="hl slc">#     m = c^d (mod n) (decryption)</span>
+<span class="hl slc">#</span>
+<span class="hl slc"># Implementation given here is neither fast nor secure enough to be of any</span>
+<span class="hl slc"># practical use besides educational purposes.</span>
 
-<span class="PreProc">import</span> math
-<span class="PreProc">import</span> random
+<span class="hl kwa">import</span> math
+<span class="hl kwa">import</span> random
 
-<span class="Statement">def</span> <span class="Identifier">is_prime</span>(n):
-    <span class="Statement">if</span> n &lt; <span class="Constant">2</span>:
-        <span class="Statement">return</span> <span class="Identifier">False</span>
-    <span class="Statement">for</span> i <span class="Statement">in</span> <span class="Identifier">xrange</span>(<span class="Constant">2</span>, <span class="Identifier">int</span>(math.sqrt(n)) + <span class="Constant">1</span>):
-        <span class="Statement">if</span> n % i == <span class="Constant">0</span>:
-            <span class="Statement">return</span> <span class="Identifier">False</span>
-    <span class="Statement">return</span> <span class="Identifier">True</span>
+<span class="hl kwa">def</span> <span class="hl kwd">is_prime</span><span class="hl opt">(</span>n<span class="hl opt">):</span>
+    <span class="hl kwa">if</span> n <span class="hl opt">&lt;</span> <span class="hl num">2</span><span class="hl opt">:</span>
+        <span class="hl kwa">return False</span>
+    <span class="hl kwa">for</span> i <span class="hl kwa">in</span> <span class="hl kwb">xrange</span><span class="hl opt">(</span><span class="hl num">2</span><span class="hl opt">,</span> <span class="hl kwb">int</span><span class="hl opt">(</span>math<span class="hl opt">.</span><span class="hl kwd">sqrt</span><span class="hl opt">(</span>n<span class="hl opt">)) +</span> <span class="hl num">1</span><span class="hl opt">):</span>
+        <span class="hl kwa">if</span> n <span class="hl opt">%</span> i <span class="hl opt">==</span> <span class="hl num">0</span><span class="hl opt">:</span>
+            <span class="hl kwa">return False</span>
+    <span class="hl kwa">return True</span>
 
-<span class="Statement">def</span> <span class="Identifier">gen_prime</span>(a, b):
-    r = random.randrange(a, b)
-    <span class="Statement">while</span> <span class="Statement">not</span> is_prime(r):
-        r = random.randrange(a, b)
-    <span class="Statement">return</span> r
+<span class="hl kwa">def</span> <span class="hl kwd">gen_prime</span><span class="hl opt">(</span>a<span class="hl opt">,</span> b<span class="hl opt">):</span>
+    r <span class="hl opt">=</span> random<span class="hl opt">.</span><span class="hl kwd">randrange</span><span class="hl opt">(</span>a<span class="hl opt">,</span> b<span class="hl opt">)</span>
+    <span class="hl kwa">while not</span> <span class="hl kwd">is_prime</span><span class="hl opt">(</span>r<span class="hl opt">):</span>
+        r <span class="hl opt">=</span> random<span class="hl opt">.</span><span class="hl kwd">randrange</span><span class="hl opt">(</span>a<span class="hl opt">,</span> b<span class="hl opt">)</span>
+    <span class="hl kwa">return</span> r
 
-<span class="Statement">def</span> <span class="Identifier">gcd</span>(a, b):
-    <span class="Statement">while</span> b:
-        a, b = b, a % b
-    <span class="Statement">return</span> a
+<span class="hl kwa">def</span> <span class="hl kwd">gcd</span><span class="hl opt">(</span>a<span class="hl opt">,</span> b<span class="hl opt">):</span>
+    <span class="hl kwa">while</span> b<span class="hl opt">:</span>
+        a<span class="hl opt">,</span> b <span class="hl opt">=</span> b<span class="hl opt">,</span> a <span class="hl opt">%</span> b
+    <span class="hl kwa">return</span> a
 
-<span class="Statement">def</span> <span class="Identifier">lcm</span>(a, b):
-    <span class="Statement">return</span> (a * b) / gcd(a, b)
+<span class="hl kwa">def</span> <span class="hl kwd">lcm</span><span class="hl opt">(</span>a<span class="hl opt">,</span> b<span class="hl opt">):</span>
+    <span class="hl kwa">return</span> <span class="hl opt">(</span>a <span class="hl opt">*</span> b<span class="hl opt">) /</span> <span class="hl kwd">gcd</span><span class="hl opt">(</span>a<span class="hl opt">,</span> b<span class="hl opt">)</span>
 
-<span class="Statement">def</span> <span class="Identifier">gen_coprime</span>(n):
-    r = random.randrange(<span class="Constant">2</span>, n)
-    <span class="Statement">while</span> gcd(n, r) != <span class="Constant">1</span>:
-        r = random.randrange(<span class="Constant">2</span>, n)
-    <span class="Statement">return</span> r
+<span class="hl kwa">def</span> <span class="hl kwd">gen_coprime</span><span class="hl opt">(</span>n<span class="hl opt">):</span>
+    r <span class="hl opt">=</span> random<span class="hl opt">.</span><span class="hl kwd">randrange</span><span class="hl opt">(</span><span class="hl num">2</span><span class="hl opt">,</span> n<span class="hl opt">)</span>
+    <span class="hl kwa">while</span> <span class="hl kwd">gcd</span><span class="hl opt">(</span>n<span class="hl opt">,</span> r<span class="hl opt">) !=</span> <span class="hl num">1</span><span class="hl opt">:</span>
+        r <span class="hl opt">=</span> random<span class="hl opt">.</span><span class="hl kwd">randrange</span><span class="hl opt">(</span><span class="hl num">2</span><span class="hl opt">,</span> n<span class="hl opt">)</span>
+    <span class="hl kwa">return</span> r
 
-<span class="Statement">def</span> <span class="Identifier">mod_inverse</span>(a, b):
-    r, r_old = a, b
-    x, x_old = <span class="Constant">1</span>, <span class="Constant">0</span>
-    <span class="Statement">while</span> r:
-        (q, r), r_old = <span class="Identifier">divmod</span>(r_old, r), r
-        x, x_old = x_old - q * x, x
-    <span class="Statement">return</span> x_old % b
+<span class="hl kwa">def</span> <span class="hl kwd">mod_inverse</span><span class="hl opt">(</span>a<span class="hl opt">,</span> b<span class="hl opt">):</span>
+    r<span class="hl opt">,</span> r_old <span class="hl opt">=</span> a<span class="hl opt">,</span> b
+    x<span class="hl opt">,</span> x_old <span class="hl opt">=</span> <span class="hl num">1</span><span class="hl opt">,</span> <span class="hl num">0</span>
+    <span class="hl kwa">while</span> r<span class="hl opt">:</span>
+        <span class="hl opt">(</span>q<span class="hl opt">,</span> r<span class="hl opt">),</span> r_old <span class="hl opt">=</span> <span class="hl kwb">divmod</span><span class="hl opt">(</span>r_old<span class="hl opt">,</span> r<span class="hl opt">),</span> r
+        x<span class="hl opt">,</span> x_old <span class="hl opt">=</span> x_old <span class="hl opt">-</span> q <span class="hl opt">*</span> x<span class="hl opt">,</span> x
+    <span class="hl kwa">return</span> x_old <span class="hl opt">%</span> b
 
-<span class="Statement">def</span> <span class="Identifier">number</span>(s):
-    <span class="Statement">return</span> <span class="Identifier">long</span>(s.encode(<span class="Constant">'</span><span class="Constant">hex</span><span class="Constant">'</span>), <span class="Constant">16</span>)
+<span class="hl kwa">def</span> <span class="hl kwd">number</span><span class="hl opt">(</span>s<span class="hl opt">):</span>
+    <span class="hl kwa">return</span> <span class="hl kwb">long</span><span class="hl opt">(</span>s<span class="hl opt">.</span><span class="hl kwd">encode</span><span class="hl opt">(</span><span class="hl str">&#39;hex&#39;</span><span class="hl opt">),</span> <span class="hl num">16</span><span class="hl opt">)</span>
 
-<span class="Statement">def</span> <span class="Identifier">string</span>(n):
-    <span class="Statement">return</span> <span class="Identifier">hex</span>(n).lstrip(<span class="Constant">'</span><span class="Constant">0x</span><span class="Constant">'</span>).rstrip(<span class="Constant">'</span><span class="Constant">L</span><span class="Constant">'</span>).decode(<span class="Constant">'</span><span class="Constant">hex</span><span class="Constant">'</span>)
+<span class="hl kwa">def</span> <span class="hl kwd">string</span><span class="hl opt">(</span>n<span class="hl opt">):</span>
+    <span class="hl kwa">return</span> <span class="hl kwb">hex</span><span class="hl opt">(</span>n<span class="hl opt">).</span><span class="hl kwd">lstrip</span><span class="hl opt">(</span><span class="hl str">&#39;0x&#39;</span><span class="hl opt">).</span><span class="hl kwd">rstrip</span><span class="hl opt">(</span><span class="hl str">&#39;L&#39;</span><span class="hl opt">).</span><span class="hl kwd">decode</span><span class="hl opt">(</span><span class="hl str">&#39;hex&#39;</span><span class="hl opt">)</span>
 
-<span class="Statement">def</span> <span class="Identifier">encrypt</span>(m, e, n):
-    <span class="Statement">return</span> <span class="Identifier">pow</span>(m, e, n)
+<span class="hl kwa">def</span> <span class="hl kwd">encrypt</span><span class="hl opt">(</span>m<span class="hl opt">,</span> e<span class="hl opt">,</span> n<span class="hl opt">):</span>
+    <span class="hl kwa">return</span> <span class="hl kwb">pow</span><span class="hl opt">(</span>m<span class="hl opt">,</span> e<span class="hl opt">,</span> n<span class="hl opt">)</span>
 
-<span class="Statement">def</span> <span class="Identifier">decrypt</span>(c, d, n):
-    <span class="Statement">return</span> <span class="Identifier">pow</span>(c, d, n)
+<span class="hl kwa">def</span> <span class="hl kwd">decrypt</span><span class="hl opt">(</span>c<span class="hl opt">,</span> d<span class="hl opt">,</span> n<span class="hl opt">):</span>
+    <span class="hl kwa">return</span> <span class="hl kwb">pow</span><span class="hl opt">(</span>c<span class="hl opt">,</span> d<span class="hl opt">,</span> n<span class="hl opt">)</span>
 
-p = gen_prime(<span class="Constant">1e12</span>, <span class="Constant">1e13</span>)
-q = gen_prime(<span class="Constant">1e14</span>, <span class="Constant">1e15</span>)
-n = p * q
-t = lcm(p-<span class="Constant">1</span>, q-<span class="Constant">1</span>)
-e = gen_coprime(t)
-d = mod_inverse(e, t)
+p <span class="hl opt">=</span> <span class="hl kwd">gen_prime</span><span class="hl opt">(</span><span class="hl num">1</span>e12<span class="hl opt">,</span> <span class="hl num">1</span>e13<span class="hl opt">)</span>
+q <span class="hl opt">=</span> <span class="hl kwd">gen_prime</span><span class="hl opt">(</span><span class="hl num">1</span>e14<span class="hl opt">,</span> <span class="hl num">1</span>e15<span class="hl opt">)</span>
+n <span class="hl opt">=</span> p <span class="hl opt">*</span> q
+t <span class="hl opt">=</span> <span class="hl kwd">lcm</span><span class="hl opt">(</span>p<span class="hl opt">-</span><span class="hl num">1</span><span class="hl opt">,</span> q<span class="hl opt">-</span><span class="hl num">1</span><span class="hl opt">)</span>
+e <span class="hl opt">=</span> <span class="hl kwd">gen_coprime</span><span class="hl opt">(</span>t<span class="hl opt">)</span>
+d <span class="hl opt">=</span> <span class="hl kwd">mod_inverse</span><span class="hl opt">(</span>e<span class="hl opt">,</span> t<span class="hl opt">)</span>
 
-<span class="Identifier">print</span> <span class="Constant">'</span><span class="Constant">p</span><span class="Constant">'</span>, p
-<span class="Identifier">print</span> <span class="Constant">'</span><span class="Constant">q</span><span class="Constant">'</span>, q
-<span class="Identifier">print</span> <span class="Constant">'</span><span class="Constant">n</span><span class="Constant">'</span>, n
-<span class="Identifier">print</span> <span class="Constant">'</span><span class="Constant">t</span><span class="Constant">'</span>, t
-<span class="Identifier">print</span> <span class="Constant">'</span><span class="Constant">e</span><span class="Constant">'</span>, e
-<span class="Identifier">print</span> <span class="Constant">'</span><span class="Constant">d</span><span class="Constant">'</span>, d
+<span class="hl kwa">print</span> <span class="hl str">&#39;p&#39;</span><span class="hl opt">,</span> p
+<span class="hl kwa">print</span> <span class="hl str">&#39;q&#39;</span><span class="hl opt">,</span> q
+<span class="hl kwa">print</span> <span class="hl str">&#39;n&#39;</span><span class="hl opt">,</span> n
+<span class="hl kwa">print</span> <span class="hl str">&#39;t&#39;</span><span class="hl opt">,</span> t
+<span class="hl kwa">print</span> <span class="hl str">&#39;e&#39;</span><span class="hl opt">,</span> e
+<span class="hl kwa">print</span> <span class="hl str">&#39;d&#39;</span><span class="hl opt">,</span> d
 
-<span class="Comment"># size of message should be less than size of n</span>
-<span class="Comment"># or you may need to divide the message into blocks</span>
-message = <span class="Constant">&quot;</span><span class="Constant">hello world</span><span class="Constant">&quot;</span>
+<span class="hl slc"># size of message should be less than size of n</span>
+<span class="hl slc"># or you may need to divide the message into blocks</span>
+message <span class="hl opt">=</span> <span class="hl str">&quot;hello world&quot;</span>
 
-<span class="Identifier">print</span> <span class="Constant">'</span><span class="Constant">m</span><span class="Constant">'</span>, message
-cipher = encrypt(number(message), e, n)
-<span class="Identifier">print</span> <span class="Constant">'</span><span class="Constant">c</span><span class="Constant">'</span>, cipher
-message = string(decrypt(cipher, d, n))
-<span class="Identifier">print</span> <span class="Constant">'</span><span class="Constant">m</span><span class="Constant">'</span>, message
+<span class="hl kwa">print</span> <span class="hl str">&#39;m&#39;</span><span class="hl opt">,</span> message
+cipher <span class="hl opt">=</span> <span class="hl kwd">encrypt</span><span class="hl opt">(</span><span class="hl kwd">number</span><span class="hl opt">(</span>message<span class="hl opt">),</span> e<span class="hl opt">,</span> n<span class="hl opt">)</span>
+<span class="hl kwa">print</span> <span class="hl str">&#39;c&#39;</span><span class="hl opt">,</span> cipher
+message <span class="hl opt">=</span> <span class="hl kwd">string</span><span class="hl opt">(</span><span class="hl kwd">decrypt</span><span class="hl opt">(</span>cipher<span class="hl opt">,</span> d<span class="hl opt">,</span> n<span class="hl opt">))</span>
+<span class="hl kwa">print</span> <span class="hl str">&#39;m&#39;</span><span class="hl opt">,</span> message
 </pre>
 </body>
 </html>
-<!-- vim: set foldmethod=manual : -->
+<!--HTML generated by highlight 3.62, http://www.andre-simon.de/-->

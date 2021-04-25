@@ -1,323 +1,301 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
-<html>
+<!DOCTYPE html>
+<html lang="en">
 <head>
-<meta http-equiv="content-type" content="text/html; charset=UTF-8">
-<title>~/Dropbox/workspace/web/codes/lisp.ml.html</title>
-<meta name="Generator" content="Vim/8.0">
-<meta name="plugin-version" content="vim7.4_v2">
-<meta name="syntax" content="ocaml">
-<meta name="settings" content="use_css,no_foldcolumn,expand_tabs,prevent_copy=">
-<meta name="colorscheme" content="none">
-<style type="text/css">
-<!--
-pre { font-family: monospace; color: #000000; background-color: #ffffff; }
-body { font-family: monospace; color: #000000; background-color: #ffffff; }
-* { font-size: 1em; }
-.PreProc { color: #c000c0; }
-.Type { color: #008000; }
-.Statement { color: #af5f00; }
-.Comment { color: #0000c0; }
-.Constant { color: #c00000; }
--->
-</style>
-
-<script type='text/javascript'>
-<!--
-
--->
-</script>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>lisp.ml</title>
+<link rel="stylesheet" type="text/css" href="../highlight.css">
 </head>
-<body>
-<pre id='vimCodeElement'>
-<span class="Comment">(*</span>
-<span class="Comment"> * lisp.ml</span>
-<span class="Comment"> *</span>
-<span class="Comment"> * Basic lisp evaluator</span>
-<span class="Comment"> *</span>
-<span class="Comment"> * You can compile this file with the following command:</span>
-<span class="Comment"> *</span>
-<span class="Comment"> *     ocamlc -I +camlp4 -pp camlp4o lisp.ml -o lisp</span>
-<span class="Comment"> *)</span>
+<body class="hl">
+<pre class="hl"><span class="hl com">(*</span>
+<span class="hl com"> * lisp.ml</span>
+<span class="hl com"> *</span>
+<span class="hl com"> * Basic lisp evaluator</span>
+<span class="hl com"> *</span>
+<span class="hl com"> * You can compile this file with the following command:</span>
+<span class="hl com"> *</span>
+<span class="hl com"> *     ocamlc -I +camlp4 -pp camlp4o lisp.ml -o lisp</span>
+<span class="hl com"> *)</span>
 
-<span class="Comment">(* Lex *)</span>
+<span class="hl com">(* Lex *)</span>
 
-<span class="Statement">module</span><span class="PreProc"> Tok</span> <span class="Statement">=</span>
-  <span class="PreProc">struct</span>
-    <span class="Statement">type</span> token <span class="Statement">=</span>
-      <span class="Statement">|</span> <span class="Constant">LPar</span>
-      <span class="Statement">|</span> <span class="Constant">RPar</span>
-      <span class="Statement">|</span> <span class="Constant">Def</span>
-      <span class="Statement">|</span> <span class="Constant">Lam</span>
-      <span class="Statement">|</span> <span class="Constant">If</span>
-      <span class="Statement">|</span> <span class="Constant">True</span>
-      <span class="Statement">|</span> <span class="Constant">False</span>
-      <span class="Statement">|</span> <span class="Constant">Num</span> <span class="Statement">of</span> <span class="Type">float</span>
-      <span class="Statement">|</span> <span class="Constant">Var</span> <span class="Statement">of</span> <span class="Type">string</span>
-  <span class="PreProc">end</span>
+<span class="hl kwa">module</span> Tok <span class="hl opt">=</span>
+  <span class="hl kwa">struct</span>
+    <span class="hl kwa">type</span> token <span class="hl opt">=</span>
+      <span class="hl opt">|</span> LPar
+      <span class="hl opt">|</span> RPar
+      <span class="hl opt">|</span> Def
+      <span class="hl opt">|</span> Lam
+      <span class="hl opt">|</span> If
+      <span class="hl opt">|</span> True
+      <span class="hl opt">|</span> False
+      <span class="hl opt">|</span> Num <span class="hl kwa">of</span> <span class="hl kwb">float</span>
+      <span class="hl opt">|</span> Var <span class="hl kwa">of</span> <span class="hl kwb">string</span>
+  <span class="hl kwa">end</span>
 
-<span class="Statement">let</span> <span class="Statement">rec</span> lex <span class="Statement">=</span> <span class="Statement">parser</span>
-  <span class="Statement">|</span> <span class="Statement">[</span><span class="Statement">&lt;</span> ' <span class="Statement">(</span><span class="Constant">' '</span> <span class="Statement">|</span> <span class="Constant">'\n'</span> <span class="Statement">|</span> <span class="Constant">'\r'</span> <span class="Statement">|</span> <span class="Constant">'\t'</span><span class="Statement">)</span><span class="Statement">;</span> stream <span class="Statement">&gt;</span><span class="Statement">]</span> <span class="Statement">-&gt;</span> lex stream
-  <span class="Statement">|</span> <span class="Statement">[</span><span class="Statement">&lt;</span> '<span class="Constant">'('</span><span class="Statement">;</span> stream <span class="Statement">&gt;</span><span class="Statement">]</span> <span class="Statement">-&gt;</span> <span class="Statement">[</span><span class="Statement">&lt;</span> '<span class="PreProc">Tok</span>.<span class="Constant">LPar</span><span class="Statement">;</span> lex stream <span class="Statement">&gt;</span><span class="Statement">]</span>
-  <span class="Statement">|</span> <span class="Statement">[</span><span class="Statement">&lt;</span> '<span class="Constant">')'</span><span class="Statement">;</span> stream <span class="Statement">&gt;</span><span class="Statement">]</span> <span class="Statement">-&gt;</span> <span class="Statement">[</span><span class="Statement">&lt;</span> '<span class="PreProc">Tok</span>.<span class="Constant">RPar</span><span class="Statement">;</span> lex stream <span class="Statement">&gt;</span><span class="Statement">]</span>
-  <span class="Statement">|</span> <span class="Statement">[</span><span class="Statement">&lt;</span> ' <span class="Statement">(</span><span class="Constant">'0'</span> .. <span class="Constant">'9'</span> <span class="Statement">as</span> c<span class="Statement">)</span><span class="Statement">;</span> stream <span class="Statement">&gt;</span><span class="Statement">]</span> <span class="Statement">-&gt;</span>
-    <span class="Statement">let</span> buffer <span class="Statement">=</span> <span class="PreProc">Buffer</span>.create <span class="Constant">1</span> <span class="Statement">in</span>
-    <span class="PreProc">Buffer</span>.add_char buffer c<span class="Statement">;</span>
-    lex_number buffer stream
-  <span class="Statement">|</span> <span class="Statement">[</span><span class="Statement">&lt;</span> 'c<span class="Statement">;</span> stream <span class="Statement">&gt;</span><span class="Statement">]</span> <span class="Statement">-&gt;</span>
-    <span class="Statement">let</span> buffer <span class="Statement">=</span> <span class="PreProc">Buffer</span>.create <span class="Constant">1</span> <span class="Statement">in</span>
-    <span class="PreProc">Buffer</span>.add_char buffer c<span class="Statement">;</span>
-    lex_item buffer stream
-  <span class="Statement">|</span> <span class="Constant">[&lt; &gt;]</span> <span class="Statement">-&gt;</span> <span class="Constant">[&lt; &gt;]</span>
+<span class="hl kwa">let rec</span> <span class="hl kwd">lex</span> <span class="hl opt">=</span> parser
+  <span class="hl opt">| [&lt;</span> &#39; <span class="hl opt">(</span>&#39; &#39; <span class="hl opt">|</span> &#39;<span class="hl esc">\n</span>&#39; <span class="hl opt">|</span> &#39;<span class="hl esc">\r</span>&#39; <span class="hl opt">|</span> &#39;<span class="hl esc">\t</span>&#39;<span class="hl opt">);</span> stream <span class="hl opt">&gt;] -&gt;</span> <span class="hl kwd">lex</span> stream
+  <span class="hl opt">| [&lt;</span> &#39;&#39;<span class="hl opt">(</span>&#39;<span class="hl opt">;</span> stream <span class="hl opt">&gt;] -&gt; [&lt;</span> &#39;<span class="hl kwc">Tok</span><span class="hl opt">.</span>LPar<span class="hl opt">;</span> <span class="hl kwd">lex</span> stream <span class="hl opt">&gt;]</span>
+  <span class="hl opt">| [&lt;</span> &#39;&#39;<span class="hl opt">)</span>&#39;<span class="hl opt">;</span> stream <span class="hl opt">&gt;] -&gt; [&lt;</span> &#39;<span class="hl kwc">Tok</span><span class="hl opt">.</span>RPar<span class="hl opt">;</span> <span class="hl kwd">lex</span> stream <span class="hl opt">&gt;]</span>
+  <span class="hl opt">| [&lt;</span> &#39; <span class="hl opt">(</span>&#39;<span class="hl num">0</span>&#39; <span class="hl opt">..</span> &#39;<span class="hl num">9</span>&#39; <span class="hl kwa">as</span> c<span class="hl opt">);</span> stream <span class="hl opt">&gt;] -&gt;</span>
+    <span class="hl kwa">let</span> <span class="hl kwd">buffer</span> <span class="hl opt">=</span> <span class="hl kwc">Buffer</span><span class="hl opt">.</span>create <span class="hl num">1</span> <span class="hl kwa">in</span>
+    <span class="hl kwc">Buffer</span><span class="hl opt">.</span>add_char <span class="hl kwd">buffer</span> c<span class="hl opt">;</span>
+    lex_number <span class="hl kwd">buffer</span> stream
+  <span class="hl opt">| [&lt;</span> &#39;c<span class="hl opt">;</span> stream <span class="hl opt">&gt;] -&gt;</span>
+    <span class="hl kwa">let</span> <span class="hl kwd">buffer</span> <span class="hl opt">=</span> <span class="hl kwc">Buffer</span><span class="hl opt">.</span>create <span class="hl num">1</span> <span class="hl kwa">in</span>
+    <span class="hl kwc">Buffer</span><span class="hl opt">.</span>add_char <span class="hl kwd">buffer</span> c<span class="hl opt">;</span>
+    lex_item <span class="hl kwd">buffer</span> stream
+  <span class="hl opt">| [&lt; &gt;] -&gt; [&lt; &gt;]</span>
 
-<span class="Statement">and</span> lex_number buffer <span class="Statement">=</span> <span class="Statement">parser</span>
-  <span class="Statement">|</span> <span class="Statement">[</span><span class="Statement">&lt;</span> ' <span class="Statement">(</span><span class="Constant">'0'</span> .. <span class="Constant">'9'</span> <span class="Statement">|</span> <span class="Constant">'.'</span> <span class="Statement">as</span> c<span class="Statement">)</span><span class="Statement">;</span> stream <span class="Statement">&gt;</span><span class="Statement">]</span> <span class="Statement">-&gt;</span>
-    <span class="PreProc">Buffer</span>.add_char buffer c<span class="Statement">;</span>
-    lex_number buffer stream
-  <span class="Statement">|</span> <span class="Statement">[</span><span class="Statement">&lt;</span> stream <span class="Statement">&gt;</span><span class="Statement">]</span> <span class="Statement">-&gt;</span>
-    <span class="Statement">let</span> contents <span class="Statement">=</span> <span class="PreProc">Buffer</span>.contents buffer <span class="Statement">in</span>
-    <span class="Statement">let</span> value <span class="Statement">=</span> float_of_string contents <span class="Statement">in</span>
-    <span class="Statement">let</span> token <span class="Statement">=</span> <span class="PreProc">Tok</span>.<span class="Constant">Num</span> value <span class="Statement">in</span>
-    <span class="Statement">[</span><span class="Statement">&lt;</span> 'token<span class="Statement">;</span> lex stream <span class="Statement">&gt;</span><span class="Statement">]</span>
+<span class="hl kwa">and</span> lex_number <span class="hl kwd">buffer</span> <span class="hl opt">=</span> parser
+  <span class="hl opt">| [&lt;</span> &#39; <span class="hl opt">(</span>&#39;<span class="hl num">0</span>&#39; <span class="hl opt">..</span> &#39;<span class="hl num">9</span>&#39; <span class="hl opt">|</span> &#39;<span class="hl opt">.</span>&#39; <span class="hl kwa">as</span> c<span class="hl opt">);</span> stream <span class="hl opt">&gt;] -&gt;</span>
+    <span class="hl kwc">Buffer</span><span class="hl opt">.</span>add_char <span class="hl kwd">buffer</span> c<span class="hl opt">;</span>
+    lex_number <span class="hl kwd">buffer</span> stream
+  <span class="hl opt">| [&lt;</span> stream <span class="hl opt">&gt;] -&gt;</span>
+    <span class="hl kwa">let</span> <span class="hl kwd">contents</span> <span class="hl opt">=</span> <span class="hl kwc">Buffer</span><span class="hl opt">.</span><span class="hl kwd">contents buffer</span> <span class="hl kwa">in</span>
+    <span class="hl kwa">let value</span> <span class="hl opt">=</span> float_of_string <span class="hl kwd">contents</span> <span class="hl kwa">in</span>
+    <span class="hl kwa">let</span> <span class="hl kwd">token</span> <span class="hl opt">=</span> <span class="hl kwc">Tok</span><span class="hl opt">.</span>Num <span class="hl kwa">value in</span>
+    <span class="hl opt">[&lt;</span> &#39;<span class="hl kwd">token</span><span class="hl opt">;</span> <span class="hl kwd">lex</span> stream <span class="hl opt">&gt;]</span>
 
-<span class="Statement">and</span> lex_item buffer <span class="Statement">=</span> <span class="Statement">parser</span>
-  <span class="Statement">|</span> <span class="Statement">[</span><span class="Statement">&lt;</span> ' <span class="Statement">(</span><span class="Constant">' '</span> <span class="Statement">|</span> <span class="Constant">'\n'</span> <span class="Statement">|</span> <span class="Constant">'\r'</span> <span class="Statement">|</span> <span class="Constant">'\t'</span><span class="Statement">)</span><span class="Statement">;</span> stream <span class="Statement">&gt;</span><span class="Statement">]</span> <span class="Statement">-&gt;</span>
-    <span class="Statement">[</span><span class="Statement">&lt;</span> 'identify buffer<span class="Statement">;</span> lex stream <span class="Statement">&gt;</span><span class="Statement">]</span>
-  <span class="Statement">|</span> <span class="Statement">[</span><span class="Statement">&lt;</span> '<span class="Constant">'('</span><span class="Statement">;</span> stream <span class="Statement">&gt;</span><span class="Statement">]</span> <span class="Statement">-&gt;</span> <span class="Statement">[</span><span class="Statement">&lt;</span> 'identify buffer<span class="Statement">;</span> '<span class="PreProc">Tok</span>.<span class="Constant">LPar</span><span class="Statement">;</span> lex stream <span class="Statement">&gt;</span><span class="Statement">]</span>
-  <span class="Statement">|</span> <span class="Statement">[</span><span class="Statement">&lt;</span> '<span class="Constant">')'</span><span class="Statement">;</span> stream <span class="Statement">&gt;</span><span class="Statement">]</span> <span class="Statement">-&gt;</span> <span class="Statement">[</span><span class="Statement">&lt;</span> 'identify buffer<span class="Statement">;</span> '<span class="PreProc">Tok</span>.<span class="Constant">RPar</span><span class="Statement">;</span> lex stream <span class="Statement">&gt;</span><span class="Statement">]</span>
-  <span class="Statement">|</span> <span class="Statement">[</span><span class="Statement">&lt;</span> 'c<span class="Statement">;</span> stream <span class="Statement">&gt;</span><span class="Statement">]</span> <span class="Statement">-&gt;</span>
-    <span class="PreProc">Buffer</span>.add_char buffer c<span class="Statement">;</span>
-    lex_item buffer stream
-  <span class="Statement">|</span> <span class="Constant">[&lt; &gt;]</span> <span class="Statement">-&gt;</span> <span class="Statement">[</span><span class="Statement">&lt;</span> 'identify buffer <span class="Statement">&gt;</span><span class="Statement">]</span>
+<span class="hl kwa">and</span> lex_item <span class="hl kwd">buffer</span> <span class="hl opt">=</span> parser
+  <span class="hl opt">| [&lt;</span> &#39; <span class="hl opt">(</span>&#39; &#39; <span class="hl opt">|</span> &#39;<span class="hl esc">\n</span>&#39; <span class="hl opt">|</span> &#39;<span class="hl esc">\r</span>&#39; <span class="hl opt">|</span> &#39;<span class="hl esc">\t</span>&#39;<span class="hl opt">);</span> stream <span class="hl opt">&gt;] -&gt;</span>
+    <span class="hl opt">[&lt;</span> &#39;identify <span class="hl kwd">buffer</span><span class="hl opt">;</span> <span class="hl kwd">lex</span> stream <span class="hl opt">&gt;]</span>
+  <span class="hl opt">| [&lt;</span> &#39;&#39;<span class="hl opt">(</span>&#39;<span class="hl opt">;</span> stream <span class="hl opt">&gt;] -&gt; [&lt;</span> &#39;identify <span class="hl kwd">buffer</span><span class="hl opt">;</span> &#39;<span class="hl kwc">Tok</span><span class="hl opt">.</span>LPar<span class="hl opt">;</span> <span class="hl kwd">lex</span> stream <span class="hl opt">&gt;]</span>
+  <span class="hl opt">| [&lt;</span> &#39;&#39;<span class="hl opt">)</span>&#39;<span class="hl opt">;</span> stream <span class="hl opt">&gt;] -&gt; [&lt;</span> &#39;identify <span class="hl kwd">buffer</span><span class="hl opt">;</span> &#39;<span class="hl kwc">Tok</span><span class="hl opt">.</span>RPar<span class="hl opt">;</span> <span class="hl kwd">lex</span> stream <span class="hl opt">&gt;]</span>
+  <span class="hl opt">| [&lt;</span> &#39;c<span class="hl opt">;</span> stream <span class="hl opt">&gt;] -&gt;</span>
+    <span class="hl kwc">Buffer</span><span class="hl opt">.</span>add_char <span class="hl kwd">buffer</span> c<span class="hl opt">;</span>
+    lex_item <span class="hl kwd">buffer</span> stream
+  <span class="hl opt">| [&lt; &gt;] -&gt; [&lt;</span> &#39;identify <span class="hl kwd">buffer</span> <span class="hl opt">&gt;]</span>
 
-<span class="Statement">and</span> identify buffer <span class="Statement">=</span>
-  <span class="Statement">let</span> contents <span class="Statement">=</span> <span class="PreProc">Buffer</span>.contents buffer <span class="Statement">in</span>
-  <span class="Statement">match</span> contents <span class="Statement">with</span>
-  <span class="Statement">|</span> <span class="Constant">&quot;define&quot;</span> <span class="Statement">-&gt;</span> <span class="PreProc">Tok</span>.<span class="Constant">Def</span>
-  <span class="Statement">|</span> <span class="Constant">&quot;lambda&quot;</span> <span class="Statement">-&gt;</span> <span class="PreProc">Tok</span>.<span class="Constant">Lam</span>
-  <span class="Statement">|</span> <span class="Constant">&quot;if&quot;</span> <span class="Statement">-&gt;</span> <span class="PreProc">Tok</span>.<span class="Constant">If</span>
-  <span class="Statement">|</span> <span class="Constant">&quot;#t&quot;</span> <span class="Statement">-&gt;</span> <span class="PreProc">Tok</span>.<span class="Constant">True</span>
-  <span class="Statement">|</span> <span class="Constant">&quot;#f&quot;</span> <span class="Statement">-&gt;</span> <span class="PreProc">Tok</span>.<span class="Constant">False</span>
-  <span class="Statement">|</span> contents <span class="Statement">-&gt;</span> <span class="PreProc">Tok</span>.<span class="Constant">Var</span> contents
+<span class="hl kwa">and</span> identify <span class="hl kwd">buffer</span> <span class="hl opt">=</span>
+  <span class="hl kwa">let</span> <span class="hl kwd">contents</span> <span class="hl opt">=</span> <span class="hl kwc">Buffer</span><span class="hl opt">.</span><span class="hl kwd">contents buffer</span> <span class="hl kwa">in</span>
+  <span class="hl kwa">match</span> <span class="hl kwd">contents</span> <span class="hl kwa">with</span>
+  <span class="hl opt">|</span> <span class="hl str">&quot;define&quot;</span> <span class="hl opt">-&gt;</span> <span class="hl kwc">Tok</span><span class="hl opt">.</span>Def
+  <span class="hl opt">|</span> <span class="hl str">&quot;lambda&quot;</span> <span class="hl opt">-&gt;</span> <span class="hl kwc">Tok</span><span class="hl opt">.</span>Lam
+  <span class="hl opt">|</span> <span class="hl str">&quot;if&quot;</span> <span class="hl opt">-&gt;</span> <span class="hl kwc">Tok</span><span class="hl opt">.</span>If
+  <span class="hl opt">|</span> <span class="hl str">&quot;#t&quot;</span> <span class="hl opt">-&gt;</span> <span class="hl kwc">Tok</span><span class="hl opt">.</span>True
+  <span class="hl opt">|</span> <span class="hl str">&quot;#f&quot;</span> <span class="hl opt">-&gt;</span> <span class="hl kwc">Tok</span><span class="hl opt">.</span>False
+  <span class="hl opt">|</span> <span class="hl kwd">contents</span> <span class="hl opt">-&gt;</span> <span class="hl kwc">Tok</span><span class="hl opt">.</span>Var <span class="hl kwd">contents</span>
 
-<span class="Statement">let</span> string_of_token <span class="Statement">=</span> <span class="Statement">function</span>
-  <span class="Statement">|</span> <span class="PreProc">Tok</span>.<span class="Constant">LPar</span> <span class="Statement">-&gt;</span> <span class="Constant">&quot;(&quot;</span>
-  <span class="Statement">|</span> <span class="PreProc">Tok</span>.<span class="Constant">RPar</span> <span class="Statement">-&gt;</span> <span class="Constant">&quot;)&quot;</span>
-  <span class="Statement">|</span> <span class="PreProc">Tok</span>.<span class="Constant">Def</span> <span class="Statement">-&gt;</span> <span class="Constant">&quot;define&quot;</span>
-  <span class="Statement">|</span> <span class="PreProc">Tok</span>.<span class="Constant">Lam</span> <span class="Statement">-&gt;</span> <span class="Constant">&quot;lambda&quot;</span>
-  <span class="Statement">|</span> <span class="PreProc">Tok</span>.<span class="Constant">If</span> <span class="Statement">-&gt;</span> <span class="Constant">&quot;if&quot;</span>
-  <span class="Statement">|</span> <span class="PreProc">Tok</span>.<span class="Constant">True</span> <span class="Statement">-&gt;</span> <span class="Constant">&quot;#t&quot;</span>
-  <span class="Statement">|</span> <span class="PreProc">Tok</span>.<span class="Constant">False</span> <span class="Statement">-&gt;</span> <span class="Constant">&quot;#f&quot;</span>
-  <span class="Statement">|</span> <span class="PreProc">Tok</span>.<span class="Constant">Num</span> num <span class="Statement">-&gt;</span> string_of_float num
-  <span class="Statement">|</span> <span class="PreProc">Tok</span>.<span class="Constant">Var</span> var <span class="Statement">-&gt;</span> var
+<span class="hl kwa">let</span> <span class="hl kwd">string_of_token</span> <span class="hl opt">=</span> <span class="hl kwa">function</span>
+  <span class="hl opt">|</span> <span class="hl kwc">Tok</span><span class="hl opt">.</span>LPar <span class="hl opt">-&gt;</span> <span class="hl str">&quot;(&quot;</span>
+  <span class="hl opt">|</span> <span class="hl kwc">Tok</span><span class="hl opt">.</span>RPar <span class="hl opt">-&gt;</span> <span class="hl str">&quot;)&quot;</span>
+  <span class="hl opt">|</span> <span class="hl kwc">Tok</span><span class="hl opt">.</span>Def <span class="hl opt">-&gt;</span> <span class="hl str">&quot;define&quot;</span>
+  <span class="hl opt">|</span> <span class="hl kwc">Tok</span><span class="hl opt">.</span>Lam <span class="hl opt">-&gt;</span> <span class="hl str">&quot;lambda&quot;</span>
+  <span class="hl opt">|</span> <span class="hl kwc">Tok</span><span class="hl opt">.</span>If <span class="hl opt">-&gt;</span> <span class="hl str">&quot;if&quot;</span>
+  <span class="hl opt">|</span> <span class="hl kwc">Tok</span><span class="hl opt">.</span>True <span class="hl opt">-&gt;</span> <span class="hl str">&quot;#t&quot;</span>
+  <span class="hl opt">|</span> <span class="hl kwc">Tok</span><span class="hl opt">.</span>False <span class="hl opt">-&gt;</span> <span class="hl str">&quot;#f&quot;</span>
+  <span class="hl opt">|</span> <span class="hl kwc">Tok</span><span class="hl opt">.</span>Num num <span class="hl opt">-&gt;</span> string_of_float num
+  <span class="hl opt">|</span> <span class="hl kwc">Tok</span><span class="hl opt">.</span>Var var <span class="hl opt">-&gt;</span> var
 
-<span class="Statement">let</span> print_token token <span class="Statement">=</span> token <span class="Statement">|</span><span class="Statement">&gt;</span> string_of_token <span class="Statement">|</span><span class="Statement">&gt;</span> print_endline
+<span class="hl kwa">let</span> <span class="hl kwd">print_token token</span> <span class="hl opt">=</span> <span class="hl kwd">token</span> <span class="hl opt">|&gt;</span> <span class="hl kwd">string_of_token</span> <span class="hl opt">|&gt;</span> print_endline
 
-<span class="Comment">(* Parse *)</span>
+<span class="hl com">(* Parse *)</span>
 
-<span class="Statement">module</span><span class="PreProc"> Exp</span> <span class="Statement">=</span> <span class="PreProc">struct</span>
-  <span class="Statement">type</span> expr <span class="Statement">=</span>
-    <span class="Statement">|</span> <span class="Constant">Nil</span>
-    <span class="Statement">|</span> <span class="Constant">Bool</span> <span class="Statement">of</span> <span class="Type">bool</span>
-    <span class="Statement">|</span> <span class="Constant">Num</span> <span class="Statement">of</span> <span class="Type">float</span>
-    <span class="Statement">|</span> <span class="Constant">Var</span> <span class="Statement">of</span> <span class="Type">string</span>
-    <span class="Statement">|</span> <span class="Constant">Cond</span> <span class="Statement">of</span> expr <span class="Statement">*</span> expr <span class="Statement">*</span> expr
-    <span class="Statement">|</span> <span class="Constant">Def</span> <span class="Statement">of</span> expr <span class="Statement">*</span> expr
-    <span class="Statement">|</span> <span class="Constant">Lam</span> <span class="Statement">of</span> expr <span class="Type">list</span> <span class="Statement">*</span> expr
-    <span class="Statement">|</span> <span class="Constant">Blt</span> <span class="Statement">of</span> <span class="Statement">(</span>expr <span class="Type">list</span> <span class="Statement">-&gt;</span> expr<span class="Statement">)</span>
-    <span class="Statement">|</span> <span class="Constant">App</span> <span class="Statement">of</span> expr <span class="Statement">*</span> expr <span class="Type">list</span>
-<span class="PreProc">end</span>
+<span class="hl kwa">module</span> Exp <span class="hl opt">=</span> <span class="hl kwa">struct</span>
+  <span class="hl kwa">type</span> expr <span class="hl opt">=</span>
+    <span class="hl opt">|</span> Nil
+    <span class="hl opt">|</span> Bool <span class="hl kwa">of</span> <span class="hl kwb">bool</span>
+    <span class="hl opt">|</span> Num <span class="hl kwa">of</span> <span class="hl kwb">float</span>
+    <span class="hl opt">|</span> Var <span class="hl kwa">of</span> <span class="hl kwb">string</span>
+    <span class="hl opt">|</span> Cond <span class="hl kwa">of</span> expr <span class="hl opt">*</span> expr <span class="hl opt">*</span> expr
+    <span class="hl opt">|</span> Def <span class="hl kwa">of</span> expr <span class="hl opt">*</span> expr
+    <span class="hl opt">|</span> Lam <span class="hl kwa">of</span> expr list <span class="hl opt">*</span> expr
+    <span class="hl opt">|</span> Blt <span class="hl kwa">of</span> <span class="hl opt">(</span>expr list <span class="hl opt">-&gt;</span> expr<span class="hl opt">)</span>
+    <span class="hl opt">|</span> App <span class="hl kwa">of</span> expr <span class="hl opt">*</span> expr list
+<span class="hl kwa">end</span>
 
-<span class="Statement">let</span> <span class="Statement">rec</span> parse <span class="Statement">=</span> <span class="Statement">parser</span>
-  <span class="Statement">|</span> <span class="Statement">[</span><span class="Statement">&lt;</span> expr<span class="Statement">=</span>parse_expr<span class="Statement">;</span> stream <span class="Statement">&gt;</span><span class="Statement">]</span> <span class="Statement">-&gt;</span>
-    print_string <span class="Constant">&quot;-&gt; &quot;</span><span class="Statement">;</span> flush stdout<span class="Statement">;</span>
-    <span class="Statement">[</span><span class="Statement">&lt;</span> 'expr<span class="Statement">;</span> parse stream <span class="Statement">&gt;</span><span class="Statement">]</span>
-  <span class="Statement">|</span> <span class="Constant">[&lt; &gt;]</span> <span class="Statement">-&gt;</span> <span class="Constant">[&lt; &gt;]</span>
+<span class="hl kwa">let rec</span> <span class="hl kwd">parse</span> <span class="hl opt">=</span> parser
+  <span class="hl opt">| [&lt;</span> expr<span class="hl opt">=</span><span class="hl kwd">parse_expr</span><span class="hl opt">;</span> stream <span class="hl opt">&gt;] -&gt;</span>
+    print_string <span class="hl str">&quot;-&gt; &quot;</span><span class="hl opt">;</span> flush stdout<span class="hl opt">;</span>
+    <span class="hl opt">[&lt;</span> &#39;expr<span class="hl opt">;</span> <span class="hl kwd">parse</span> stream <span class="hl opt">&gt;]</span>
+  <span class="hl opt">| [&lt; &gt;] -&gt; [&lt; &gt;]</span>
 
-<span class="Statement">and</span> parse_expr <span class="Statement">=</span> <span class="Statement">parser</span>
-  <span class="Statement">|</span> <span class="Statement">[</span><span class="Statement">&lt;</span> '<span class="PreProc">Tok</span>.<span class="Constant">LPar</span><span class="Statement">;</span> stream <span class="Statement">&gt;</span><span class="Statement">]</span> <span class="Statement">-&gt;</span> parse_list stream
-  <span class="Statement">|</span> <span class="Statement">[</span><span class="Statement">&lt;</span> '<span class="PreProc">Tok</span>.<span class="Constant">True</span><span class="Statement">;</span> <span class="Statement">_</span> <span class="Statement">&gt;</span><span class="Statement">]</span> <span class="Statement">-&gt;</span> <span class="PreProc">Exp</span>.<span class="Constant">Bool</span> <span class="Constant">true</span>
-  <span class="Statement">|</span> <span class="Statement">[</span><span class="Statement">&lt;</span> '<span class="PreProc">Tok</span>.<span class="Constant">False</span><span class="Statement">;</span> <span class="Statement">_</span> <span class="Statement">&gt;</span><span class="Statement">]</span> <span class="Statement">-&gt;</span> <span class="PreProc">Exp</span>.<span class="Constant">Bool</span> <span class="Constant">false</span>
-  <span class="Statement">|</span> <span class="Statement">[</span><span class="Statement">&lt;</span> '<span class="PreProc">Tok</span>.<span class="Constant">Num</span> num<span class="Statement">;</span> <span class="Statement">_</span> <span class="Statement">&gt;</span><span class="Statement">]</span> <span class="Statement">-&gt;</span> <span class="PreProc">Exp</span>.<span class="Constant">Num</span> num
-  <span class="Statement">|</span> <span class="Statement">[</span><span class="Statement">&lt;</span> '<span class="PreProc">Tok</span>.<span class="Constant">Var</span> var<span class="Statement">;</span> <span class="Statement">_</span> <span class="Statement">&gt;</span><span class="Statement">]</span> <span class="Statement">-&gt;</span> <span class="PreProc">Exp</span>.<span class="Constant">Var</span> var
+<span class="hl kwa">and</span> <span class="hl kwd">parse_expr</span> <span class="hl opt">=</span> parser
+  <span class="hl opt">| [&lt;</span> &#39;<span class="hl kwc">Tok</span><span class="hl opt">.</span>LPar<span class="hl opt">;</span> stream <span class="hl opt">&gt;] -&gt;</span> parse_list stream
+  <span class="hl opt">| [&lt;</span> &#39;<span class="hl kwc">Tok</span><span class="hl opt">.</span>True<span class="hl opt">;</span> _ <span class="hl opt">&gt;] -&gt;</span> <span class="hl kwc">Exp</span><span class="hl opt">.</span>Bool <span class="hl kwa">true</span>
+  <span class="hl opt">| [&lt;</span> &#39;<span class="hl kwc">Tok</span><span class="hl opt">.</span>False<span class="hl opt">;</span> _ <span class="hl opt">&gt;] -&gt;</span> <span class="hl kwc">Exp</span><span class="hl opt">.</span>Bool <span class="hl kwa">false</span>
+  <span class="hl opt">| [&lt;</span> &#39;<span class="hl kwc">Tok</span><span class="hl opt">.</span>Num num<span class="hl opt">;</span> _ <span class="hl opt">&gt;] -&gt;</span> <span class="hl kwc">Exp</span><span class="hl opt">.</span>Num num
+  <span class="hl opt">| [&lt;</span> &#39;<span class="hl kwc">Tok</span><span class="hl opt">.</span>Var var<span class="hl opt">;</span> _ <span class="hl opt">&gt;] -&gt;</span> <span class="hl kwc">Exp</span><span class="hl opt">.</span>Var var
 
-<span class="Statement">and</span> parse_list <span class="Statement">=</span> <span class="Statement">parser</span>
-  <span class="Statement">|</span> <span class="Statement">[</span><span class="Statement">&lt;</span> '<span class="PreProc">Tok</span>.<span class="Constant">RPar</span><span class="Statement">;</span> <span class="Statement">_</span> <span class="Statement">&gt;</span><span class="Statement">]</span> <span class="Statement">-&gt;</span> <span class="PreProc">Exp</span>.<span class="Constant">Nil</span>
-  <span class="Statement">|</span> <span class="Statement">[</span><span class="Statement">&lt;</span> '<span class="PreProc">Tok</span>.<span class="Constant">If</span><span class="Statement">;</span>
-       con<span class="Statement">=</span>parse_expr<span class="Statement">;</span>
-       expr1<span class="Statement">=</span>parse_expr<span class="Statement">;</span>
-       expr2<span class="Statement">=</span>parse_expr<span class="Statement">;</span>
-       '<span class="PreProc">Tok</span>.<span class="Constant">RPar</span><span class="Statement">;</span> <span class="Statement">_</span> <span class="Statement">&gt;</span><span class="Statement">]</span> <span class="Statement">-&gt;</span> <span class="PreProc">Exp</span>.<span class="Constant">Cond</span> <span class="Statement">(</span>con, expr1, expr2<span class="Statement">)</span>
-  <span class="Statement">|</span> <span class="Statement">[</span><span class="Statement">&lt;</span> '<span class="PreProc">Tok</span>.<span class="Constant">Def</span><span class="Statement">;</span> <span class="Statement">(</span>var, expr<span class="Statement">)</span><span class="Statement">=</span>parse_def<span class="Statement">;</span> '<span class="PreProc">Tok</span>.<span class="Constant">RPar</span><span class="Statement">;</span> <span class="Statement">_</span> <span class="Statement">&gt;</span><span class="Statement">]</span> <span class="Statement">-&gt;</span> <span class="PreProc">Exp</span>.<span class="Constant">Def</span> <span class="Statement">(</span>var, expr<span class="Statement">)</span>
-  <span class="Statement">|</span> <span class="Statement">[</span><span class="Statement">&lt;</span> '<span class="PreProc">Tok</span>.<span class="Constant">Lam</span><span class="Statement">;</span>
-       '<span class="PreProc">Tok</span>.<span class="Constant">LPar</span><span class="Statement">;</span>
-       args<span class="Statement">=</span>parse_args <span class="Constant">[]</span><span class="Statement">;</span>
-       expr<span class="Statement">=</span>parse_expr<span class="Statement">;</span>
-       '<span class="PreProc">Tok</span>.<span class="Constant">RPar</span><span class="Statement">;</span> <span class="Statement">_</span> <span class="Statement">&gt;</span><span class="Statement">]</span> <span class="Statement">-&gt;</span> <span class="PreProc">Exp</span>.<span class="Constant">Lam</span> <span class="Statement">(</span>args, expr<span class="Statement">)</span>
-  <span class="Statement">|</span> <span class="Statement">[</span><span class="Statement">&lt;</span> func<span class="Statement">=</span>parse_expr<span class="Statement">;</span> args<span class="Statement">=</span>parse_args <span class="Constant">[]</span><span class="Statement">;</span> <span class="Statement">_</span> <span class="Statement">&gt;</span><span class="Statement">]</span> <span class="Statement">-&gt;</span> <span class="PreProc">Exp</span>.<span class="Constant">App</span> <span class="Statement">(</span>func, args<span class="Statement">)</span>
+<span class="hl kwa">and</span> parse_list <span class="hl opt">=</span> parser
+  <span class="hl opt">| [&lt;</span> &#39;<span class="hl kwc">Tok</span><span class="hl opt">.</span>RPar<span class="hl opt">;</span> _ <span class="hl opt">&gt;] -&gt;</span> <span class="hl kwc">Exp</span><span class="hl opt">.</span>Nil
+  <span class="hl opt">| [&lt;</span> &#39;<span class="hl kwc">Tok</span><span class="hl opt">.</span>If<span class="hl opt">;</span>
+       con<span class="hl opt">=</span><span class="hl kwd">parse_expr</span><span class="hl opt">;</span>
+       expr1<span class="hl opt">=</span><span class="hl kwd">parse_expr</span><span class="hl opt">;</span>
+       expr2<span class="hl opt">=</span><span class="hl kwd">parse_expr</span><span class="hl opt">;</span>
+       &#39;<span class="hl kwc">Tok</span><span class="hl opt">.</span>RPar<span class="hl opt">;</span> _ <span class="hl opt">&gt;] -&gt;</span> <span class="hl kwc">Exp</span><span class="hl opt">.</span>Cond <span class="hl opt">(</span>con<span class="hl opt">,</span> expr1<span class="hl opt">,</span> expr2<span class="hl opt">)</span>
+  <span class="hl opt">| [&lt;</span> &#39;<span class="hl kwc">Tok</span><span class="hl opt">.</span>Def<span class="hl opt">; (</span>var<span class="hl opt">,</span> expr<span class="hl opt">)=</span>parse_def<span class="hl opt">;</span> &#39;<span class="hl kwc">Tok</span><span class="hl opt">.</span>RPar<span class="hl opt">;</span> _ <span class="hl opt">&gt;] -&gt;</span> <span class="hl kwc">Exp</span><span class="hl opt">.</span>Def <span class="hl opt">(</span>var<span class="hl opt">,</span> expr<span class="hl opt">)</span>
+  <span class="hl opt">| [&lt;</span> &#39;<span class="hl kwc">Tok</span><span class="hl opt">.</span>Lam<span class="hl opt">;</span>
+       &#39;<span class="hl kwc">Tok</span><span class="hl opt">.</span>LPar<span class="hl opt">;</span>
+       args<span class="hl opt">=</span>parse_args <span class="hl opt">[];</span>
+       expr<span class="hl opt">=</span><span class="hl kwd">parse_expr</span><span class="hl opt">;</span>
+       &#39;<span class="hl kwc">Tok</span><span class="hl opt">.</span>RPar<span class="hl opt">;</span> _ <span class="hl opt">&gt;] -&gt;</span> <span class="hl kwc">Exp</span><span class="hl opt">.</span>Lam <span class="hl opt">(</span>args<span class="hl opt">,</span> expr<span class="hl opt">)</span>
+  <span class="hl opt">| [&lt;</span> func<span class="hl opt">=</span><span class="hl kwd">parse_expr</span><span class="hl opt">;</span> args<span class="hl opt">=</span>parse_args <span class="hl opt">[];</span> _ <span class="hl opt">&gt;] -&gt;</span> <span class="hl kwc">Exp</span><span class="hl opt">.</span>App <span class="hl opt">(</span>func<span class="hl opt">,</span> args<span class="hl opt">)</span>
 
-<span class="Statement">and</span> parse_def <span class="Statement">=</span> <span class="Statement">parser</span>
-  <span class="Statement">|</span> <span class="Statement">[</span><span class="Statement">&lt;</span> '<span class="PreProc">Tok</span>.<span class="Constant">LPar</span><span class="Statement">;</span>
-       var<span class="Statement">=</span>parse_expr<span class="Statement">;</span>
-       args<span class="Statement">=</span>parse_args <span class="Constant">[]</span><span class="Statement">;</span>
-       expr<span class="Statement">=</span>parse_expr<span class="Statement">;</span> <span class="Statement">_</span> <span class="Statement">&gt;</span><span class="Statement">]</span> <span class="Statement">-&gt;</span> <span class="Statement">(</span>var, <span class="PreProc">Exp</span>.<span class="Constant">Lam</span> <span class="Statement">(</span>args, expr<span class="Statement">))</span>
-  <span class="Statement">|</span> <span class="Statement">[</span><span class="Statement">&lt;</span> var<span class="Statement">=</span>parse_expr<span class="Statement">;</span> expr<span class="Statement">=</span>parse_expr<span class="Statement">;</span> <span class="Statement">_</span> <span class="Statement">&gt;</span><span class="Statement">]</span> <span class="Statement">-&gt;</span> <span class="Statement">(</span>var, expr<span class="Statement">)</span>
+<span class="hl kwa">and</span> parse_def <span class="hl opt">=</span> parser
+  <span class="hl opt">| [&lt;</span> &#39;<span class="hl kwc">Tok</span><span class="hl opt">.</span>LPar<span class="hl opt">;</span>
+       var<span class="hl opt">=</span><span class="hl kwd">parse_expr</span><span class="hl opt">;</span>
+       args<span class="hl opt">=</span>parse_args <span class="hl opt">[];</span>
+       expr<span class="hl opt">=</span><span class="hl kwd">parse_expr</span><span class="hl opt">;</span> _ <span class="hl opt">&gt;] -&gt; (</span>var<span class="hl opt">,</span> <span class="hl kwc">Exp</span><span class="hl opt">.</span>Lam <span class="hl opt">(</span>args<span class="hl opt">,</span> expr<span class="hl opt">))</span>
+  <span class="hl opt">| [&lt;</span> var<span class="hl opt">=</span><span class="hl kwd">parse_expr</span><span class="hl opt">;</span> expr<span class="hl opt">=</span><span class="hl kwd">parse_expr</span><span class="hl opt">;</span> _ <span class="hl opt">&gt;] -&gt; (</span>var<span class="hl opt">,</span> expr<span class="hl opt">)</span>
 
-<span class="Statement">and</span> parse_args acc <span class="Statement">=</span> <span class="Statement">parser</span>
-  <span class="Statement">|</span> <span class="Statement">[</span><span class="Statement">&lt;</span> '<span class="PreProc">Tok</span>.<span class="Constant">RPar</span><span class="Statement">;</span> <span class="Statement">_</span> <span class="Statement">&gt;</span><span class="Statement">]</span> <span class="Statement">-&gt;</span> <span class="PreProc">List</span>.rev acc
-  <span class="Statement">|</span> <span class="Statement">[</span><span class="Statement">&lt;</span> arg<span class="Statement">=</span>parse_expr<span class="Statement">;</span> stream <span class="Statement">&gt;</span><span class="Statement">]</span> <span class="Statement">-&gt;</span> parse_args <span class="Statement">(</span>arg <span class="Statement">::</span> acc<span class="Statement">)</span> stream
+<span class="hl kwa">and</span> parse_args acc <span class="hl opt">=</span> parser
+  <span class="hl opt">| [&lt;</span> &#39;<span class="hl kwc">Tok</span><span class="hl opt">.</span>RPar<span class="hl opt">;</span> _ <span class="hl opt">&gt;] -&gt;</span> <span class="hl kwc">List</span><span class="hl opt">.</span>rev acc
+  <span class="hl opt">| [&lt;</span> arg<span class="hl opt">=</span><span class="hl kwd">parse_expr</span><span class="hl opt">;</span> stream <span class="hl opt">&gt;] -&gt;</span> parse_args <span class="hl opt">(</span>arg <span class="hl opt">::</span> acc<span class="hl opt">)</span> stream
 
-<span class="Statement">let</span> <span class="Statement">rec</span> string_of_expr <span class="Statement">=</span> <span class="Statement">function</span>
-  <span class="Statement">|</span> <span class="PreProc">Exp</span>.<span class="Constant">Nil</span> <span class="Statement">-&gt;</span> <span class="Constant">&quot;nil&quot;</span>
-  <span class="Statement">|</span> <span class="PreProc">Exp</span>.<span class="Constant">Num</span> num <span class="Statement">-&gt;</span> string_of_float num
-  <span class="Statement">|</span> <span class="PreProc">Exp</span>.<span class="Constant">Var</span> var <span class="Statement">-&gt;</span> var
-  <span class="Statement">|</span> <span class="PreProc">Exp</span>.<span class="Constant">Bool</span> <span class="Constant">true</span> <span class="Statement">-&gt;</span> <span class="Constant">&quot;#t&quot;</span>
-  <span class="Statement">|</span> <span class="PreProc">Exp</span>.<span class="Constant">Bool</span> <span class="Constant">false</span> <span class="Statement">-&gt;</span> <span class="Constant">&quot;#f&quot;</span>
-  <span class="Statement">|</span> <span class="PreProc">Exp</span>.<span class="Constant">Cond</span> <span class="Statement">(</span>con, expr1, expr2<span class="Statement">)</span> <span class="Statement">-&gt;</span>
-    <span class="Statement">let</span> con <span class="Statement">=</span> string_of_expr con <span class="Statement">in</span>
-    <span class="Statement">let</span> expr1 <span class="Statement">=</span> string_of_expr expr1 <span class="Statement">in</span>
-    <span class="Statement">let</span> expr2 <span class="Statement">=</span> string_of_expr expr2 <span class="Statement">in</span>
-    <span class="Constant">&quot;(if &quot;</span> <span class="Statement">^</span> con <span class="Statement">^</span> <span class="Constant">&quot; &quot;</span> <span class="Statement">^</span> expr1 <span class="Statement">^</span> <span class="Constant">&quot; &quot;</span> <span class="Statement">^</span> expr2 <span class="Statement">^</span> <span class="Constant">&quot;)&quot;</span>
-  <span class="Statement">|</span> <span class="PreProc">Exp</span>.<span class="Constant">Def</span> <span class="Statement">(</span>var, expr<span class="Statement">)</span> <span class="Statement">-&gt;</span>
-    <span class="Statement">let</span> var <span class="Statement">=</span> string_of_expr var <span class="Statement">in</span>
-    <span class="Statement">let</span> expr <span class="Statement">=</span> string_of_expr expr <span class="Statement">in</span>
-    <span class="Constant">&quot;(define &quot;</span> <span class="Statement">^</span> var <span class="Statement">^</span> <span class="Constant">&quot; &quot;</span> <span class="Statement">^</span> expr <span class="Statement">^</span> <span class="Constant">&quot;)&quot;</span>
-  <span class="Statement">|</span> <span class="PreProc">Exp</span>.<span class="Constant">Lam</span> <span class="Statement">(</span>args, expr<span class="Statement">)</span> <span class="Statement">-&gt;</span>
-    <span class="Statement">let</span> args <span class="Statement">=</span> args <span class="Statement">|</span><span class="Statement">&gt;</span> <span class="PreProc">List</span>.map string_of_expr <span class="Statement">|</span><span class="Statement">&gt;</span> <span class="PreProc">String</span>.concat <span class="Constant">&quot; &quot;</span> <span class="Statement">in</span>
-    <span class="Statement">let</span> expr <span class="Statement">=</span> string_of_expr expr <span class="Statement">in</span>
-    <span class="Constant">&quot;(lambda (&quot;</span> <span class="Statement">^</span> args <span class="Statement">^</span> <span class="Constant">&quot;) &quot;</span> <span class="Statement">^</span> expr <span class="Statement">^</span> <span class="Constant">&quot;)&quot;</span>
-  <span class="Statement">|</span> <span class="PreProc">Exp</span>.<span class="Constant">App</span> <span class="Statement">(</span>func, args<span class="Statement">)</span> <span class="Statement">-&gt;</span>
-    <span class="Statement">let</span> func <span class="Statement">=</span> string_of_expr func <span class="Statement">in</span>
-    <span class="Statement">let</span> args <span class="Statement">=</span> args <span class="Statement">|</span><span class="Statement">&gt;</span> <span class="PreProc">List</span>.map string_of_expr <span class="Statement">|</span><span class="Statement">&gt;</span> <span class="PreProc">String</span>.concat <span class="Constant">&quot; &quot;</span> <span class="Statement">in</span>
-    <span class="Constant">&quot;(&quot;</span> <span class="Statement">^</span> func <span class="Statement">^</span> <span class="Constant">&quot; &quot;</span> <span class="Statement">^</span> args <span class="Statement">^</span> <span class="Constant">&quot;)&quot;</span>
-  <span class="Statement">|</span> <span class="PreProc">Exp</span>.<span class="Constant">Blt</span> blt <span class="Statement">-&gt;</span> <span class="Statement">assert</span> <span class="Constant">false</span>
+<span class="hl kwa">let rec</span> <span class="hl kwd">string_of_expr</span> <span class="hl opt">=</span> <span class="hl kwa">function</span>
+  <span class="hl opt">|</span> <span class="hl kwc">Exp</span><span class="hl opt">.</span>Nil <span class="hl opt">-&gt;</span> <span class="hl str">&quot;nil&quot;</span>
+  <span class="hl opt">|</span> <span class="hl kwc">Exp</span><span class="hl opt">.</span>Num num <span class="hl opt">-&gt;</span> string_of_float num
+  <span class="hl opt">|</span> <span class="hl kwc">Exp</span><span class="hl opt">.</span>Var var <span class="hl opt">-&gt;</span> var
+  <span class="hl opt">|</span> <span class="hl kwc">Exp</span><span class="hl opt">.</span>Bool <span class="hl kwa">true</span> <span class="hl opt">-&gt;</span> <span class="hl str">&quot;#t&quot;</span>
+  <span class="hl opt">|</span> <span class="hl kwc">Exp</span><span class="hl opt">.</span>Bool <span class="hl kwa">false</span> <span class="hl opt">-&gt;</span> <span class="hl str">&quot;#f&quot;</span>
+  <span class="hl opt">|</span> <span class="hl kwc">Exp</span><span class="hl opt">.</span>Cond <span class="hl opt">(</span>con<span class="hl opt">,</span> expr1<span class="hl opt">,</span> expr2<span class="hl opt">) -&gt;</span>
+    <span class="hl kwa">let</span> <span class="hl kwd">con</span> <span class="hl opt">=</span> <span class="hl kwd">string_of_expr con</span> <span class="hl kwa">in</span>
+    <span class="hl kwa">let</span> <span class="hl kwd">expr1</span> <span class="hl opt">=</span> <span class="hl kwd">string_of_expr expr1</span> <span class="hl kwa">in</span>
+    <span class="hl kwa">let</span> <span class="hl kwd">expr2</span> <span class="hl opt">=</span> <span class="hl kwd">string_of_expr expr2</span> <span class="hl kwa">in</span>
+    <span class="hl str">&quot;(if &quot;</span> ^ <span class="hl kwd">con</span> ^ <span class="hl str">&quot; &quot;</span> ^ <span class="hl kwd">expr1</span> ^ <span class="hl str">&quot; &quot;</span> ^ <span class="hl kwd">expr2</span> ^ <span class="hl str">&quot;)&quot;</span>
+  <span class="hl opt">|</span> <span class="hl kwc">Exp</span><span class="hl opt">.</span>Def <span class="hl opt">(</span>var<span class="hl opt">,</span> expr<span class="hl opt">) -&gt;</span>
+    <span class="hl kwa">let</span> <span class="hl kwd">var</span> <span class="hl opt">=</span> <span class="hl kwd">string_of_expr var</span> <span class="hl kwa">in</span>
+    <span class="hl kwa">let</span> <span class="hl kwd">expr</span> <span class="hl opt">=</span> <span class="hl kwd">string_of_expr expr</span> <span class="hl kwa">in</span>
+    <span class="hl str">&quot;(define &quot;</span> ^ <span class="hl kwd">var</span> ^ <span class="hl str">&quot; &quot;</span> ^ <span class="hl kwd">expr</span> ^ <span class="hl str">&quot;)&quot;</span>
+  <span class="hl opt">|</span> <span class="hl kwc">Exp</span><span class="hl opt">.</span>Lam <span class="hl opt">(</span>args<span class="hl opt">,</span> <span class="hl kwd">expr</span><span class="hl opt">) -&gt;</span>
+    <span class="hl kwa">let</span> <span class="hl kwd">args</span> <span class="hl opt">=</span> <span class="hl kwd">args</span> <span class="hl opt">|&gt;</span> <span class="hl kwc">List</span><span class="hl opt">.</span>map <span class="hl kwd">string_of_expr</span> <span class="hl opt">|&gt;</span> <span class="hl kwc">String</span><span class="hl opt">.</span>concat <span class="hl str">&quot; &quot;</span> <span class="hl kwa">in</span>
+    <span class="hl kwa">let</span> <span class="hl kwd">expr</span> <span class="hl opt">=</span> <span class="hl kwd">string_of_expr expr</span> <span class="hl kwa">in</span>
+    <span class="hl str">&quot;(lambda (&quot;</span> ^ <span class="hl kwd">args</span> ^ <span class="hl str">&quot;) &quot;</span> ^ <span class="hl kwd">expr</span> ^ <span class="hl str">&quot;)&quot;</span>
+  <span class="hl opt">|</span> <span class="hl kwc">Exp</span><span class="hl opt">.</span>App <span class="hl opt">(</span>func<span class="hl opt">,</span> <span class="hl kwd">args</span><span class="hl opt">) -&gt;</span>
+    <span class="hl kwa">let</span> <span class="hl kwd">func</span> <span class="hl opt">=</span> <span class="hl kwd">string_of_expr func</span> <span class="hl kwa">in</span>
+    <span class="hl kwa">let</span> <span class="hl kwd">args</span> <span class="hl opt">=</span> <span class="hl kwd">args</span> <span class="hl opt">|&gt;</span> <span class="hl kwc">List</span><span class="hl opt">.</span>map <span class="hl kwd">string_of_expr</span> <span class="hl opt">|&gt;</span> <span class="hl kwc">String</span><span class="hl opt">.</span>concat <span class="hl str">&quot; &quot;</span> <span class="hl kwa">in</span>
+    <span class="hl str">&quot;(&quot;</span> ^ <span class="hl kwd">func</span> ^ <span class="hl str">&quot; &quot;</span> ^ <span class="hl kwd">args</span> ^ <span class="hl str">&quot;)&quot;</span>
+  <span class="hl opt">|</span> <span class="hl kwc">Exp</span><span class="hl opt">.</span>Blt blt <span class="hl opt">-&gt;</span> <span class="hl kwa">assert false</span>
 
-<span class="Statement">let</span> print_expr expr <span class="Statement">=</span> expr <span class="Statement">|</span><span class="Statement">&gt;</span> string_of_expr <span class="Statement">|</span><span class="Statement">&gt;</span> print_endline
+<span class="hl kwa">let</span> <span class="hl kwd">print_expr expr</span> <span class="hl opt">=</span> <span class="hl kwd">expr</span> <span class="hl opt">|&gt;</span> <span class="hl kwd">string_of_expr</span> <span class="hl opt">|&gt;</span> print_endline
 
-<span class="Comment">(* Eval *)</span>
+<span class="hl com">(* Eval *)</span>
 
-<span class="Statement">let</span> <span class="Statement">rec</span> eval env <span class="Statement">=</span> <span class="Statement">parser</span>
-  <span class="Statement">|</span> <span class="Statement">[</span><span class="Statement">&lt;</span> 'expr<span class="Statement">;</span> stream <span class="Statement">&gt;</span><span class="Statement">]</span> <span class="Statement">-&gt;</span>
-    <span class="Statement">begin</span> <span class="Statement">try</span>
-      <span class="Statement">let</span> <span class="Statement">(</span>res, env<span class="Statement">)</span> <span class="Statement">=</span> eval_expr env expr <span class="Statement">in</span>
-      print_expr res<span class="Statement">;</span>
-      eval env stream
-    <span class="Statement">with</span>
-    <span class="Statement">|</span> <span class="Constant">Failure</span> err <span class="Statement">-&gt;</span> print_endline err<span class="Statement">;</span> eval env stream
-    <span class="Statement">end</span><span class="Statement">;</span>
-  <span class="Statement">|</span> <span class="Constant">[&lt; &gt;]</span> <span class="Statement">-&gt;</span> <span class="Constant">[&lt; &gt;]</span>
+<span class="hl kwa">let rec</span> <span class="hl kwd">eval</span> env <span class="hl opt">=</span> parser
+  <span class="hl opt">| [&lt;</span> &#39;<span class="hl kwd">expr</span><span class="hl opt">;</span> stream <span class="hl opt">&gt;] -&gt;</span>
+    <span class="hl kwa">begin try</span>
+      <span class="hl kwa">let</span> <span class="hl opt">(</span>res<span class="hl opt">,</span> env<span class="hl opt">) =</span> eval_expr env <span class="hl kwd">expr</span> <span class="hl kwa">in</span>
+      <span class="hl kwd">print_expr</span> res<span class="hl opt">;</span>
+      <span class="hl kwd">eval</span> env stream
+    <span class="hl kwa">with</span>
+    <span class="hl opt">|</span> Failure err <span class="hl opt">-&gt;</span> print_endline err<span class="hl opt">;</span> <span class="hl kwd">eval</span> env stream
+    <span class="hl kwa">end</span><span class="hl opt">;</span>
+  <span class="hl opt">| [&lt; &gt;] -&gt; [&lt; &gt;]</span>
 
-<span class="Statement">and</span> eval_expr env <span class="Statement">=</span> <span class="Statement">function</span>
-  <span class="Statement">|</span> <span class="PreProc">Exp</span>.<span class="Constant">Nil</span> <span class="Statement">as</span> nil <span class="Statement">-&gt;</span> <span class="Statement">(</span>nil, env<span class="Statement">)</span>
-  <span class="Statement">|</span> <span class="PreProc">Exp</span>.<span class="Constant">Bool</span> <span class="Statement">_</span> <span class="Statement">as</span> con <span class="Statement">-&gt;</span> <span class="Statement">(</span>con, env<span class="Statement">)</span>
-  <span class="Statement">|</span> <span class="PreProc">Exp</span>.<span class="Constant">Num</span> <span class="Statement">_</span> <span class="Statement">as</span> num <span class="Statement">-&gt;</span> <span class="Statement">(</span>num, env<span class="Statement">)</span>
-  <span class="Statement">|</span> <span class="PreProc">Exp</span>.<span class="Constant">Var</span> <span class="Statement">_</span> <span class="Statement">as</span> var <span class="Statement">-&gt;</span>
-    <span class="Statement">let</span> res <span class="Statement">=</span> lookup var env <span class="Statement">in</span>
-    <span class="Statement">(</span>res, env<span class="Statement">)</span>
-  <span class="Statement">|</span> <span class="PreProc">Exp</span>.<span class="Constant">Cond</span> <span class="Statement">(</span>cond, expr1, expr2<span class="Statement">)</span> <span class="Statement">-&gt;</span>
-    <span class="Statement">begin</span> <span class="Statement">match</span> fst<span class="Statement">(</span>eval_expr env cond<span class="Statement">)</span> <span class="Statement">with</span>
-    <span class="Statement">|</span> <span class="PreProc">Exp</span>.<span class="Constant">Bool</span> <span class="Constant">true</span> <span class="Statement">-&gt;</span> eval_expr env expr1
-    <span class="Statement">|</span> <span class="PreProc">Exp</span>.<span class="Constant">Bool</span> <span class="Constant">false</span> <span class="Statement">-&gt;</span> eval_expr env expr2
-    <span class="Statement">|</span> <span class="Statement">_</span> <span class="Statement">-&gt;</span> failwith <span class="Constant">&quot;ERROR: expected boolean&quot;</span>
-    <span class="Statement">end</span>
-  <span class="Statement">|</span> <span class="PreProc">Exp</span>.<span class="Constant">Def</span> <span class="Statement">(</span>var, expr<span class="Statement">)</span> <span class="Statement">-&gt;</span> <span class="Statement">(</span><span class="PreProc">Exp</span>.<span class="Constant">Nil</span>, <span class="Statement">(</span>var, expr<span class="Statement">)</span> <span class="Statement">::</span> env<span class="Statement">)</span>
-  <span class="Statement">|</span> <span class="PreProc">Exp</span>.<span class="Constant">Lam</span> <span class="Statement">(</span><span class="Statement">_</span>, <span class="Statement">_</span><span class="Statement">)</span> <span class="Statement">as</span> lam <span class="Statement">-&gt;</span> <span class="Statement">(</span>lam, env<span class="Statement">)</span>
-  <span class="Statement">|</span> <span class="PreProc">Exp</span>.<span class="Constant">Blt</span> <span class="Statement">_</span> <span class="Statement">as</span> blt <span class="Statement">-&gt;</span> <span class="Statement">(</span>blt, env<span class="Statement">)</span>
-  <span class="Statement">|</span> <span class="PreProc">Exp</span>.<span class="Constant">App</span> <span class="Statement">(</span>func, args<span class="Statement">)</span> <span class="Statement">-&gt;</span>
-    <span class="Statement">let</span> args <span class="Statement">=</span> <span class="PreProc">List</span>.map <span class="Statement">(fun</span> expr <span class="Statement">-&gt;</span> fst<span class="Statement">(</span>eval_expr env expr<span class="Statement">))</span> args <span class="Statement">in</span>
-    <span class="Statement">begin</span> <span class="Statement">match</span> fst<span class="Statement">(</span>eval_expr env func<span class="Statement">)</span> <span class="Statement">with</span>
-    <span class="Statement">|</span> <span class="PreProc">Exp</span>.<span class="Constant">Lam</span> <span class="Statement">(</span>vars, expr<span class="Statement">)</span> <span class="Statement">-&gt;</span>
-      <span class="Statement">if</span> <span class="PreProc">List</span>.length vars <span class="Statement">&lt;&gt;</span> <span class="PreProc">List</span>.length args
-      <span class="Statement">then</span> failwith <span class="Constant">&quot;ERROR: wrong number of arguments&quot;</span><span class="Statement">;</span>
-      <span class="Statement">let</span> binds <span class="Statement">=</span> <span class="PreProc">List</span>.combine vars args <span class="Statement">in</span>
-      <span class="Statement">let</span> res <span class="Statement">=</span> fst<span class="Statement">(</span>eval_expr <span class="Statement">(</span>binds @ env<span class="Statement">)</span> expr<span class="Statement">)</span> <span class="Statement">in</span>
-      <span class="Statement">(</span>res, env<span class="Statement">)</span>
-    <span class="Statement">|</span> <span class="PreProc">Exp</span>.<span class="Constant">Blt</span> func <span class="Statement">-&gt;</span>
-      <span class="Statement">let</span> res <span class="Statement">=</span> func args <span class="Statement">in</span>
-      <span class="Statement">(</span>res, env<span class="Statement">)</span>
-    <span class="Statement">|</span> <span class="Statement">_</span> <span class="Statement">-&gt;</span> failwith <span class="Constant">&quot;ERROR: expected function&quot;</span>
-    <span class="Statement">end</span>
+<span class="hl kwa">and</span> eval_expr env <span class="hl opt">=</span> <span class="hl kwa">function</span>
+  <span class="hl opt">|</span> <span class="hl kwc">Exp</span><span class="hl opt">.</span>Nil <span class="hl kwa">as</span> nil <span class="hl opt">-&gt; (</span>nil<span class="hl opt">,</span> env<span class="hl opt">)</span>
+  <span class="hl opt">|</span> <span class="hl kwc">Exp</span><span class="hl opt">.</span>Bool _ <span class="hl kwa">as</span> <span class="hl kwd">con</span> <span class="hl opt">-&gt; (</span><span class="hl kwd">con</span><span class="hl opt">,</span> env<span class="hl opt">)</span>
+  <span class="hl opt">|</span> <span class="hl kwc">Exp</span><span class="hl opt">.</span>Num _ <span class="hl kwa">as</span> num <span class="hl opt">-&gt; (</span>num<span class="hl opt">,</span> env<span class="hl opt">)</span>
+  <span class="hl opt">|</span> <span class="hl kwc">Exp</span><span class="hl opt">.</span>Var _ <span class="hl kwa">as</span> <span class="hl kwd">var</span> <span class="hl opt">-&gt;</span>
+    <span class="hl kwa">let</span> <span class="hl kwd">res</span> <span class="hl opt">=</span> lookup <span class="hl kwd">var</span> env <span class="hl kwa">in</span>
+    <span class="hl opt">(</span><span class="hl kwd">res</span><span class="hl opt">,</span> env<span class="hl opt">)</span>
+  <span class="hl opt">|</span> <span class="hl kwc">Exp</span><span class="hl opt">.</span>Cond <span class="hl opt">(</span>cond<span class="hl opt">,</span> <span class="hl kwd">expr1</span><span class="hl opt">,</span> <span class="hl kwd">expr2</span><span class="hl opt">) -&gt;</span>
+    <span class="hl kwa">begin match</span> fst<span class="hl opt">(</span>eval_expr env cond<span class="hl opt">)</span> <span class="hl kwa">with</span>
+    <span class="hl opt">|</span> <span class="hl kwc">Exp</span><span class="hl opt">.</span>Bool <span class="hl kwa">true</span> <span class="hl opt">-&gt;</span> eval_expr env <span class="hl kwd">expr1</span>
+    <span class="hl opt">|</span> <span class="hl kwc">Exp</span><span class="hl opt">.</span>Bool <span class="hl kwa">false</span> <span class="hl opt">-&gt;</span> eval_expr env <span class="hl kwd">expr2</span>
+    <span class="hl opt">|</span> _ <span class="hl opt">-&gt;</span> failwith <span class="hl str">&quot;ERROR: expected boolean&quot;</span>
+    <span class="hl kwa">end</span>
+  <span class="hl opt">|</span> <span class="hl kwc">Exp</span><span class="hl opt">.</span>Def <span class="hl opt">(</span><span class="hl kwd">var</span><span class="hl opt">,</span> <span class="hl kwd">expr</span><span class="hl opt">) -&gt; (</span><span class="hl kwc">Exp</span><span class="hl opt">.</span>Nil<span class="hl opt">, (</span><span class="hl kwd">var</span><span class="hl opt">,</span> <span class="hl kwd">expr</span><span class="hl opt">) ::</span> env<span class="hl opt">)</span>
+  <span class="hl opt">|</span> <span class="hl kwc">Exp</span><span class="hl opt">.</span>Lam <span class="hl opt">(</span>_<span class="hl opt">,</span> _<span class="hl opt">)</span> <span class="hl kwa">as</span> lam <span class="hl opt">-&gt; (</span>lam<span class="hl opt">,</span> env<span class="hl opt">)</span>
+  <span class="hl opt">|</span> <span class="hl kwc">Exp</span><span class="hl opt">.</span>Blt _ <span class="hl kwa">as</span> blt <span class="hl opt">-&gt; (</span>blt<span class="hl opt">,</span> env<span class="hl opt">)</span>
+  <span class="hl opt">|</span> <span class="hl kwc">Exp</span><span class="hl opt">.</span>App <span class="hl opt">(</span><span class="hl kwd">func</span><span class="hl opt">,</span> <span class="hl kwd">args</span><span class="hl opt">) -&gt;</span>
+    <span class="hl kwa">let</span> <span class="hl kwd">args</span> <span class="hl opt">=</span> <span class="hl kwc">List</span><span class="hl opt">.</span>map <span class="hl opt">(</span><span class="hl kwa">fun</span> <span class="hl kwd">expr</span> <span class="hl opt">-&gt;</span> fst<span class="hl opt">(</span>eval_expr env <span class="hl kwd">expr</span><span class="hl opt">))</span> <span class="hl kwd">args</span> <span class="hl kwa">in</span>
+    <span class="hl kwa">begin match</span> fst<span class="hl opt">(</span>eval_expr env <span class="hl kwd">func</span><span class="hl opt">)</span> <span class="hl kwa">with</span>
+    <span class="hl opt">|</span> <span class="hl kwc">Exp</span><span class="hl opt">.</span>Lam <span class="hl opt">(</span>vars<span class="hl opt">,</span> <span class="hl kwd">expr</span><span class="hl opt">) -&gt;</span>
+      <span class="hl kwa">if</span> <span class="hl kwc">List</span><span class="hl opt">.</span>length vars <span class="hl opt">&lt;&gt;</span> <span class="hl kwc">List</span><span class="hl opt">.</span>length <span class="hl kwd">args</span>
+      <span class="hl kwa">then</span> failwith <span class="hl str">&quot;ERROR: wrong number of arguments&quot;</span><span class="hl opt">;</span>
+      <span class="hl kwa">let</span> <span class="hl kwd">binds</span> <span class="hl opt">=</span> <span class="hl kwc">List</span><span class="hl opt">.</span>combine vars <span class="hl kwd">args</span> <span class="hl kwa">in</span>
+      <span class="hl kwa">let</span> <span class="hl kwd">res</span> <span class="hl opt">=</span> fst<span class="hl opt">(</span>eval_expr <span class="hl opt">(</span><span class="hl kwd">binds</span> <span class="hl opt">&#64;</span> env<span class="hl opt">)</span> <span class="hl kwd">expr</span><span class="hl opt">)</span> <span class="hl kwa">in</span>
+      <span class="hl opt">(</span><span class="hl kwd">res</span><span class="hl opt">,</span> env<span class="hl opt">)</span>
+    <span class="hl opt">|</span> <span class="hl kwc">Exp</span><span class="hl opt">.</span>Blt <span class="hl kwd">func</span> <span class="hl opt">-&gt;</span>
+      <span class="hl kwa">let</span> <span class="hl kwd">res</span> <span class="hl opt">=</span> <span class="hl kwd">func args</span> <span class="hl kwa">in</span>
+      <span class="hl opt">(</span><span class="hl kwd">res</span><span class="hl opt">,</span> env<span class="hl opt">)</span>
+    <span class="hl opt">|</span> _ <span class="hl opt">-&gt;</span> failwith <span class="hl str">&quot;ERROR: expected function&quot;</span>
+    <span class="hl kwa">end</span>
 
-<span class="Statement">and</span> lookup var <span class="Statement">=</span> <span class="Statement">function</span>
-  <span class="Statement">|</span> <span class="Statement">(</span>v, e<span class="Statement">)</span> <span class="Statement">::</span> tl <span class="Statement">-&gt;</span> <span class="Statement">if</span> v <span class="Statement">=</span> var <span class="Statement">then</span> e <span class="Statement">else</span> lookup var tl
-  <span class="Statement">|</span> <span class="Statement">_</span> <span class="Statement">-&gt;</span> failwith <span class="Constant">&quot;ERROR: unbound variable&quot;</span>
+<span class="hl kwa">and</span> lookup <span class="hl kwd">var</span> <span class="hl opt">=</span> <span class="hl kwa">function</span>
+  <span class="hl opt">| (</span>v<span class="hl opt">,</span> e<span class="hl opt">) ::</span> tl <span class="hl opt">-&gt;</span> <span class="hl kwa">if</span> v <span class="hl opt">=</span> <span class="hl kwd">var</span> <span class="hl kwa">then</span> e <span class="hl kwa">else</span> lookup <span class="hl kwd">var</span> tl
+  <span class="hl opt">|</span> _ <span class="hl opt">-&gt;</span> failwith <span class="hl str">&quot;ERROR: unbound variable&quot;</span>
 
-<span class="Comment">(* Built-in functions *)</span>
+<span class="hl com">(* Built-in functions *)</span>
 
-<span class="Statement">let</span> eq <span class="Statement">=</span> <span class="Statement">function</span>
-  <span class="Statement">|</span> x <span class="Statement">::</span> y <span class="Statement">::</span> <span class="Constant">[]</span> <span class="Statement">-&gt;</span> <span class="PreProc">Exp</span>.<span class="Constant">Bool</span> <span class="Statement">(</span>x <span class="Statement">=</span> y<span class="Statement">)</span>
-  <span class="Statement">|</span> <span class="Statement">_</span> <span class="Statement">-&gt;</span> <span class="Statement">assert</span> <span class="Constant">false</span>
+<span class="hl kwa">let</span> <span class="hl kwd">eq</span> <span class="hl opt">=</span> <span class="hl kwa">function</span>
+  <span class="hl opt">|</span> x <span class="hl opt">::</span> y <span class="hl opt">:: [] -&gt;</span> <span class="hl kwc">Exp</span><span class="hl opt">.</span>Bool <span class="hl opt">(</span>x <span class="hl opt">=</span> y<span class="hl opt">)</span>
+  <span class="hl opt">|</span> _ <span class="hl opt">-&gt;</span> <span class="hl kwa">assert false</span>
 
-<span class="Statement">let</span> lt <span class="Statement">=</span> <span class="Statement">function</span>
-  <span class="Statement">|</span> x <span class="Statement">::</span> y <span class="Statement">::</span> <span class="Constant">[]</span> <span class="Statement">-&gt;</span> <span class="PreProc">Exp</span>.<span class="Constant">Bool</span> <span class="Statement">(</span>x <span class="Statement">&lt;</span> y<span class="Statement">)</span>
-  <span class="Statement">|</span> <span class="Statement">_</span> <span class="Statement">-&gt;</span> <span class="Statement">assert</span> <span class="Constant">false</span>
+<span class="hl kwa">let</span> <span class="hl kwd">lt</span> <span class="hl opt">=</span> <span class="hl kwa">function</span>
+  <span class="hl opt">|</span> x <span class="hl opt">::</span> y <span class="hl opt">:: [] -&gt;</span> <span class="hl kwc">Exp</span><span class="hl opt">.</span>Bool <span class="hl opt">(</span>x <span class="hl opt">&lt;</span> y<span class="hl opt">)</span>
+  <span class="hl opt">|</span> _ <span class="hl opt">-&gt;</span> <span class="hl kwa">assert false</span>
 
-<span class="Statement">let</span> gt <span class="Statement">=</span> <span class="Statement">function</span>
-  <span class="Statement">|</span> x <span class="Statement">::</span> y <span class="Statement">::</span> <span class="Constant">[]</span> <span class="Statement">-&gt;</span> <span class="PreProc">Exp</span>.<span class="Constant">Bool</span> <span class="Statement">(</span>x <span class="Statement">&gt;</span> y<span class="Statement">)</span>
-  <span class="Statement">|</span> <span class="Statement">_</span> <span class="Statement">-&gt;</span> <span class="Statement">assert</span> <span class="Constant">false</span>
+<span class="hl kwa">let</span> <span class="hl kwd">gt</span> <span class="hl opt">=</span> <span class="hl kwa">function</span>
+  <span class="hl opt">|</span> x <span class="hl opt">::</span> y <span class="hl opt">:: [] -&gt;</span> <span class="hl kwc">Exp</span><span class="hl opt">.</span>Bool <span class="hl opt">(</span>x <span class="hl opt">&gt;</span> y<span class="hl opt">)</span>
+  <span class="hl opt">|</span> _ <span class="hl opt">-&gt;</span> <span class="hl kwa">assert false</span>
 
-<span class="Statement">let</span> le <span class="Statement">=</span> <span class="Statement">function</span>
-  <span class="Statement">|</span> x <span class="Statement">::</span> y <span class="Statement">::</span> <span class="Constant">[]</span> <span class="Statement">-&gt;</span> <span class="PreProc">Exp</span>.<span class="Constant">Bool</span> <span class="Statement">(</span>x <span class="Statement">&lt;</span><span class="Statement">=</span> y<span class="Statement">)</span>
-  <span class="Statement">|</span> <span class="Statement">_</span> <span class="Statement">-&gt;</span> <span class="Statement">assert</span> <span class="Constant">false</span>
+<span class="hl kwa">let</span> <span class="hl kwd">le</span> <span class="hl opt">=</span> <span class="hl kwa">function</span>
+  <span class="hl opt">|</span> x <span class="hl opt">::</span> y <span class="hl opt">:: [] -&gt;</span> <span class="hl kwc">Exp</span><span class="hl opt">.</span>Bool <span class="hl opt">(</span>x <span class="hl opt">&lt;=</span> y<span class="hl opt">)</span>
+  <span class="hl opt">|</span> _ <span class="hl opt">-&gt;</span> <span class="hl kwa">assert false</span>
 
-<span class="Statement">let</span> ge <span class="Statement">=</span> <span class="Statement">function</span>
-  <span class="Statement">|</span> x <span class="Statement">::</span> y <span class="Statement">::</span> <span class="Constant">[]</span> <span class="Statement">-&gt;</span> <span class="PreProc">Exp</span>.<span class="Constant">Bool</span> <span class="Statement">(</span>x <span class="Statement">&gt;</span><span class="Statement">=</span> y<span class="Statement">)</span>
-  <span class="Statement">|</span> <span class="Statement">_</span> <span class="Statement">-&gt;</span> <span class="Statement">assert</span> <span class="Constant">false</span>
+<span class="hl kwa">let</span> <span class="hl kwd">ge</span> <span class="hl opt">=</span> <span class="hl kwa">function</span>
+  <span class="hl opt">|</span> x <span class="hl opt">::</span> y <span class="hl opt">:: [] -&gt;</span> <span class="hl kwc">Exp</span><span class="hl opt">.</span>Bool <span class="hl opt">(</span>x <span class="hl opt">&gt;=</span> y<span class="hl opt">)</span>
+  <span class="hl opt">|</span> _ <span class="hl opt">-&gt;</span> <span class="hl kwa">assert false</span>
 
-<span class="Statement">let</span> binop f x z <span class="Statement">=</span>
-  <span class="Statement">match</span> <span class="Statement">(</span>x, z<span class="Statement">)</span> <span class="Statement">with</span>
-  <span class="Statement">|</span> <span class="Statement">((</span><span class="PreProc">Exp</span>.<span class="Constant">Num</span> x<span class="Statement">)</span>, <span class="Statement">(</span><span class="PreProc">Exp</span>.<span class="Constant">Num</span> z<span class="Statement">))</span> <span class="Statement">-&gt;</span> <span class="PreProc">Exp</span>.<span class="Constant">Num</span> <span class="Statement">(</span>f x z<span class="Statement">)</span>
-  <span class="Statement">|</span> <span class="Statement">_</span> <span class="Statement">-&gt;</span> <span class="Statement">assert</span> <span class="Constant">false</span>
+<span class="hl kwa">let</span> <span class="hl kwd">binop</span> f x z <span class="hl opt">=</span>
+  <span class="hl kwa">match</span> <span class="hl opt">(</span>x<span class="hl opt">,</span> z<span class="hl opt">)</span> <span class="hl kwa">with</span>
+  <span class="hl opt">| ((</span><span class="hl kwc">Exp</span><span class="hl opt">.</span>Num x<span class="hl opt">), (</span><span class="hl kwc">Exp</span><span class="hl opt">.</span>Num z<span class="hl opt">)) -&gt;</span> <span class="hl kwc">Exp</span><span class="hl opt">.</span>Num <span class="hl opt">(</span>f x z<span class="hl opt">)</span>
+  <span class="hl opt">|</span> _ <span class="hl opt">-&gt;</span> <span class="hl kwa">assert false</span>
 
-<span class="Statement">let</span> add <span class="Statement">=</span> <span class="PreProc">List</span>.fold_left <span class="Statement">(</span>binop <span class="Statement">(</span>+.<span class="Statement">))</span> <span class="Statement">(</span><span class="PreProc">Exp</span>.<span class="Constant">Num</span> <span class="Constant">0.0</span><span class="Statement">)</span>
+<span class="hl kwa">let</span> <span class="hl kwd">add</span> <span class="hl opt">=</span> <span class="hl kwc">List</span><span class="hl opt">.</span>fold_left <span class="hl opt">(</span><span class="hl kwd">binop</span> <span class="hl opt">(+.)) (</span><span class="hl kwc">Exp</span><span class="hl opt">.</span>Num <span class="hl num">0.0</span><span class="hl opt">)</span>
 
-<span class="Statement">let</span> mul <span class="Statement">=</span> <span class="PreProc">List</span>.fold_left <span class="Statement">(</span>binop <span class="Statement">(</span> <span class="Statement">*</span>. <span class="Statement">))</span> <span class="Statement">(</span><span class="PreProc">Exp</span>.<span class="Constant">Num</span> <span class="Constant">1.0</span><span class="Statement">)</span>
+<span class="hl kwa">let</span> <span class="hl kwd">mul</span> <span class="hl opt">=</span> <span class="hl kwc">List</span><span class="hl opt">.</span>fold_left <span class="hl opt">(</span><span class="hl kwd">binop</span> <span class="hl opt">( *. )) (</span><span class="hl kwc">Exp</span><span class="hl opt">.</span>Num <span class="hl num">1.0</span><span class="hl opt">)</span>
 
-<span class="Statement">let</span> sub <span class="Statement">=</span> <span class="Statement">function</span>
-  <span class="Statement">|</span> <span class="PreProc">Exp</span>.<span class="Constant">Num</span> hd <span class="Statement">::</span> <span class="Constant">[]</span> <span class="Statement">-&gt;</span> <span class="PreProc">Exp</span>.<span class="Constant">Num</span> <span class="Statement">(</span><span class="Constant">0.0</span> -. hd<span class="Statement">)</span>
-  <span class="Statement">|</span> <span class="PreProc">Exp</span>.<span class="Constant">Num</span> hd <span class="Statement">::</span> tl <span class="Statement">-&gt;</span>
-    <span class="Statement">begin</span> <span class="Statement">match</span> add tl <span class="Statement">with</span>
-    <span class="Statement">|</span> <span class="PreProc">Exp</span>.<span class="Constant">Num</span> rest <span class="Statement">-&gt;</span> <span class="PreProc">Exp</span>.<span class="Constant">Num</span> <span class="Statement">(</span>hd -. rest<span class="Statement">)</span>
-    <span class="Statement">|</span> <span class="Statement">_</span> <span class="Statement">-&gt;</span> <span class="Statement">assert</span> <span class="Constant">false</span>
-    <span class="Statement">end</span>
-  <span class="Statement">|</span> <span class="Statement">_</span> <span class="Statement">-&gt;</span> <span class="Statement">assert</span> <span class="Constant">false</span>
+<span class="hl kwa">let</span> <span class="hl kwd">sub</span> <span class="hl opt">=</span> <span class="hl kwa">function</span>
+  <span class="hl opt">|</span> <span class="hl kwc">Exp</span><span class="hl opt">.</span>Num hd <span class="hl opt">:: [] -&gt;</span> <span class="hl kwc">Exp</span><span class="hl opt">.</span>Num <span class="hl opt">(</span><span class="hl num">0.0</span> <span class="hl opt">-.</span> hd<span class="hl opt">)</span>
+  <span class="hl opt">|</span> <span class="hl kwc">Exp</span><span class="hl opt">.</span>Num hd <span class="hl opt">::</span> tl <span class="hl opt">-&gt;</span>
+    <span class="hl kwa">begin match</span> <span class="hl kwd">add</span> tl <span class="hl kwa">with</span>
+    <span class="hl opt">|</span> <span class="hl kwc">Exp</span><span class="hl opt">.</span>Num rest <span class="hl opt">-&gt;</span> <span class="hl kwc">Exp</span><span class="hl opt">.</span>Num <span class="hl opt">(</span>hd <span class="hl opt">-.</span> rest<span class="hl opt">)</span>
+    <span class="hl opt">|</span> _ <span class="hl opt">-&gt;</span> <span class="hl kwa">assert false</span>
+    <span class="hl kwa">end</span>
+  <span class="hl opt">|</span> _ <span class="hl opt">-&gt;</span> <span class="hl kwa">assert false</span>
 
-<span class="Statement">let</span> div <span class="Statement">=</span> <span class="Statement">function</span>
-  <span class="Statement">|</span> <span class="PreProc">Exp</span>.<span class="Constant">Num</span> hd <span class="Statement">::</span> <span class="Constant">[]</span> <span class="Statement">-&gt;</span> <span class="PreProc">Exp</span>.<span class="Constant">Num</span> <span class="Statement">(</span><span class="Constant">1.0</span> /. hd<span class="Statement">)</span>
-  <span class="Statement">|</span> <span class="PreProc">Exp</span>.<span class="Constant">Num</span> hd <span class="Statement">::</span> tl <span class="Statement">-&gt;</span>
-    <span class="Statement">begin</span> <span class="Statement">match</span> mul tl <span class="Statement">with</span>
-    <span class="Statement">|</span> <span class="PreProc">Exp</span>.<span class="Constant">Num</span> rest <span class="Statement">-&gt;</span> <span class="PreProc">Exp</span>.<span class="Constant">Num</span> <span class="Statement">(</span>hd /. rest<span class="Statement">)</span>
-    <span class="Statement">|</span> <span class="Statement">_</span> <span class="Statement">-&gt;</span> <span class="Statement">assert</span> <span class="Constant">false</span>
-    <span class="Statement">end</span>
-  <span class="Statement">|</span> <span class="Statement">_</span> <span class="Statement">-&gt;</span> <span class="Statement">assert</span> <span class="Constant">false</span>
+<span class="hl kwa">let</span> <span class="hl kwd">div</span> <span class="hl opt">=</span> <span class="hl kwa">function</span>
+  <span class="hl opt">|</span> <span class="hl kwc">Exp</span><span class="hl opt">.</span>Num hd <span class="hl opt">:: [] -&gt;</span> <span class="hl kwc">Exp</span><span class="hl opt">.</span>Num <span class="hl opt">(</span><span class="hl num">1.0</span> <span class="hl opt">/.</span> hd<span class="hl opt">)</span>
+  <span class="hl opt">|</span> <span class="hl kwc">Exp</span><span class="hl opt">.</span>Num hd <span class="hl opt">::</span> tl <span class="hl opt">-&gt;</span>
+    <span class="hl kwa">begin match</span> <span class="hl kwd">mul</span> tl <span class="hl kwa">with</span>
+    <span class="hl opt">|</span> <span class="hl kwc">Exp</span><span class="hl opt">.</span>Num rest <span class="hl opt">-&gt;</span> <span class="hl kwc">Exp</span><span class="hl opt">.</span>Num <span class="hl opt">(</span>hd <span class="hl opt">/.</span> rest<span class="hl opt">)</span>
+    <span class="hl opt">|</span> _ <span class="hl opt">-&gt;</span> <span class="hl kwa">assert false</span>
+    <span class="hl kwa">end</span>
+  <span class="hl opt">|</span> _ <span class="hl opt">-&gt;</span> <span class="hl kwa">assert false</span>
 
-<span class="Statement">let</span> env <span class="Statement">=</span> <span class="Statement">[</span>
-  <span class="Statement">(</span><span class="PreProc">Exp</span>.<span class="Constant">Var</span> <span class="Constant">&quot;+&quot;</span>, <span class="PreProc">Exp</span>.<span class="Constant">Blt</span> add<span class="Statement">)</span><span class="Statement">;</span>
-  <span class="Statement">(</span><span class="PreProc">Exp</span>.<span class="Constant">Var</span> <span class="Constant">&quot;-&quot;</span>, <span class="PreProc">Exp</span>.<span class="Constant">Blt</span> sub<span class="Statement">)</span><span class="Statement">;</span>
-  <span class="Statement">(</span><span class="PreProc">Exp</span>.<span class="Constant">Var</span> <span class="Constant">&quot;*&quot;</span>, <span class="PreProc">Exp</span>.<span class="Constant">Blt</span> mul<span class="Statement">)</span><span class="Statement">;</span>
-  <span class="Statement">(</span><span class="PreProc">Exp</span>.<span class="Constant">Var</span> <span class="Constant">&quot;/&quot;</span>, <span class="PreProc">Exp</span>.<span class="Constant">Blt</span> div<span class="Statement">)</span><span class="Statement">;</span>
-  <span class="Statement">(</span><span class="PreProc">Exp</span>.<span class="Constant">Var</span> <span class="Constant">&quot;=&quot;</span>, <span class="PreProc">Exp</span>.<span class="Constant">Blt</span> eq<span class="Statement">)</span><span class="Statement">;</span>
-  <span class="Statement">(</span><span class="PreProc">Exp</span>.<span class="Constant">Var</span> <span class="Constant">&quot;&lt;&quot;</span>, <span class="PreProc">Exp</span>.<span class="Constant">Blt</span> lt<span class="Statement">)</span><span class="Statement">;</span>
-  <span class="Statement">(</span><span class="PreProc">Exp</span>.<span class="Constant">Var</span> <span class="Constant">&quot;&gt;&quot;</span>, <span class="PreProc">Exp</span>.<span class="Constant">Blt</span> gt<span class="Statement">)</span><span class="Statement">;</span>
-  <span class="Statement">(</span><span class="PreProc">Exp</span>.<span class="Constant">Var</span> <span class="Constant">&quot;&lt;=&quot;</span>, <span class="PreProc">Exp</span>.<span class="Constant">Blt</span> le<span class="Statement">)</span><span class="Statement">;</span>
-  <span class="Statement">(</span><span class="PreProc">Exp</span>.<span class="Constant">Var</span> <span class="Constant">&quot;&gt;=&quot;</span>, <span class="PreProc">Exp</span>.<span class="Constant">Blt</span> ge<span class="Statement">)</span><span class="Statement">;</span>
-<span class="Statement">]</span>
+<span class="hl kwa">let</span> <span class="hl kwd">env</span> <span class="hl opt">= [</span>
+  <span class="hl opt">(</span><span class="hl kwc">Exp</span><span class="hl opt">.</span>Var <span class="hl str">&quot;+&quot;</span><span class="hl opt">,</span> <span class="hl kwc">Exp</span><span class="hl opt">.</span>Blt <span class="hl kwd">add</span><span class="hl opt">);</span>
+  <span class="hl opt">(</span><span class="hl kwc">Exp</span><span class="hl opt">.</span>Var <span class="hl str">&quot;-&quot;</span><span class="hl opt">,</span> <span class="hl kwc">Exp</span><span class="hl opt">.</span>Blt <span class="hl kwd">sub</span><span class="hl opt">);</span>
+  <span class="hl opt">(</span><span class="hl kwc">Exp</span><span class="hl opt">.</span>Var <span class="hl str">&quot;*&quot;</span><span class="hl opt">,</span> <span class="hl kwc">Exp</span><span class="hl opt">.</span>Blt <span class="hl kwd">mul</span><span class="hl opt">);</span>
+  <span class="hl opt">(</span><span class="hl kwc">Exp</span><span class="hl opt">.</span>Var <span class="hl str">&quot;/&quot;</span><span class="hl opt">,</span> <span class="hl kwc">Exp</span><span class="hl opt">.</span>Blt <span class="hl kwd">div</span><span class="hl opt">);</span>
+  <span class="hl opt">(</span><span class="hl kwc">Exp</span><span class="hl opt">.</span>Var <span class="hl str">&quot;=&quot;</span><span class="hl opt">,</span> <span class="hl kwc">Exp</span><span class="hl opt">.</span>Blt <span class="hl kwd">eq</span><span class="hl opt">);</span>
+  <span class="hl opt">(</span><span class="hl kwc">Exp</span><span class="hl opt">.</span>Var <span class="hl str">&quot;&lt;&quot;</span><span class="hl opt">,</span> <span class="hl kwc">Exp</span><span class="hl opt">.</span>Blt <span class="hl kwd">lt</span><span class="hl opt">);</span>
+  <span class="hl opt">(</span><span class="hl kwc">Exp</span><span class="hl opt">.</span>Var <span class="hl str">&quot;&gt;&quot;</span><span class="hl opt">,</span> <span class="hl kwc">Exp</span><span class="hl opt">.</span>Blt <span class="hl kwd">gt</span><span class="hl opt">);</span>
+  <span class="hl opt">(</span><span class="hl kwc">Exp</span><span class="hl opt">.</span>Var <span class="hl str">&quot;&lt;=&quot;</span><span class="hl opt">,</span> <span class="hl kwc">Exp</span><span class="hl opt">.</span>Blt <span class="hl kwd">le</span><span class="hl opt">);</span>
+  <span class="hl opt">(</span><span class="hl kwc">Exp</span><span class="hl opt">.</span>Var <span class="hl str">&quot;&gt;=&quot;</span><span class="hl opt">,</span> <span class="hl kwc">Exp</span><span class="hl opt">.</span>Blt <span class="hl kwd">ge</span><span class="hl opt">);</span>
+<span class="hl opt">]</span>
 
-<span class="Comment">(* Read-Eval-Print-Loop (REPL) *)</span>
+<span class="hl com">(* Read-Eval-Print-Loop (REPL) *)</span>
 
-<span class="Statement">let</span> <span class="Statement">rec</span> print <span class="Statement">=</span> <span class="Statement">parser</span>
-  <span class="Statement">|</span> <span class="Statement">[</span><span class="Statement">&lt;</span> 'expr<span class="Statement">;</span> stream <span class="Statement">&gt;</span><span class="Statement">]</span> <span class="Statement">-&gt;</span>
-    print_expr expr<span class="Statement">;</span>
-    print stream
-  <span class="Statement">|</span> <span class="Constant">[&lt; &gt;]</span> <span class="Statement">-&gt;</span> <span class="Constant">()</span>
+<span class="hl kwa">let rec</span> <span class="hl kwd">print</span> <span class="hl opt">=</span> parser
+  <span class="hl opt">| [&lt;</span> &#39;<span class="hl kwd">expr</span><span class="hl opt">;</span> stream <span class="hl opt">&gt;] -&gt;</span>
+    <span class="hl kwd">print_expr expr</span><span class="hl opt">;</span>
+    <span class="hl kwd">print</span> stream
+  <span class="hl opt">| [&lt; &gt;] -&gt; ()</span>
 
-<span class="Statement">let</span> <span class="Constant">()</span> <span class="Statement">=</span>
+<span class="hl kwa">let</span> <span class="hl opt">() =</span>
   stdin
-  <span class="Statement">|</span><span class="Statement">&gt;</span> <span class="PreProc">Stream</span>.of_channel
-  <span class="Statement">|</span><span class="Statement">&gt;</span> lex
-  <span class="Statement">|</span><span class="Statement">&gt;</span> parse
-  <span class="Statement">|</span><span class="Statement">&gt;</span> eval env
-  <span class="Statement">|</span><span class="Statement">&gt;</span> print
+  <span class="hl opt">|&gt;</span> <span class="hl kwc">Stream</span><span class="hl opt">.</span>of_channel
+  <span class="hl opt">|&gt;</span> <span class="hl kwd">lex</span>
+  <span class="hl opt">|&gt;</span> <span class="hl kwd">parse</span>
+  <span class="hl opt">|&gt;</span> <span class="hl kwd">eval env</span>
+  <span class="hl opt">|&gt;</span> <span class="hl kwd">print</span>
 </pre>
 </body>
 </html>
-<!-- vim: set foldmethod=manual : -->
+<!--HTML generated by highlight 3.62, http://www.andre-simon.de/-->

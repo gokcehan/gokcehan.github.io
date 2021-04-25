@@ -1,86 +1,63 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
-<html>
+<!DOCTYPE html>
+<html lang="en">
 <head>
-<meta http-equiv="content-type" content="text/html; charset=UTF-8">
-<title>~/Dropbox/workspace/web/codes/leak.py.html</title>
-<meta name="Generator" content="Vim/8.0">
-<meta name="plugin-version" content="vim7.4_v2">
-<meta name="syntax" content="python">
-<meta name="settings" content="use_css,no_foldcolumn,expand_tabs,prevent_copy=">
-<meta name="colorscheme" content="none">
-<style type="text/css">
-<!--
-pre { font-family: monospace; color: #000000; background-color: #ffffff; }
-body { font-family: monospace; color: #000000; background-color: #ffffff; }
-* { font-size: 1em; }
-.PreProc { color: #c000c0; }
-.Identifier { color: #008080; }
-.Statement { color: #af5f00; }
-.Comment { color: #0000c0; }
-.Constant { color: #c00000; }
-.Special { color: #c000c0; }
--->
-</style>
-
-<script type='text/javascript'>
-<!--
-
--->
-</script>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>leak.py</title>
+<link rel="stylesheet" type="text/css" href="../highlight.css">
 </head>
-<body>
-<pre id='vimCodeElement'>
-<span class="Comment">#!/usr/bin/env python</span>
-<span class="Comment">#</span>
-<span class="Comment"># leak.py</span>
-<span class="Comment">#</span>
-<span class="Comment"># A toy memory leak detector for ltrace</span>
-<span class="Comment">#</span>
-<span class="Comment"># This is a proof of concept work for detecting memory leaks from the output of</span>
-<span class="Comment"># ltrace. The idea is to simply trace malloc and free calls in an execution and</span>
-<span class="Comment"># report non-freed allocations in the end. Other allocation methods are not</span>
-<span class="Comment"># added to keep it simple.</span>
-<span class="Comment">#</span>
-<span class="Comment"># This can only detect the existence of leaks without showing the location of</span>
-<span class="Comment"># the allocations in the source code. Also, since this is a dynamic analysis</span>
-<span class="Comment"># method, absence of leaks does not necessarily mean the program is leak free</span>
-<span class="Comment"># for all execution paths. Therefore, this is not very useful in practice.</span>
-<span class="Comment">#</span>
-<span class="Comment"># To run the script, you need to redirect ltrace output from stderr to stdout,</span>
-<span class="Comment"># and then redirect regular output to null device, and pipe stdout to this</span>
-<span class="Comment"># script. An example for `ls` command is shown below:</span>
-<span class="Comment">#</span>
-<span class="Comment">#     ltrace ls 2&gt;&amp;1 &gt;/dev/null | ./leak.py</span>
-<span class="Comment">#</span>
+<body class="hl">
+<pre class="hl"><span class="hl slc">#!/usr/bin/env python</span>
+<span class="hl slc">#</span>
+<span class="hl slc"># leak.py</span>
+<span class="hl slc">#</span>
+<span class="hl slc"># A toy memory leak detector for ltrace</span>
+<span class="hl slc">#</span>
+<span class="hl slc"># This is a proof of concept work for detecting memory leaks from the output of</span>
+<span class="hl slc"># ltrace. The idea is to simply trace malloc and free calls in an execution and</span>
+<span class="hl slc"># report non-freed allocations in the end. Other allocation methods are not</span>
+<span class="hl slc"># added to keep it simple.</span>
+<span class="hl slc">#</span>
+<span class="hl slc"># This can only detect the existence of leaks without showing the location of</span>
+<span class="hl slc"># the allocations in the source code. Also, since this is a dynamic analysis</span>
+<span class="hl slc"># method, absence of leaks does not necessarily mean the program is leak free</span>
+<span class="hl slc"># for all execution paths. Therefore, this is not very useful in practice.</span>
+<span class="hl slc">#</span>
+<span class="hl slc"># To run the script, you need to redirect ltrace output from stderr to stdout,</span>
+<span class="hl slc"># and then redirect regular output to null device, and pipe stdout to this</span>
+<span class="hl slc"># script. An example for `ls` command is shown below:</span>
+<span class="hl slc">#</span>
+<span class="hl slc">#     ltrace ls 2&gt;&amp;1 &gt;/dev/null | ./leak.py</span>
+<span class="hl slc">#</span>
 
-<span class="PreProc">import</span> re
-<span class="PreProc">import</span> sys
+<span class="hl kwa">import</span> re
+<span class="hl kwa">import</span> sys
 
-lines = <span class="Identifier">filter</span>(<span class="Statement">lambda</span> l: <span class="Constant">'</span><span class="Constant">malloc</span><span class="Constant">'</span> <span class="Statement">in</span> l <span class="Statement">or</span> <span class="Constant">'</span><span class="Constant">free</span><span class="Constant">'</span> <span class="Statement">in</span> l, sys.stdin)
+lines <span class="hl opt">=</span> <span class="hl kwb">filter</span><span class="hl opt">(</span><span class="hl kwa">lambda</span> l<span class="hl opt">:</span> <span class="hl str">&#39;malloc&#39;</span> <span class="hl kwa">in</span> l <span class="hl kwa">or</span> <span class="hl str">&#39;free&#39;</span> <span class="hl kwa">in</span> l<span class="hl opt">,</span> sys<span class="hl opt">.</span>stdin<span class="hl opt">)</span>
 
-<span class="Identifier">print</span> <span class="Constant">'</span><span class="Special">\n</span><span class="Constant">These are all the malloc and free calls in the execution</span><span class="Constant">'</span>
-<span class="Statement">for</span> line <span class="Statement">in</span> lines:
-    <span class="Identifier">print</span> line,
+<span class="hl kwa">print</span> <span class="hl str">&#39;</span><span class="hl esc">\n</span><span class="hl str">These are all the malloc and free calls in the execution&#39;</span>
+<span class="hl kwa">for</span> line <span class="hl kwa">in</span> lines<span class="hl opt">:</span>
+    <span class="hl kwa">print</span> line<span class="hl opt">,</span>
 
-mems = {}
-<span class="Statement">for</span> line <span class="Statement">in</span> lines:
-    toks = line.split()
+mems <span class="hl opt">= {}</span>
+<span class="hl kwa">for</span> line <span class="hl kwa">in</span> lines<span class="hl opt">:</span>
+    toks <span class="hl opt">=</span> line<span class="hl opt">.</span><span class="hl kwd">split</span><span class="hl opt">()</span>
 
-    <span class="Comment"># malloc(size) = addr</span>
-    <span class="Statement">if</span> <span class="Constant">'</span><span class="Constant">malloc</span><span class="Constant">'</span> <span class="Statement">in</span> toks[<span class="Constant">0</span>]:
-        size = re.search(<span class="Constant">r'</span><span class="Constant">malloc\((.*)\)</span><span class="Constant">'</span>, toks[<span class="Constant">0</span>]).group(<span class="Constant">1</span>)
-        addr = toks[<span class="Constant">2</span>]
-        mems[addr] = size
+    <span class="hl slc"># malloc(size) = addr</span>
+    <span class="hl kwa">if</span> <span class="hl str">&#39;malloc&#39;</span> <span class="hl kwa">in</span> toks<span class="hl opt">[</span><span class="hl num">0</span><span class="hl opt">]:</span>
+        size <span class="hl opt">=</span> re<span class="hl opt">.</span><span class="hl kwd">search</span><span class="hl opt">(</span>r<span class="hl str">&#39;malloc\((.*)\)&#39;</span><span class="hl opt">,</span> toks<span class="hl opt">[</span><span class="hl num">0</span><span class="hl opt">]).</span><span class="hl kwd">group</span><span class="hl opt">(</span><span class="hl num">1</span><span class="hl opt">)</span>
+        addr <span class="hl opt">=</span> toks<span class="hl opt">[</span><span class="hl num">2</span><span class="hl opt">]</span>
+        mems<span class="hl opt">[</span>addr<span class="hl opt">] =</span> size
 
-    <span class="Comment"># free(addr) = &lt;void&gt;</span>
-    <span class="Statement">elif</span> <span class="Constant">'</span><span class="Constant">free</span><span class="Constant">'</span> <span class="Statement">in</span> toks[<span class="Constant">0</span>]:
-        addr = re.search(<span class="Constant">r'</span><span class="Constant">free\((.*)\)</span><span class="Constant">'</span>, toks[<span class="Constant">0</span>]).group(<span class="Constant">1</span>)
-        mems.pop(addr, <span class="Identifier">None</span>)
+    <span class="hl slc"># free(addr) = &lt;void&gt;</span>
+    <span class="hl kwa">elif</span> <span class="hl str">&#39;free&#39;</span> <span class="hl kwa">in</span> toks<span class="hl opt">[</span><span class="hl num">0</span><span class="hl opt">]:</span>
+        addr <span class="hl opt">=</span> re<span class="hl opt">.</span><span class="hl kwd">search</span><span class="hl opt">(</span>r<span class="hl str">&#39;free\((.*)\)&#39;</span><span class="hl opt">,</span> toks<span class="hl opt">[</span><span class="hl num">0</span><span class="hl opt">]).</span><span class="hl kwd">group</span><span class="hl opt">(</span><span class="hl num">1</span><span class="hl opt">)</span>
+        mems<span class="hl opt">.</span><span class="hl kwd">pop</span><span class="hl opt">(</span>addr<span class="hl opt">,</span> <span class="hl kwa">None</span><span class="hl opt">)</span>
 
-<span class="Identifier">print</span> <span class="Constant">'</span><span class="Special">\n</span><span class="Constant">Execution ended with the following non-freed allocations</span><span class="Constant">'</span>
-<span class="Statement">for</span> k, v <span class="Statement">in</span> mems.iteritems():
-    <span class="Identifier">print</span> <span class="Constant">'</span><span class="Constant">leaked</span><span class="Constant">'</span>, v, <span class="Constant">'</span><span class="Constant">bytes of memory at</span><span class="Constant">'</span>, k
+<span class="hl kwa">print</span> <span class="hl str">&#39;</span><span class="hl esc">\n</span><span class="hl str">Execution ended with the following non-freed allocations&#39;</span>
+<span class="hl kwa">for</span> k<span class="hl opt">,</span> v <span class="hl kwa">in</span> mems<span class="hl opt">.</span><span class="hl kwd">iteritems</span><span class="hl opt">():</span>
+    <span class="hl kwa">print</span> <span class="hl str">&#39;leaked&#39;</span><span class="hl opt">,</span> v<span class="hl opt">,</span> <span class="hl str">&#39;bytes of memory at&#39;</span><span class="hl opt">,</span> k
 </pre>
 </body>
 </html>
-<!-- vim: set foldmethod=manual : -->
+<!--HTML generated by highlight 3.62, http://www.andre-simon.de/-->
