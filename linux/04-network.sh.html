@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>04-network.sh</title>
+<link rel="stylesheet" type="text/css" href="../highlight.css">
+</head>
+<body class="hl">
+<pre class="hl"><span class="hl slc">#!/bin/sh</span>
+
+<span class="hl slc">## ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~</span>
+<span class="hl slc">## NETWORKING</span>
+<span class="hl slc">## ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~</span>
+
+<span class="hl slc"># ping (8) - send ICMP ECHO_REQUEST to network hosts</span>
+<span class="hl slc"># hostname (1) - show or set the system&#39;s host name</span>
+<span class="hl slc"># arp (8) - manipulate the system ARP cache</span>
+<span class="hl slc"># inetutils-traceroute (1) - Trace the route to a host</span>
+<span class="hl slc"># netstat (8) - Print network connections, routing tables, interface statistics, masquerade connections, and multicast memberships</span>
+<span class="hl slc"># tcpdump (8) - dump traffic on a network</span>
+
+<span class="hl slc"># send ICMP ECHO_REQUEST to &#39;example.com&#39; -- interrupt with Ctrl-c to quit</span>
+<span class="hl kwc">ping</span> example.com
+<span class="hl slc"># PING example.com (93.184.216.34) 56(84) bytes of data.</span>
+<span class="hl slc"># 64 bytes from 93.184.216.34 (93.184.216.34): icmp_seq=1 ttl=52 time=201 ms</span>
+<span class="hl slc"># 64 bytes from 93.184.216.34 (93.184.216.34): icmp_seq=2 ttl=52 time=225 ms</span>
+<span class="hl slc"># 64 bytes from 93.184.216.34 (93.184.216.34): icmp_seq=3 ttl=52 time=244 ms</span>
+<span class="hl slc"># ^C</span>
+<span class="hl slc"># --- example.com ping statistics ---</span>
+<span class="hl slc"># 3 packets transmitted, 3 received, 0% packet loss, time 2004ms</span>
+<span class="hl slc"># rtt min/avg/max/mdev = 201.991/223.954/244.408/17.353 ms</span>
+
+<span class="hl slc"># send ICMP ECHO_REQUEST to &#39;example.com&#39; three times</span>
+<span class="hl kwc">ping</span> <span class="hl kwb">-c</span> <span class="hl num">3</span> example.com
+<span class="hl slc"># PING example.com (93.184.216.34) 56(84) bytes of data.</span>
+<span class="hl slc"># 64 bytes from 93.184.216.34 (93.184.216.34): icmp_seq=1 ttl=52 time=165 ms</span>
+<span class="hl slc"># 64 bytes from 93.184.216.34 (93.184.216.34): icmp_seq=2 ttl=52 time=187 ms</span>
+<span class="hl slc"># 64 bytes from 93.184.216.34 (93.184.216.34): icmp_seq=3 ttl=52 time=204 ms</span>
+<span class="hl slc">#</span>
+<span class="hl slc"># --- example.com ping statistics ---</span>
+<span class="hl slc"># 3 packets transmitted, 3 received, 0% packet loss, time 2009ms</span>
+<span class="hl slc"># rtt min/avg/max/mdev = 165.847/186.036/204.693/15.895 ms</span>
+
+<span class="hl slc"># display system hostname</span>
+hostname
+<span class="hl slc"># gokcehan-VirtualBox</span>
+
+<span class="hl slc"># display ip address</span>
+hostname <span class="hl kwb">-I</span>
+<span class="hl slc"># 10.0.x.x</span>
+
+<span class="hl slc"># check external ip address using a third-party service</span>
+curl ifconfig.me
+<span class="hl slc"># 193.140.xxx.xxx</span>
+
+<span class="hl slc"># display current arp table</span>
+arp
+<span class="hl slc"># Address                  HWtype  HWaddress           Flags Mask            Iface</span>
+<span class="hl slc"># ardic.cc.boun.edu.tr             (incomplete)                              eno1</span>
+<span class="hl slc"># xxx.xxx.xxx.1            ether   xx:xx:xx:xx:xx:xx   C                     eno1</span>
+<span class="hl slc"># tesla.me.boun.edu.tr     ether   xx:xx:xx:xx:xx:xx   C                     eno1</span>
+<span class="hl slc"># simurg.cc.boun.edu.tr            (incomplete)                              eno1</span>
+
+<span class="hl slc"># display current arp table with numerical addresses</span>
+arp <span class="hl kwb">-n</span>
+<span class="hl slc"># Address                  HWtype  HWaddress           Flags Mask            Iface</span>
+<span class="hl slc"># xxx.xxx.xxx.20                   (incomplete)                              eno1</span>
+<span class="hl slc"># xxx.xxx.xxx.1            ether   xx:xx:xx:xx:xx:xx   C                     eno1</span>
+<span class="hl slc"># xxx.xxx.xxx.69           ether   xx:xx:xx:xx:xx:xx   C                     eno1</span>
+<span class="hl slc"># xxx.xxx.xxx.50                   (incomplete)                              eno1</span>
+
+<span class="hl slc"># track route packets to &#39;example.com&#39;</span>
+<span class="hl kwc">traceroute</span> example.com
+<span class="hl slc"># traceroute to example.com (93.184.216.34), 30 hops max, 60 byte packets</span>
+<span class="hl slc">#  1  193.140.xxx.1 (193.140.xxx.1)  4.925 ms  5.146 ms  5.806 ms</span>
+<span class="hl slc">#  2  192.168.200.1 (192.168.200.1)  2.868 ms  3.289 ms  3.378 ms</span>
+<span class="hl slc">#  3  192.168.192.70 (192.168.192.70)  0.760 ms  0.774 ms  0.932 ms</span>
+<span class="hl slc">#  4  193.140.194.1 (193.140.194.1)  1.435 ms  1.449 ms  1.684 ms</span>
+<span class="hl slc">#  5  193.255.0.217 (193.255.0.217)  3.011 ms  3.018 ms  3.221 ms</span>
+<span class="hl slc">#  6  193.140.0.149 (193.140.0.149)  9.441 ms  8.718 ms  9.585 ms</span>
+<span class="hl slc">#  7  host-85-29-25-9.reverse.superonline.net (85.29.25.9)  8.929 ms  9.135 ms  9.180 ms</span>
+<span class="hl slc">#  8  * * *</span>
+<span class="hl slc">#  9  * * *</span>
+<span class="hl slc"># 10  * * *</span>
+<span class="hl slc"># 11  * * *</span>
+<span class="hl slc"># 12  * * *</span>
+<span class="hl slc"># 13  * * *</span>
+<span class="hl slc"># 14  ix-ae-10-0.tcore1.IT5-Istanbul.as6453.net (5.23.0.37)  13.802 ms  13.814 ms  13.787 ms</span>
+<span class="hl slc"># 15  if-ae-8-2.tcore1.FNM-Frankfurt.as6453.net (195.219.156.21)  63.382 ms  63.929 ms  62.853 ms</span>
+<span class="hl slc"># 16  if-ae-12-2.tcore2.FNM-Frankfurt.as6453.net (195.219.87.1)  51.188 ms  54.153 ms  61.829 ms</span>
+<span class="hl slc"># 17  ffm-b1-link.telia.net (213.248.82.40)  55.953 ms  57.335 ms  55.975 ms</span>
+<span class="hl slc"># 18  ffm-bb3-link.telia.net (62.115.137.128)  56.951 ms  53.125 ms ffm-bb4-link.telia.net (62.115.137.166)  54.949 ms</span>
+<span class="hl slc"># 19  ash-bb4-link.telia.net (62.115.141.108)  150.267 ms hbg-bb4-link.telia.net (213.155.135.141)  69.194 ms ash-bb4-link.telia.net (62.115.141.108)  157.538 ms</span>
+<span class="hl slc"># 20  ash-b1-link.telia.net (213.155.136.39)  159.854 ms kbn-bb3-link.telia.net (62.115.115.96)  74.760 ms ash-b1-link.telia.net (213.155.136.39)  146.984 ms</span>
+<span class="hl slc"># 21  edgecast-ic-315151-ash-b1.c.telia.net (195.12.254.154)  150.414 ms edgecast-ic-315152-ash-b1.c.telia.net (213.155.141.226)  149.454 ms edgecast-ic-315151-ash-b1.c.telia.net (195.12.254.154)  147.807 ms</span>
+<span class="hl slc"># 22  nyk-bb3-link.telia.net (80.91.247.127)  138.630 ms 152.195.65.133 (152.195.65.133)  154.188 ms 152.195.64.133 (152.195.64.133)  156.731 ms</span>
+<span class="hl slc"># 23  93.184.216.34 (93.184.216.34)  151.871 ms  152.085 ms ash-b1-link.telia.net (80.91.248.157)  150.086 ms</span>
+
+<span class="hl slc"># display network interface table</span>
+netstat <span class="hl kwb">-i</span>
+<span class="hl slc"># Kernel Interface table</span>
+<span class="hl slc"># Iface   MTU Met   RX-OK RX-ERR RX-DRP RX-OVR    TX-OK TX-ERR TX-DRP TX-OVR Flg</span>
+<span class="hl slc"># eno1       1500 0    590598      0      0 0        235380      0      0      0 BMRU</span>
+<span class="hl slc"># lo        65536 0       534      0      0 0           534      0      0      0 LRU</span>
+
+<span class="hl slc"># display kernel routing table</span>
+netstat <span class="hl kwb">-r</span>
+<span class="hl slc"># Kernel IP routing table</span>
+<span class="hl slc"># Destination     Gateway         Genmask         Flags   MSS Window  irtt Iface</span>
+<span class="hl slc"># default         xxx.xxx.xxx.1   0.0.0.0         UG        0 0          0 eno1</span>
+<span class="hl slc"># link-local      *               255.255.0.0     U         0 0          0 eno1</span>
+<span class="hl slc"># xxx.xxx.xxx.2   xxx.xxx.xxx.1   255.255.255.255 UGH       0 0          0 eno1</span>
+<span class="hl slc"># xxx.xxx.xxx.0   *               255.255.255.0   U         0 0          0 eno1</span>
+
+<span class="hl slc"># display kernel routing table with numerical addresses</span>
+netstat <span class="hl kwb">-rn</span>
+<span class="hl slc"># Kernel IP routing table</span>
+<span class="hl slc"># Destination     Gateway         Genmask         Flags   MSS Window  irtt Iface</span>
+<span class="hl slc"># 0.0.0.0         xxx.xxx.xxx.1   0.0.0.0         UG        0 0          0 eno1</span>
+<span class="hl slc"># xxx.xxx.xxx.0   0.0.0.0         255.255.0.0     U         0 0          0 eno1</span>
+<span class="hl slc"># xxx.xxx.xxx.2   xxx.xxx.xxx.1   255.255.255.255 UGH       0 0          0 eno1</span>
+<span class="hl slc"># xxx.xxx.xxx.0   0.0.0.0         255.255.255.0   U         0 0          0 eno1</span>
+
+<span class="hl slc"># display statistics for each protocol</span>
+netstat <span class="hl kwb">-s</span>
+<span class="hl slc"># (displays the information)</span>
+
+<span class="hl slc"># display all open ports</span>
+netstat
+<span class="hl slc"># (displays the information)</span>
+
+<span class="hl slc"># display all listening ports</span>
+netstat <span class="hl kwb">-l</span>
+<span class="hl slc"># (displays the information)</span>
+
+<span class="hl slc"># display all open ports with program names</span>
+netstat <span class="hl kwb">-p</span>
+<span class="hl slc"># (displays the information)</span>
+
+<span class="hl slc"># capture all network packets</span>
+sudo tcpdump
+<span class="hl slc"># (shows packets)</span>
+
+<span class="hl slc"># capture all network packets without converting addresses</span>
+sudo tcpdump <span class="hl kwb">-n</span>
+<span class="hl slc"># (shows packets)</span>
+
+<span class="hl slc"># capture all network packets using src or dst port 22</span>
+sudo tcpdump port <span class="hl num">22</span>
+<span class="hl slc"># (shows packets)</span>
+
+<span class="hl slc"># capture all network packets using port 20 or 21</span>
+sudo tcpdump port <span class="hl num">20</span> or port <span class="hl num">21</span>
+<span class="hl slc"># (shows packets)</span>
+
+<span class="hl slc"># capture all network packets using port 80 and print in ascii form</span>
+sudo tcpdump port <span class="hl num">80</span> <span class="hl kwb">-A</span>
+<span class="hl slc"># (shows packets)</span>
+
+<span class="hl slc"># capture all network packets and save to &#39;foo.pcap&#39; file</span>
+sudo tcpdump <span class="hl kwb">-w</span> foo.pcap
+<span class="hl slc"># (writes packets to the file)</span>
+
+<span class="hl slc"># select all network packets in &#39;foo.pcap&#39; file using port 80 and print in ascii form</span>
+tcpdump <span class="hl kwb">-r</span> foo.pcap port <span class="hl num">80</span> <span class="hl kwb">-A</span>
+<span class="hl slc"># (reads packets from the file)</span>
+
+<span class="hl slc">## ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~</span>
+<span class="hl slc">## CONFIGURATION</span>
+<span class="hl slc">## ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~</span>
+
+<span class="hl slc"># ifconfig (8) - configure a network interface</span>
+<span class="hl slc"># ifup (8) - bring a network interface up</span>
+<span class="hl slc"># ifdown (8) - take a network interface down</span>
+<span class="hl slc"># ip (8) - show / manipulate routing, devices, policy routing and tunnels</span>
+
+<span class="hl slc"># display statuses of currently active interfaces</span>
+ifconfig
+<span class="hl slc"># eno1      Link encap:Ethernet  HWaddr xx:xx:xx:xx:xx:xx</span>
+<span class="hl slc">#           inet addr:xxx.xxx.xxx.xxx  Bcast:xxx.xxx.xxx.255  Mask:255.255.255.0</span>
+<span class="hl slc">#           inet6 addr: fe80::b3b3:46b1:7592:cb6/64 Scope:Link</span>
+<span class="hl slc">#           UP BROADCAST RUNNING MULTICAST  MTU:1500  Metric:1</span>
+<span class="hl slc">#           RX packets:604008 errors:0 dropped:0 overruns:0 frame:0</span>
+<span class="hl slc">#           TX packets:238267 errors:0 dropped:0 overruns:0 carrier:0</span>
+<span class="hl slc">#           collisions:0 txqueuelen:1000</span>
+<span class="hl slc">#           RX bytes:608197341 (608.1 MB)  TX bytes:31493090 (31.4 MB)</span>
+<span class="hl slc">#           Interrupt:20 Memory:ec100000-ec120000</span>
+<span class="hl slc">#</span>
+<span class="hl slc"># lo        Link encap:Local Loopback</span>
+<span class="hl slc">#           inet addr:127.0.0.1  Mask:255.0.0.0</span>
+<span class="hl slc">#           inet6 addr: ::1/128 Scope:Host</span>
+<span class="hl slc">#           UP LOOPBACK RUNNING  MTU:65536  Metric:1</span>
+<span class="hl slc">#           RX packets:534 errors:0 dropped:0 overruns:0 frame:0</span>
+<span class="hl slc">#           TX packets:534 errors:0 dropped:0 overruns:0 carrier:0</span>
+<span class="hl slc">#           collisions:0 txqueuelen:1000</span>
+<span class="hl slc">#           RX bytes:42160 (42.1 KB)  TX bytes:42160 (42.1 KB)</span>
+<span class="hl slc">#</span>
+
+<span class="hl slc"># disables &#39;eno1&#39; interface</span>
+sudo ifconfig eno1 down
+<span class="hl slc"># (interface is disabled)</span>
+
+<span class="hl slc"># set MAC address of &#39;eno1&#39; interface to &#39;00:00:00:00:00:01&#39;</span>
+sudo ifconfig eno1 hw ether <span class="hl num">00</span><span class="hl opt">:</span><span class="hl num">00</span><span class="hl opt">:</span><span class="hl num">00</span><span class="hl opt">:</span><span class="hl num">00</span><span class="hl opt">:</span><span class="hl num">00</span><span class="hl opt">:</span><span class="hl num">01</span>
+<span class="hl slc"># (MAC address is changed)</span>
+
+<span class="hl slc"># change MTU size of &#39;eno1&#39; interface to &#39;1492&#39;</span>
+sudo ifconfig eno1 mtu <span class="hl num">1492</span>
+<span class="hl slc"># (MTU size is changed)</span>
+
+<span class="hl slc"># enables &#39;eno1&#39; interface</span>
+sudo ifconfig eno1 up
+<span class="hl slc"># (interface is enabled)</span>
+
+<span class="hl slc"># disables &#39;eno1&#39; interface</span>
+sudo ifdown eno1
+<span class="hl slc"># (interface is disabled)</span>
+
+<span class="hl slc"># enables eno1 interface</span>
+sudo ifup eno1
+<span class="hl slc"># (interface is enabled)</span>
+
+<span class="hl slc"># display addresses of all network interfaces</span>
+ip addr
+<span class="hl slc"># 1: lo: &lt;LOOPBACK,UP,LOWER_UP&gt; mtu 65536 qdisc noqueue state UNKNOWN group default qlen 1000</span>
+<span class="hl slc">#     link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00</span>
+<span class="hl slc">#     inet 127.0.0.1/8 scope host lo</span>
+<span class="hl slc">#        valid_lft forever preferred_lft forever</span>
+<span class="hl slc">#     inet6 ::1/128 scope host</span>
+<span class="hl slc">#        valid_lft forever preferred_lft forever</span>
+<span class="hl slc"># 2: eno1: &lt;BROADCAST,MULTICAST,UP,LOWER_UP&gt; mtu 1500 qdisc pfifo_fast state UP group default qlen 1000</span>
+<span class="hl slc">#     link/ether 00:00:00:00:00:01 brd ff:ff:ff:ff:ff:ff</span>
+<span class="hl slc">#     inet xxx.xxx.xxx.49/24 brd 193.140.xxx.255 scope global dynamic eno1</span>
+<span class="hl slc">#        valid_lft 1197sec preferred_lft 1197sec</span>
+<span class="hl slc">#     inet6 fe80::b3b3:46b1:7592:cb6/64 scope link</span>
+<span class="hl slc">#        valid_lft forever preferred_lft forever</span>
+
+<span class="hl slc"># display states of all network interfaces</span>
+ip link
+<span class="hl slc"># 1: lo: &lt;LOOPBACK,UP,LOWER_UP&gt; mtu 65536 qdisc noqueue state UNKNOWN mode DEFAULT group default qlen 1000</span>
+<span class="hl slc">#     link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00</span>
+<span class="hl slc"># 2: eno1: &lt;BROADCAST,MULTICAST,UP,LOWER_UP&gt; mtu 1500 qdisc pfifo_fast state UP mode DEFAULT group default qlen 1000</span>
+<span class="hl slc">#     link/ether 00:00:00:00:00:01 brd ff:ff:ff:ff:ff:ff</span>
+
+<span class="hl slc"># display kernel routing table</span>
+ip route
+<span class="hl slc"># default via xxx.xxx.xxx.1 dev eno1  proto static  metric 100</span>
+<span class="hl slc"># xxx.xxx.xxx.0/16 dev eno1  scope link  metric 1000</span>
+<span class="hl slc"># xxx.xxx.xxx.2 via xxx.xxx.xxx.1 dev eno1  proto dhcp  metric 100</span>
+<span class="hl slc"># xxx.xxx.xxx.0/24 dev eno1  proto kernel  scope link  src xxx.xxx.xxx.124  metric 100</span>
+
+<span class="hl slc"># disable &#39;eno1&#39; interface</span>
+sudo ip link <span class="hl kwb">set</span> eno1 down
+<span class="hl slc"># (interface is disabled)</span>
+
+<span class="hl slc"># enable &#39;eno1&#39; interface</span>
+sudo ip link <span class="hl kwb">set</span> eno1 up
+<span class="hl slc"># (interface is enabled)</span>
+
+<span class="hl slc">## ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~</span>
+<span class="hl slc">## NAME RESOLUTION</span>
+<span class="hl slc">## ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~</span>
+
+<span class="hl slc"># nslookup (1) - query Internet name servers interactively</span>
+<span class="hl slc"># host (1) - DNS lookup utility</span>
+<span class="hl slc"># dig (1) - DNS lookup utility</span>
+
+<span class="hl slc"># Domain Name System (DNS)</span>
+<span class="hl slc"># ~~~</span>
+<span class="hl slc"># Translates domain names to IP addresses</span>
+<span class="hl slc"># Known hosts are listed in `/etc/hosts`</span>
+<span class="hl slc"># DNS servers are configured in `/etc/resolv.conf`</span>
+
+<span class="hl slc"># query the address of a site</span>
+<span class="hl kwc">nslookup</span> example.com
+<span class="hl slc"># Server:         193.140.192.20</span>
+<span class="hl slc"># Address:        193.140.192.20#53</span>
+<span class="hl slc">#</span>
+<span class="hl slc"># Non-authoritative answer:</span>
+<span class="hl slc"># Name:   example.com</span>
+<span class="hl slc"># Address: 93.184.216.34</span>
+
+<span class="hl slc"># query the address of a site using a different DNS server</span>
+<span class="hl kwc">nslookup</span> example.com <span class="hl num">8.8.8.8</span>
+<span class="hl slc"># Server:		8.8.8.8</span>
+<span class="hl slc"># Address:	8.8.8.8#53</span>
+<span class="hl slc">#</span>
+<span class="hl slc"># Non-authoritative answer:</span>
+<span class="hl slc"># Name:	example.com</span>
+<span class="hl slc"># Address: 93.184.216.34</span>
+<span class="hl slc">#</span>
+
+<span class="hl slc"># reverse query an IP address</span>
+<span class="hl kwc">nslookup</span> <span class="hl num">93.184.216.34</span>
+<span class="hl slc"># Server:         193.140.192.20</span>
+<span class="hl slc"># Address:        193.140.192.20#53</span>
+<span class="hl slc">#</span>
+<span class="hl slc"># ** server can&#39;t find 34.216.184.93.in-addr.arpa.: NXDOMAIN</span>
+
+<span class="hl slc"># query the address of a site</span>
+<span class="hl kwc">host</span> example.com
+<span class="hl slc"># example.com has address 93.184.216.34</span>
+<span class="hl slc"># example.com has IPv6 address 2606:2800:220:1:248:1893:25c8:1946</span>
+
+<span class="hl slc"># query the address of a site using a different DNS server</span>
+<span class="hl kwc">host</span> example.com <span class="hl num">8.8.8.8</span>
+<span class="hl slc"># Using domain server:</span>
+<span class="hl slc"># Name: 8.8.8.8</span>
+<span class="hl slc"># Address: 8.8.8.8#53</span>
+<span class="hl slc"># Aliases:</span>
+<span class="hl slc">#</span>
+<span class="hl slc"># example.com has address 93.184.216.34</span>
+<span class="hl slc"># example.com has IPv6 address 2606:2800:220:1:248:1893:25c8:1946</span>
+
+<span class="hl slc"># reverse query an IP address</span>
+<span class="hl kwc">host</span> <span class="hl num">93.184.216.34</span>
+<span class="hl slc"># Host 34.216.184.93.in-addr.arpa. not found: 3(NXDOMAIN)</span>
+
+<span class="hl slc"># query the address of a site</span>
+<span class="hl kwc">dig</span> example.com
+<span class="hl slc"># ; &lt;&lt;&gt;&gt; DiG 9.10.3-P4-Ubuntu &lt;&lt;&gt;&gt; example.com</span>
+<span class="hl slc"># ;; global options: +cmd</span>
+<span class="hl slc"># ;; Got answer:</span>
+<span class="hl slc"># ;; -&gt;&gt;HEADER&lt;&lt;- opcode: QUERY, status: NOERROR, id: 27151</span>
+<span class="hl slc"># ;; flags: qr rd ra; QUERY: 1, ANSWER: 1, AUTHORITY: 2, ADDITIONAL: 3</span>
+<span class="hl slc">#</span>
+<span class="hl slc"># ;; OPT PSEUDOSECTION:</span>
+<span class="hl slc"># ; EDNS: version: 0, flags:; udp: 4096</span>
+<span class="hl slc"># ;; QUESTION SECTION:</span>
+<span class="hl slc"># ;example.com.			IN	A</span>
+<span class="hl slc">#</span>
+<span class="hl slc"># ;; ANSWER SECTION:</span>
+<span class="hl slc"># example.com.		27485	IN	A	93.184.216.34</span>
+<span class="hl slc">#</span>
+<span class="hl slc"># ;; AUTHORITY SECTION:</span>
+<span class="hl slc"># example.com.		27485	IN	NS	b.iana-servers.net.</span>
+<span class="hl slc"># example.com.		27485	IN	NS	a.iana-servers.net.</span>
+<span class="hl slc">#</span>
+<span class="hl slc"># ;; ADDITIONAL SECTION:</span>
+<span class="hl slc"># a.iana-servers.net.	1072	IN	A	199.43.135.53</span>
+<span class="hl slc"># b.iana-servers.net.	1072	IN	A	199.43.133.53</span>
+<span class="hl slc">#</span>
+<span class="hl slc"># ;; Query time: 237 msec</span>
+<span class="hl slc"># ;; SERVER: 193.140.192.20#53(193.140.192.20)</span>
+<span class="hl slc"># ;; WHEN: Sat Sep 23 17:33:00 +03 2017</span>
+<span class="hl slc"># ;; MSG SIZE  rcvd: 136</span>
+<span class="hl slc">#</span>
+
+<span class="hl slc"># query the address of a site using a different DNS server</span>
+<span class="hl kwc">dig</span> &#64;<span class="hl num">8.8.8.8</span> example.com
+<span class="hl slc"># ; &lt;&lt;&gt;&gt; DiG 9.10.3-P4-Ubuntu &lt;&lt;&gt;&gt; &#64;8.8.8.8 example.com</span>
+<span class="hl slc"># ; (1 server found)</span>
+<span class="hl slc"># ;; global options: +cmd</span>
+<span class="hl slc"># ;; Got answer:</span>
+<span class="hl slc"># ;; -&gt;&gt;HEADER&lt;&lt;- opcode: QUERY, status: NOERROR, id: 46070</span>
+<span class="hl slc"># ;; flags: qr rd ra ad; QUERY: 1, ANSWER: 1, AUTHORITY: 0, ADDITIONAL: 1</span>
+<span class="hl slc">#</span>
+<span class="hl slc"># ;; OPT PSEUDOSECTION:</span>
+<span class="hl slc"># ; EDNS: version: 0, flags:; udp: 512</span>
+<span class="hl slc"># ;; QUESTION SECTION:</span>
+<span class="hl slc"># ;example.com.			IN	A</span>
+<span class="hl slc">#</span>
+<span class="hl slc"># ;; ANSWER SECTION:</span>
+<span class="hl slc"># example.com.		50153	IN	A	93.184.216.34</span>
+<span class="hl slc">#</span>
+<span class="hl slc"># ;; Query time: 37 msec</span>
+<span class="hl slc"># ;; SERVER: 8.8.8.8#53(8.8.8.8)</span>
+<span class="hl slc"># ;; WHEN: Sat Sep 23 17:34:27 +03 2017</span>
+<span class="hl slc"># ;; MSG SIZE  rcvd: 56</span>
+<span class="hl slc">#</span>
+
+<span class="hl slc"># reverse query an IP address</span>
+<span class="hl kwc">dig</span> <span class="hl kwb">-x</span> <span class="hl num">93.184.216.34</span>
+<span class="hl slc"># ; &lt;&lt;&gt;&gt; DiG 9.11.3-1ubuntu1.9-Ubuntu &lt;&lt;&gt;&gt; -x 93.184.216.34</span>
+<span class="hl slc"># ;; global options: +cmd</span>
+<span class="hl slc"># ;; Got answer:</span>
+<span class="hl slc"># ;; -&gt;&gt;HEADER&lt;&lt;- opcode: QUERY, status: NXDOMAIN, id: 36024</span>
+<span class="hl slc"># ;; flags: qr rd ra; QUERY: 1, ANSWER: 0, AUTHORITY: 0, ADDITIONAL: 1</span>
+<span class="hl slc"># </span>
+<span class="hl slc"># ;; OPT PSEUDOSECTION:</span>
+<span class="hl slc"># ; EDNS: version: 0, flags:; udp: 65494</span>
+<span class="hl slc"># ;; QUESTION SECTION:</span>
+<span class="hl slc"># ;34.216.184.93.in-addr.arpa.	IN	PTR</span>
+<span class="hl slc"># </span>
+<span class="hl slc"># ;; Query time: 1 msec</span>
+<span class="hl slc"># ;; SERVER: 127.0.0.53#53(127.0.0.53)</span>
+<span class="hl slc"># ;; WHEN: Sat Oct 19 22:51:33 +03 2019</span>
+<span class="hl slc"># ;; MSG SIZE  rcvd: 55</span>
+<span class="hl slc"># </span>
+
+<span class="hl slc">## ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~</span>
+<span class="hl slc">## REMOTE CONNECTIONS</span>
+<span class="hl slc">## ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~</span>
+
+<span class="hl slc"># telnet (1) - user interface to the TELNET protocol</span>
+<span class="hl slc"># nc (1) - arbitrary TCP and UDP connections and listens</span>
+<span class="hl slc"># ssh (1) - OpenSSH SSH client (remote login program)</span>
+<span class="hl slc"># scp (1) - secure copy (remote file copy program)</span>
+<span class="hl slc"># rsync (1) - a fast, versatile, remote (and local) file-copying tool</span>
+<span class="hl slc"># sshfs (1) - filesystem client based on ssh</span>
+<span class="hl slc"># curl (1) - transfer a URL</span>
+<span class="hl slc"># wget (1) - The non-interactive network downloader.</span>
+
+<span class="hl slc"># create &#39;hello.html&#39; file with content up to &#39;EOF&#39;</span>
+<span class="hl kwc">cat</span> <span class="hl str">&lt;&lt; &#39;EOF&#39; &gt; hello.html</span>
+<span class="hl str">&lt;!DOCTYPE html&gt;</span>
+<span class="hl str">&lt;html&gt;</span>
+<span class="hl str">&lt;head&gt;</span>
+<span class="hl str">&lt;meta charset=&quot;UTF-8&quot;&gt;</span>
+<span class="hl str">&lt;title&gt;Title of the document&lt;/title&gt;</span>
+<span class="hl str">&lt;/head&gt;</span>
+<span class="hl str">&lt;body&gt;</span>
+<span class="hl str">Hello World!</span>
+<span class="hl str">&lt;/body&gt;</span>
+<span class="hl str">&lt;/html&gt;</span>
+<span class="hl str">EOF</span>
+<span class="hl slc"># (creates the file)</span>
+
+<span class="hl slc"># start an HTTP server on localhost</span>
+python <span class="hl kwb">-m</span> SimpleHTTPServer
+<span class="hl slc"># Serving HTTP on 0.0.0.0 port 8000 ...</span>
+<span class="hl slc"># 127.0.0.1 - - [23/Sep/2017 18:18:15] &quot;GET /hello.html HTTP/1.1&quot; 200 -</span>
+<span class="hl slc"># 127.0.0.1 - - [23/Sep/2017 18:18:36] &quot;GET /hello.html HTTP/1.1&quot; 200 -</span>
+
+<span class="hl slc"># make a GET request from localhost on port 8000</span>
+<span class="hl kwc">telnet</span> localhost <span class="hl num">8000</span>
+<span class="hl slc"># Trying 127.0.0.1...</span>
+<span class="hl slc"># Connected to localhost.</span>
+<span class="hl slc"># Escape character is &#39;^]&#39;.</span>
+<span class="hl slc"># GET /hello.html HTTP/1.1</span>
+<span class="hl slc">#</span>
+<span class="hl slc"># HTTP/1.0 200 OK</span>
+<span class="hl slc"># Server: SimpleHTTP/0.6 Python/2.7.12</span>
+<span class="hl slc"># Date: Sat, 23 Sep 2017 14:47:38 GMT</span>
+<span class="hl slc"># Content-type: text/html</span>
+<span class="hl slc"># Content-Length: 135</span>
+<span class="hl slc"># Last-Modified: Sat, 23 Sep 2017 14:41:22 GMT</span>
+<span class="hl slc">#</span>
+<span class="hl slc"># &lt;!DOCTYPE html&gt;</span>
+<span class="hl slc"># &lt;html&gt;</span>
+<span class="hl slc"># &lt;head&gt;</span>
+<span class="hl slc"># &lt;meta charset=&quot;UTF-8&quot;&gt;</span>
+<span class="hl slc"># &lt;title&gt;Title of the document&lt;/title&gt;</span>
+<span class="hl slc"># &lt;/head&gt;</span>
+<span class="hl slc"># &lt;body&gt;</span>
+<span class="hl slc"># Hello World!</span>
+<span class="hl slc"># &lt;/body&gt;</span>
+<span class="hl slc"># &lt;/html&gt;</span>
+<span class="hl slc"># Connection closed by foreign host.</span>
+
+<span class="hl slc"># make a GET request from localhost on port 8000</span>
+<span class="hl kwb">printf</span> <span class="hl str">&quot;GET /hello.html HTTP/1.1</span><span class="hl esc">\r\n\r\n</span><span class="hl str">&quot;</span> <span class="hl opt">|</span> nc localhost <span class="hl num">8000</span>
+<span class="hl slc"># HTTP/1.0 200 OK</span>
+<span class="hl slc"># Server: SimpleHTTP/0.6 Python/2.7.12</span>
+<span class="hl slc"># Date: Sat, 23 Sep 2017 15:18:36 GMT</span>
+<span class="hl slc"># Content-type: text/html</span>
+<span class="hl slc"># Content-Length: 135</span>
+<span class="hl slc"># Last-Modified: Sat, 23 Sep 2017 14:41:22 GMT</span>
+<span class="hl slc">#</span>
+<span class="hl slc"># &lt;!DOCTYPE html&gt;</span>
+<span class="hl slc"># &lt;html&gt;</span>
+<span class="hl slc"># &lt;head&gt;</span>
+<span class="hl slc"># &lt;meta charset=&quot;UTF-8&quot;&gt;</span>
+<span class="hl slc"># &lt;title&gt;Title of the document&lt;/title&gt;</span>
+<span class="hl slc"># &lt;/head&gt;</span>
+<span class="hl slc"># &lt;body&gt;</span>
+<span class="hl slc"># Hello World!</span>
+<span class="hl slc"># &lt;/body&gt;</span>
+<span class="hl slc"># &lt;/html&gt;</span>
+
+<span class="hl slc"># start an SMTP server on localhost</span>
+python <span class="hl kwb">-m</span> smtpd <span class="hl kwb">-n -c</span> DebuggingServer localhost<span class="hl opt">:</span><span class="hl num">8025</span>
+<span class="hl slc"># ---------- MESSAGE FOLLOWS ----------</span>
+<span class="hl slc"># Body of email.</span>
+<span class="hl slc"># ------------ END MESSAGE ------------</span>
+<span class="hl slc"># ---------- MESSAGE FOLLOWS ----------</span>
+<span class="hl slc"># Body of email.</span>
+<span class="hl slc"># ------------ END MESSAGE ------------</span>
+
+<span class="hl slc"># send an email to localhost on port 8025</span>
+<span class="hl kwc">telnet</span> localhost <span class="hl num">8025</span>
+<span class="hl slc"># Trying 127.0.0.1...</span>
+<span class="hl slc"># Connected to localhost.</span>
+<span class="hl slc"># Escape character is &#39;^]&#39;.</span>
+<span class="hl slc"># 220 ext Python SMTP proxy version 0.2</span>
+<span class="hl slc"># HELO host.example.com</span>
+<span class="hl slc"># MAIL FROM:&lt;user&#64;host.example.com&gt;</span>
+<span class="hl slc"># RCPT TO:&lt;user2&#64;host.example.com&gt;</span>
+<span class="hl slc"># DATA</span>
+<span class="hl slc"># Body of email.</span>
+<span class="hl slc"># .</span>
+<span class="hl slc"># QUIT</span>
+<span class="hl slc"># 250 ext</span>
+<span class="hl slc"># 250 Ok</span>
+<span class="hl slc"># 250 Ok</span>
+<span class="hl slc"># 354 End data with &lt;CR&gt;&lt;LF&gt;.&lt;CR&gt;&lt;LF&gt;</span>
+<span class="hl slc"># 250 Ok</span>
+<span class="hl slc"># 221 Bye</span>
+<span class="hl slc"># Connection closed by foreign host.</span>
+
+<span class="hl slc"># send an email to localhost on port 8025</span>
+<span class="hl kwb">printf</span> <span class="hl str">&quot;HELO host.example.com</span><span class="hl esc">\r</span>
+<span class="hl str">MAIL FROM:&lt;user&#64;host.example.com&gt;</span><span class="hl esc">\r</span>
+<span class="hl str">RCPT TO:&lt;user2&#64;host.example.com&gt;</span><span class="hl esc">\r</span>
+<span class="hl str">DATA</span><span class="hl esc">\r</span>
+<span class="hl str">Body of email.</span><span class="hl esc">\r</span>
+<span class="hl str">.</span><span class="hl esc">\r</span>
+<span class="hl str">QUIT</span><span class="hl esc">\r\n</span><span class="hl str">&quot;</span> <span class="hl opt">|</span> nc localhost <span class="hl num">8025</span>
+<span class="hl slc"># 220 ext Python SMTP proxy version 0.2</span>
+<span class="hl slc"># 250 ext</span>
+<span class="hl slc"># 250 Ok</span>
+<span class="hl slc"># 250 Ok</span>
+<span class="hl slc"># 354 End data with &lt;CR&gt;&lt;LF&gt;.&lt;CR&gt;&lt;LF&gt;</span>
+<span class="hl slc"># 250 Ok</span>
+<span class="hl slc"># 221 Bye</span>
+
+<span class="hl slc"># listen port 1234 and send &#39;hello.html&#39;</span>
+nc <span class="hl kwb">-l</span> <span class="hl num">1234</span> <span class="hl opt">&lt;</span> hello.html
+<span class="hl slc"># (listens the port)</span>
+
+<span class="hl slc"># connect localhost on port 1234</span>
+nc localhost <span class="hl num">1234</span>
+<span class="hl slc"># &lt;!DOCTYPE html&gt;</span>
+<span class="hl slc"># &lt;html&gt;</span>
+<span class="hl slc"># &lt;head&gt;</span>
+<span class="hl slc"># &lt;meta charset=&quot;UTF-8&quot;&gt;</span>
+<span class="hl slc"># &lt;title&gt;Title of the document&lt;/title&gt;</span>
+<span class="hl slc"># &lt;/head&gt;</span>
+<span class="hl slc"># &lt;body&gt;</span>
+<span class="hl slc"># Hello World!</span>
+<span class="hl slc"># &lt;/body&gt;</span>
+<span class="hl slc"># &lt;/html&gt;</span>
+
+<span class="hl slc"># connect to &#39;example.com&#39; as &#39;user&#39; using SSH</span>
+<span class="hl kwc">ssh</span> user&#64;example.com
+<span class="hl slc"># (connects to the server)</span>
+
+<span class="hl slc"># transfer &#39;hello.html&#39; file to the remote server using SSH</span>
+scp hello.html user&#64;example.com<span class="hl opt">:</span>~
+<span class="hl slc"># (transfers the file)</span>
+
+<span class="hl slc"># transfer &#39;hello.html&#39; file from the remote server using SSH</span>
+scp user&#64;example.com<span class="hl opt">:</span>~<span class="hl opt">/</span>hello.html .
+<span class="hl slc"># (transfers the file)</span>
+
+<span class="hl slc"># transfer &#39;hello.html&#39; file to the remote server using SSH</span>
+rsync hello.html user&#64;example.com<span class="hl opt">:</span>~
+<span class="hl slc"># (transfers the file)</span>
+
+<span class="hl slc"># transfer &#39;hello.html&#39; file from the remote server using SSH</span>
+rsync user&#64;example.com<span class="hl opt">:</span>~<span class="hl opt">/</span>hello.html .
+<span class="hl slc"># (transfers the file)</span>
+
+<span class="hl slc"># create an empty directory for mounting</span>
+<span class="hl kwc">mkdir</span> mnt
+<span class="hl slc"># (creates the directory)</span>
+
+<span class="hl slc"># mount home directory of the remote server to &#39;mnt&#39; directory</span>
+sshfs user&#64;example.com<span class="hl opt">:/</span>home<span class="hl opt">/</span>user mnt
+<span class="hl slc"># (mounts the directory)</span>
+
+<span class="hl slc"># unmount &#39;mnt&#39; directory</span>
+fusermount <span class="hl kwb">-u</span> mnt
+<span class="hl slc"># (unmounts the directory)</span>
+
+<span class="hl slc"># display &#39;example.com&#39; page</span>
+curl example.com
+<span class="hl slc"># &lt;!doctype html&gt;</span>
+<span class="hl slc"># &lt;html&gt;</span>
+<span class="hl slc"># &lt;head&gt;</span>
+<span class="hl slc"># ...</span>
+<span class="hl slc"># &lt;/head&gt;</span>
+<span class="hl slc">#</span>
+<span class="hl slc"># &lt;body&gt;</span>
+<span class="hl slc"># &lt;div&gt;</span>
+<span class="hl slc">#     &lt;h1&gt;Example Domain&lt;/h1&gt;</span>
+<span class="hl slc">#     &lt;p&gt;This domain is established to be used for illustrative examples in documents. You may use this</span>
+<span class="hl slc">#     domain in examples without prior coordination or asking for permission.&lt;/p&gt;</span>
+<span class="hl slc">#     &lt;p&gt;&lt;a href=&quot;http://www.iana.org/domains/example&quot;&gt;More information...&lt;/a&gt;&lt;/p&gt;</span>
+<span class="hl slc"># &lt;/div&gt;</span>
+<span class="hl slc"># &lt;/body&gt;</span>
+<span class="hl slc"># &lt;/html&gt;</span>
+
+<span class="hl slc"># download &#39;Alice in Wonderlands&#39; book in text format and save as &#39;alice.txt&#39;</span>
+wget http<span class="hl opt">://</span>www.gutenberg.org<span class="hl opt">/</span>files<span class="hl opt">/</span><span class="hl num">11</span><span class="hl opt">/</span><span class="hl num">11</span><span class="hl kwb">-0</span>.txt <span class="hl kwb">-O</span> alice.txt
+<span class="hl slc"># (downloads the file)</span>
+</pre>
+</body>
+</html>
+<!--HTML generated by highlight 3.62, http://www.andre-simon.de/-->

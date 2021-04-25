@@ -1,13 +1,20 @@
 #!/bin/sh
 
+## ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+## TEXT PROCESSING
+## ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 ## tr (1) - translate or delete characters
 
+# delete 'l' characters
 echo 'hello world' | tr -d l
 # heo word
 
+# convert 'l' to 'x'
 echo 'hello world' | tr l x
 # hexxo worxd
 
+# lowercase everything
 echo 'Hello World' | tr A-Z a-z
 # hello world
 
@@ -19,11 +26,17 @@ echo 'hello world' | tr a-z x-za-x
 echo 'hello world' | tr a-z n-za-m
 # uryyb jbeyq
 
+# apply rot13 twice to get the original text
 echo 'hello world' | tr a-z n-za-m | tr a-z n-za-m
 # hello world
 
+# calculate complement DNA sequence
+echo 'CCTGCAACTTAGGCAGG' | tr ATGC TACG
+# GGACGTTGAATCCGTCC
+
 ## cut (1) - remove sections from each line of files
 
+# display first fields separated by ':' in '/etc/passwd'
 head /etc/passwd | cut -d: -f1
 # root
 # daemon
@@ -36,6 +49,7 @@ head /etc/passwd | cut -d: -f1
 # mail
 # news
 
+# display first and seventh fields separated by ':' in '/etc/passwd'
 head /etc/passwd | cut -d: -f1,7
 # root:/bin/bash
 # daemon:/usr/sbin/nologin
@@ -50,30 +64,23 @@ head /etc/passwd | cut -d: -f1,7
 
 ## column (1) - columnate lists
 
+# display a header and list of files
 printf "PERM LINKS OWNER GROUP SIZE MONTH DAY "; printf "HH:MM/YEAR NAME\n"; ls -l | sed 1d
 # PERM LINKS OWNER GROUP SIZE MONTH DAY HH:MM/YEAR NAME
-# -rwxrwxr-x 1 gokce gokce  994 Oct  9 12:35 apache.sh
-# drwxrwxr-x 2 gokce gokce 4096 Sep 21 00:20 awk
-# drwxrwxr-x 4 gokce gokce 4096 Oct 15 14:55 basics
-# drwxrwxr-x 2 gokce gokce 4096 Oct 15 15:00 psnotes
-# drwxrwxr-x 2 gokce gokce 4096 Sep 21 00:20 python
-# -rwxrwxr-x 1 gokce gokce 5214 Oct  9 12:19 regex.sh
-# -rwxrwxr-x 1 gokce gokce 2076 Sep 21 00:20 sed.sh
-# -rwxrwxr-x 1 gokce gokce 6314 Oct 15 15:32 shell.sh
-# -rwxrwxr-x 1 gokce gokce 7834 Oct 15 17:14 text.sh
+# drwxr-x--- 2 gokcehan gokcehan 4096 Eki 26 22:02 awk
+# -rw-r--r-- 1 gokcehan gokcehan 8120 Eki 27 19:33 regex.sh
+# -rw-r--r-- 1 gokcehan gokcehan 2043 Eki 26 22:01 sed.sh
+# -rw-r--r-- 1 gokcehan gokcehan 7873 Eki 27 20:01 text.sh
 
+# display a header and list of files in tabular form
 (printf "PERM LINKS OWNER GROUP SIZE MONTH DAY "; printf "HH:MM/YEAR NAME\n"; ls -l | sed 1d) | column -t
-# PERM        LINKS  OWNER  GROUP  SIZE  MONTH  DAY  HH:MM/YEAR  NAME
-# -rwxrwxr-x  1      gokce  gokce  994   Oct    9    12:35       apache.sh
-# drwxrwxr-x  2      gokce  gokce  4096  Sep    21   00:20       awk
-# drwxrwxr-x  4      gokce  gokce  4096  Oct    15   14:55       basics
-# drwxrwxr-x  2      gokce  gokce  4096  Oct    15   15:00       psnotes
-# drwxrwxr-x  2      gokce  gokce  4096  Sep    21   00:20       python
-# -rwxrwxr-x  1      gokce  gokce  5214  Oct    9    12:19       regex.sh
-# -rwxrwxr-x  1      gokce  gokce  2076  Sep    21   00:20       sed.sh
-# -rwxrwxr-x  1      gokce  gokce  6314  Oct    15   15:32       shell.sh
-# -rwxrwxr-x  1      gokce  gokce  7834  Oct    15   17:14       text.sh
+# PERM        LINKS  OWNER     GROUP     SIZE  MONTH  DAY  HH:MM/YEAR  NAME
+# drwxr-x---  2      gokcehan  gokcehan  4096  Eki    26   22:02       awk
+# -rw-r--r--  1      gokcehan  gokcehan  8120  Eki    27   19:33       regex.sh
+# -rw-r--r--  1      gokcehan  gokcehan  2043  Eki    26   22:01       sed.sh
+# -rw-r--r--  1      gokcehan  gokcehan  7873  Eki    27   20:01       text.sh
 
+# display fields separated by ':' in '/etc/passwd' in tabular form
 head /etc/passwd | column -t -s:
 # root    x  0  0      root    /root            /bin/bash
 # daemon  x  1  1      daemon  /usr/sbin        /usr/sbin/nologin
@@ -88,89 +95,98 @@ head /etc/passwd | column -t -s:
 
 ## sort (1) - sort lines of text files
 
+# sort alphabetically line by line
 echo -e "aaa\ndd\ncccc\nb" | sort
 # aaa
 # b
 # cccc
 # dd
 
+# display disk usage
 du -d1 /usr
-# 370032  /usr/bin
-# 292716  /usr/local
-# 53736   /usr/include
-# 5072780 /usr/share
-# 15804   /usr/sbin
-# 2674208 /usr/lib
-# 20      /usr/locale
-# 664     /usr/games
-# 250832  /usr/src
-# 8730796 /usr
+# 15764   /usr/sbin
+# 428     /usr/local
+# 21388   /usr/include
+# 1680220 /usr/lib
+# 867640  /usr/share
+# 261852  /usr/src
+# 158680  /usr/bin
+# 684     /usr/games
+# 1432    /usr/libexec
+# 3008092 /usr
 
+# sort disk usage numerically
 du -d1 /usr | sort -n
-# 20      /usr/locale
-# 664     /usr/games
-# 15804   /usr/sbin
-# 53736   /usr/include
-# 250832  /usr/src
-# 292716  /usr/local
-# 370032  /usr/bin
-# 2674208 /usr/lib
-# 5072780 /usr/share
-# 8730796 /usr
+# 428     /usr/local
+# 684     /usr/games
+# 1432    /usr/libexec
+# 15764   /usr/sbin
+# 21388   /usr/include
+# 158680  /usr/bin
+# 261852  /usr/src
+# 867640  /usr/share
+# 1680220 /usr/lib
+# 3008092 /usr
 
+# display disk usage in humanized form
 du -d1 /usr -h
-# 362M    /usr/bin
-# 286M    /usr/local
-# 53M     /usr/include
-# 4.9G    /usr/share
 # 16M     /usr/sbin
-# 2.6G    /usr/lib
-# 20K     /usr/locale
-# 664K    /usr/games
-# 245M    /usr/src
-# 8.4G    /usr
+# 428K    /usr/local
+# 21M     /usr/include
+# 1,7G    /usr/lib
+# 848M    /usr/share
+# 256M    /usr/src
+# 155M    /usr/bin
+# 684K    /usr/games
+# 1,4M    /usr/libexec
+# 2,9G    /usr
 
+# sort disk usage numerically in humanized form
 du -d1 /usr -h | sort -h
-# 20K     /usr/locale
-# 664K    /usr/games
+# 428K    /usr/local
+# 684K    /usr/games
+# 1,4M    /usr/libexec
 # 16M     /usr/sbin
-# 53M     /usr/include
-# 245M    /usr/src
-# 286M    /usr/local
-# 362M    /usr/bin
-# 2.6G    /usr/lib
-# 4.9G    /usr/share
-# 8.4G    /usr
+# 21M     /usr/include
+# 155M    /usr/bin
+# 256M    /usr/src
+# 848M    /usr/share
+# 1,7G    /usr/lib
+# 2,9G    /usr
 
+# display users and shells sorted by shells
 cat /etc/passwd | cut -d: -f1,7 | column -t -s: | sort -k2
-# root               /bin/bash
-# gokce              /bin/bash
-# _apt               /bin/false
-# avahi              /bin/false
-# ..
-# speech-dispatcher  /bin/false
-# systemd-bus-proxy  /bin/false
-# sync               /bin/sync
-# lp                 /usr/sbin/nologin
-# bin                /usr/sbin/nologin
-# ..
-# nobody             /usr/sbin/nologin
-# www-data           /usr/sbin/nologin
+# root                 /bin/bash
+# gokcehan             /bin/bash
+# gdm                  /bin/false
+# hplip                /bin/false
+# ...
+# speech-dispatcher    /bin/false
+# gnome-initial-setup  /bin/false
+# sync                 /bin/sync
+# lp                   /usr/sbin/nologin
+# bin                  /usr/sbin/nologin
+# ...
+# systemd-network      /usr/sbin/nologin
+# systemd-resolve      /usr/sbin/nologin
 
 ## uniq (1) - report or omit repeated lines
 
+# display shells used in the system
 cat /etc/passwd | cut -d: -f7 | sort | uniq
 # /bin/bash
 # /bin/false
 # /bin/sync
 # /usr/sbin/nologin
 
+# display shell counts
 cat /etc/passwd | cut -d: -f7 | sort | uniq -c
 #       2 /bin/bash
 #      22 /bin/false
 #       1 /bin/sync
 #      16 /usr/sbin/nologin
 
+# sort shell counts
 cat /etc/passwd | cut -d: -f7 | sort | uniq -c | sort -rn
 #      22 /bin/false
 #      16 /usr/sbin/nologin
@@ -179,20 +195,25 @@ cat /etc/passwd | cut -d: -f7 | sort | uniq -c | sort -rn
 
 ## wc (1) - print newline, word, and byte counts for each file
 
+# count lines in '/etc/passwd'
 cat /etc/passwd | wc -l
 # 41
 
+# count words in '/etc/passwd'
 cat /etc/passwd | wc -w
 # 70
 
+# count bytes in '/etc/passwd'
 cat /etc/passwd | wc -c
 # 2286
 
+# count lines/words/bytes in '/etc/passwd'
 cat /etc/passwd | wc
 #      41      70    2286
 
 ## shuf (1) - generate random permutations
 
+# select random words
 cat /usr/share/dict/words | shuf | head
 # crabbed
 # raceway
@@ -207,6 +228,7 @@ cat /usr/share/dict/words | shuf | head
 
 ## fmt (1) - simple optimal text formatter
 
+# format given text
 shuf /usr/share/dict/words | fmt | head
 # Collins kindergärtner Soyuz Cinderella pricklier laxness Domesday
 # Darryl's lighted departments delphiniums envisioned grapevine's
@@ -219,6 +241,7 @@ shuf /usr/share/dict/words | fmt | head
 # thumbing camerawoman's Tenochtitlan's somersault's pizazz's Nestle
 # reformation Senior overshot enlivened impugns Kroc kickoffs rocketry
 
+# format given text with a width of 40
 shuf /usr/share/dict/words | fmt -w 40 | head
 # eyesore's cagy Shorthorn outrider's
 # capaciousness flaunt's unbelief
@@ -233,6 +256,7 @@ shuf /usr/share/dict/words | fmt -w 40 | head
 
 ## colrm (1) - remove columns from a file
 
+# display first 40 characters from each line
 shuf /usr/share/dict/words | fmt | head | colrm 40
 # simile trappers jawbone hurdle's sorori
 # Mongolia's hallway's misquotation measu
@@ -245,6 +269,7 @@ shuf /usr/share/dict/words | fmt | head | colrm 40
 # meddler teachable silversmiths percolat
 # broadsword's advisers multiplier robs m
 
+# remove characters betweeen 20 and 40 from each line
 shuf /usr/share/dict/words | fmt | head | colrm 20 40
 # busting Ahab ligatuions mammoths etymologists
 # crams logging's toddu's vacillation's VLF's

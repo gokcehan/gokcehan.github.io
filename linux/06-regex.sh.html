@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>06-regex.sh</title>
+<link rel="stylesheet" type="text/css" href="../highlight.css">
+</head>
+<body class="hl">
+<pre class="hl"><span class="hl slc">#!/bin/sh</span>
+<span class="hl slc"># see also `man grep`, `man 7 regex`, and `man 7 glob`</span>
+
+<span class="hl slc">## ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~</span>
+<span class="hl slc">## REGEX</span>
+<span class="hl slc">## ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~</span>
+
+<span class="hl slc"># Regex</span>
+<span class="hl slc"># ~~~</span>
+<span class="hl slc"># Regex is inspired by regular expressions in automata theory</span>
+<span class="hl slc"># There are three regex variations implemented in unix systems</span>
+<span class="hl slc">#   Basic Regular Expressions (BRE)</span>
+<span class="hl slc">#   Extended Regular Expressions (ERE)</span>
+<span class="hl slc">#   Perl Compatible Regular Expressions (PCRE)</span>
+<span class="hl slc"># Regex can be converted to finite automata to run in linear time (except PCRE)</span>
+<span class="hl slc"># Regex is different than glob</span>
+<span class="hl slc">#   Glob is simpler whereas regex is richer</span>
+<span class="hl slc">#   Glob is for filenames whereas regex is for arbitrary text</span>
+<span class="hl slc">#   Glob is used in shell whereas regex is used in text processing tools</span>
+
+<span class="hl slc"># all words containing &#39;x&#39;</span>
+<span class="hl kwc">grep</span> <span class="hl str">&#39;x&#39;</span> <span class="hl opt">/</span>usr<span class="hl opt">/</span>share<span class="hl opt">/</span>dict<span class="hl opt">/</span>words
+<span class="hl slc"># Acrux</span>
+<span class="hl slc"># Acrux&#39;s</span>
+<span class="hl slc"># Ajax</span>
+<span class="hl slc"># ...</span>
+<span class="hl slc"># xylophonist</span>
+<span class="hl slc"># xylophonist&#39;s</span>
+<span class="hl slc"># xylophonists</span>
+
+<span class="hl slc"># all words containing &#39;xy&#39;</span>
+<span class="hl kwc">grep</span> <span class="hl str">&#39;xy&#39;</span> <span class="hl opt">/</span>usr<span class="hl opt">/</span>share<span class="hl opt">/</span>dict<span class="hl opt">/</span>words
+<span class="hl slc"># Oxycontin</span>
+<span class="hl slc"># Oxycontin&#39;s</span>
+<span class="hl slc"># Roxy</span>
+<span class="hl slc"># ...</span>
+<span class="hl slc"># xylophonist</span>
+<span class="hl slc"># xylophonist&#39;s</span>
+<span class="hl slc"># xylophonists</span>
+
+<span class="hl slc"># all words containing &#39;xy&#39; or &#39;yz&#39; (BRE)</span>
+<span class="hl kwc">grep</span> <span class="hl str">&#39;xy\|yz&#39;</span> <span class="hl opt">/</span>usr<span class="hl opt">/</span>share<span class="hl opt">/</span>dict<span class="hl opt">/</span>words
+<span class="hl slc"># Byzantine</span>
+<span class="hl slc"># Byzantine&#39;s</span>
+<span class="hl slc"># Byzantines</span>
+<span class="hl slc"># ...</span>
+<span class="hl slc"># xylophonist</span>
+<span class="hl slc"># xylophonist&#39;s</span>
+<span class="hl slc"># xylophonists</span>
+
+<span class="hl slc"># all words containing &#39;xy&#39; or &#39;yz&#39; (ERE)</span>
+<span class="hl kwc">grep</span> <span class="hl kwb">-E</span> <span class="hl str">&#39;xy|yz&#39;</span> <span class="hl opt">/</span>usr<span class="hl opt">/</span>share<span class="hl opt">/</span>dict<span class="hl opt">/</span>words
+<span class="hl slc"># Byzantine</span>
+<span class="hl slc"># Byzantine&#39;s</span>
+<span class="hl slc"># Byzantines</span>
+<span class="hl slc"># ...</span>
+<span class="hl slc"># xylophonist</span>
+<span class="hl slc"># xylophonist&#39;s</span>
+<span class="hl slc"># xylophonists</span>
+
+<span class="hl slc"># all words containing &#39;xya&#39; or &#39;yza&#39;</span>
+<span class="hl kwc">grep</span> <span class="hl kwb">-E</span> <span class="hl str">&#39;(xy|yz)a&#39;</span> <span class="hl opt">/</span>usr<span class="hl opt">/</span>share<span class="hl opt">/</span>dict<span class="hl opt">/</span>words
+<span class="hl slc"># Byzantine</span>
+<span class="hl slc"># Byzantine&#39;s</span>
+<span class="hl slc"># Byzantines</span>
+<span class="hl slc"># Byzantium</span>
+<span class="hl slc"># Byzantium&#39;s</span>
+<span class="hl slc"># oxyacetylene</span>
+<span class="hl slc"># oxyacetylene&#39;s</span>
+
+<span class="hl slc"># all words with a vowel followed by &#39;xy&#39;</span>
+<span class="hl kwc">grep</span> <span class="hl kwb">-E</span> <span class="hl str">&#39;[aeiou]xy&#39;</span> <span class="hl opt">/</span>usr<span class="hl opt">/</span>share<span class="hl opt">/</span>dict<span class="hl opt">/</span>words
+<span class="hl slc"># Roxy</span>
+<span class="hl slc"># Roxy&#39;s</span>
+<span class="hl slc"># apoplexy</span>
+<span class="hl slc"># ...</span>
+<span class="hl slc"># sexy</span>
+<span class="hl slc"># taxying</span>
+<span class="hl slc"># waxy</span>
+
+<span class="hl slc"># all words with a vowel followed by &#39;xy&#39;, any character, and then &#39;s&#39;</span>
+<span class="hl kwc">grep</span> <span class="hl kwb">-E</span> <span class="hl str">&#39;[aeiou]xy.s&#39;</span> <span class="hl opt">/</span>usr<span class="hl opt">/</span>share<span class="hl opt">/</span>dict<span class="hl opt">/</span>words
+<span class="hl slc"># Roxy&#39;s</span>
+<span class="hl slc"># apoplexy&#39;s</span>
+<span class="hl slc"># epoxy&#39;s</span>
+<span class="hl slc"># galaxy&#39;s</span>
+<span class="hl slc"># heterodoxy&#39;s</span>
+<span class="hl slc"># orthodoxy&#39;s</span>
+<span class="hl slc"># pixy&#39;s</span>
+<span class="hl slc"># proxy&#39;s</span>
+
+<span class="hl slc"># ... any character or none ...</span>
+<span class="hl kwc">grep</span> <span class="hl kwb">-E</span> <span class="hl str">&#39;[aeiou]xy.?s&#39;</span> <span class="hl opt">/</span>usr<span class="hl opt">/</span>share<span class="hl opt">/</span>dict<span class="hl opt">/</span>words
+<span class="hl slc"># Roxy&#39;s</span>
+<span class="hl slc"># apoplexy&#39;s</span>
+<span class="hl slc"># epoxy&#39;s</span>
+<span class="hl slc"># galaxy&#39;s</span>
+<span class="hl slc"># heterodoxy&#39;s</span>
+<span class="hl slc"># orthodoxy&#39;s</span>
+<span class="hl slc"># paroxysm</span>
+<span class="hl slc"># paroxysm&#39;s</span>
+<span class="hl slc"># paroxysms</span>
+<span class="hl slc"># pixy&#39;s</span>
+<span class="hl slc"># proxy&#39;s</span>
+
+<span class="hl slc"># ... any number of characters ...</span>
+<span class="hl kwc">grep</span> <span class="hl kwb">-E</span> <span class="hl str">&#39;[aeiou]xy.*s&#39;</span> <span class="hl opt">/</span>usr<span class="hl opt">/</span>share<span class="hl opt">/</span>dict<span class="hl opt">/</span>words
+<span class="hl slc"># Roxy&#39;s</span>
+<span class="hl slc"># apoplexy&#39;s</span>
+<span class="hl slc"># epoxy&#39;s</span>
+<span class="hl slc"># galaxy&#39;s</span>
+<span class="hl slc"># heterodoxy&#39;s</span>
+<span class="hl slc"># orthodoxy&#39;s</span>
+<span class="hl slc"># oxyacetylene&#39;s</span>
+<span class="hl slc"># oxygen&#39;s</span>
+<span class="hl slc"># oxygenates</span>
+<span class="hl slc"># oxygenation&#39;s</span>
+<span class="hl slc"># oxymoron&#39;s</span>
+<span class="hl slc"># oxymorons</span>
+<span class="hl slc"># paroxysm</span>
+<span class="hl slc"># paroxysm&#39;s</span>
+<span class="hl slc"># paroxysms</span>
+<span class="hl slc"># pixy&#39;s</span>
+<span class="hl slc"># proxy&#39;s</span>
+
+<span class="hl slc"># ... at least one character ...</span>
+<span class="hl kwc">grep</span> <span class="hl kwb">-E</span> <span class="hl str">&#39;[aeiou]xy.+s&#39;</span> <span class="hl opt">/</span>usr<span class="hl opt">/</span>share<span class="hl opt">/</span>dict<span class="hl opt">/</span>words
+<span class="hl slc"># Roxy&#39;s</span>
+<span class="hl slc"># apoplexy&#39;s</span>
+<span class="hl slc"># epoxy&#39;s</span>
+<span class="hl slc"># galaxy&#39;s</span>
+<span class="hl slc"># heterodoxy&#39;s</span>
+<span class="hl slc"># orthodoxy&#39;s</span>
+<span class="hl slc"># oxyacetylene&#39;s</span>
+<span class="hl slc"># oxygen&#39;s</span>
+<span class="hl slc"># oxygenates</span>
+<span class="hl slc"># oxygenation&#39;s</span>
+<span class="hl slc"># oxymoron&#39;s</span>
+<span class="hl slc"># oxymorons</span>
+<span class="hl slc"># paroxysm&#39;s</span>
+<span class="hl slc"># paroxysms</span>
+<span class="hl slc"># pixy&#39;s</span>
+<span class="hl slc"># proxy&#39;s</span>
+
+<span class="hl slc"># ... two characters ...</span>
+<span class="hl kwc">grep</span> <span class="hl kwb">-E</span> <span class="hl str">&#39;[aeiou]xy.{2}s&#39;</span> <span class="hl opt">/</span>usr<span class="hl opt">/</span>share<span class="hl opt">/</span>dict<span class="hl opt">/</span>words
+<span class="hl slc"># paroxysms</span>
+
+<span class="hl slc"># ... two or more characters ...</span>
+<span class="hl kwc">grep</span> <span class="hl kwb">-E</span> <span class="hl str">&#39;[aeiou]xy.{2,}s&#39;</span> <span class="hl opt">/</span>usr<span class="hl opt">/</span>share<span class="hl opt">/</span>dict<span class="hl opt">/</span>words
+<span class="hl slc"># oxyacetylene&#39;s</span>
+<span class="hl slc"># oxygen&#39;s</span>
+<span class="hl slc"># oxygenates</span>
+<span class="hl slc"># oxygenation&#39;s</span>
+<span class="hl slc"># oxymoron&#39;s</span>
+<span class="hl slc"># oxymorons</span>
+<span class="hl slc"># paroxysm&#39;s</span>
+<span class="hl slc"># paroxysms</span>
+
+<span class="hl slc"># ... at most three characters ...</span>
+<span class="hl kwc">grep</span> <span class="hl kwb">-E</span> <span class="hl str">&#39;[aeiou]xy.{,3}s&#39;</span> <span class="hl opt">/</span>usr<span class="hl opt">/</span>share<span class="hl opt">/</span>dict<span class="hl opt">/</span>words
+<span class="hl slc"># Roxy&#39;s</span>
+<span class="hl slc"># apoplexy&#39;s</span>
+<span class="hl slc"># epoxy&#39;s</span>
+<span class="hl slc"># galaxy&#39;s</span>
+<span class="hl slc"># heterodoxy&#39;s</span>
+<span class="hl slc"># orthodoxy&#39;s</span>
+<span class="hl slc"># paroxysm</span>
+<span class="hl slc"># paroxysm&#39;s</span>
+<span class="hl slc"># paroxysms</span>
+<span class="hl slc"># pixy&#39;s</span>
+<span class="hl slc"># proxy&#39;s</span>
+
+<span class="hl slc"># ... a number of characters between one and three ...</span>
+<span class="hl kwc">grep</span> <span class="hl kwb">-E</span> <span class="hl str">&#39;[aeiou]xy.{1,3}s&#39;</span> <span class="hl opt">/</span>usr<span class="hl opt">/</span>share<span class="hl opt">/</span>dict<span class="hl opt">/</span>words
+<span class="hl slc"># Roxy&#39;s</span>
+<span class="hl slc"># apoplexy&#39;s</span>
+<span class="hl slc"># epoxy&#39;s</span>
+<span class="hl slc"># galaxy&#39;s</span>
+<span class="hl slc"># heterodoxy&#39;s</span>
+<span class="hl slc"># orthodoxy&#39;s</span>
+<span class="hl slc"># paroxysm&#39;s</span>
+<span class="hl slc"># paroxysms</span>
+<span class="hl slc"># pixy&#39;s</span>
+<span class="hl slc"># proxy&#39;s</span>
+
+<span class="hl slc"># ... any number of characters followed by dot, comma, or apostrophe ...</span>
+<span class="hl kwc">grep</span> <span class="hl kwb">-E</span> <span class="hl str">&quot;[aeiou]xy.*[.,&#39;]s&quot;</span> <span class="hl opt">/</span>usr<span class="hl opt">/</span>share<span class="hl opt">/</span>dict<span class="hl opt">/</span>words
+<span class="hl slc"># Roxy&#39;s</span>
+<span class="hl slc"># apoplexy&#39;s</span>
+<span class="hl slc"># epoxy&#39;s</span>
+<span class="hl slc"># galaxy&#39;s</span>
+<span class="hl slc"># heterodoxy&#39;s</span>
+<span class="hl slc"># orthodoxy&#39;s</span>
+<span class="hl slc"># oxyacetylene&#39;s</span>
+<span class="hl slc"># oxygen&#39;s</span>
+<span class="hl slc"># oxygenation&#39;s</span>
+<span class="hl slc"># oxymoron&#39;s</span>
+<span class="hl slc"># paroxysm&#39;s</span>
+<span class="hl slc"># pixy&#39;s</span>
+<span class="hl slc"># proxy&#39;s</span>
+
+<span class="hl slc"># ... followed by a punctutation character ...</span>
+<span class="hl kwc">grep</span> <span class="hl kwb">-E</span> <span class="hl str">&#39;[aeiou]xy.*[[:punct:]]s&#39;</span> <span class="hl opt">/</span>usr<span class="hl opt">/</span>share<span class="hl opt">/</span>dict<span class="hl opt">/</span>words
+<span class="hl slc"># Roxy&#39;s</span>
+<span class="hl slc"># apoplexy&#39;s</span>
+<span class="hl slc"># epoxy&#39;s</span>
+<span class="hl slc"># galaxy&#39;s</span>
+<span class="hl slc"># heterodoxy&#39;s</span>
+<span class="hl slc"># orthodoxy&#39;s</span>
+<span class="hl slc"># oxyacetylene&#39;s</span>
+<span class="hl slc"># oxygen&#39;s</span>
+<span class="hl slc"># oxygenation&#39;s</span>
+<span class="hl slc"># oxymoron&#39;s</span>
+<span class="hl slc"># paroxysm&#39;s</span>
+<span class="hl slc"># pixy&#39;s</span>
+<span class="hl slc"># proxy&#39;s</span>
+
+<span class="hl slc"># ... followed by a non-punctutation character ...</span>
+<span class="hl kwc">grep</span> <span class="hl kwb">-E</span> <span class="hl str">&#39;[aeiou]xy.*[^[:punct:]]s&#39;</span> <span class="hl opt">/</span>usr<span class="hl opt">/</span>share<span class="hl opt">/</span>dict<span class="hl opt">/</span>words
+<span class="hl slc"># oxygenates</span>
+<span class="hl slc"># oxymorons</span>
+<span class="hl slc"># paroxysms</span>
+
+<span class="hl slc"># ... followed by a character in range from &#39;a&#39; to &#39;n&#39; ...</span>
+<span class="hl kwc">grep</span> <span class="hl kwb">-E</span> <span class="hl str">&#39;[aeiou]xy.*[abcdefghijklmn]s&#39;</span> <span class="hl opt">/</span>usr<span class="hl opt">/</span>share<span class="hl opt">/</span>dict<span class="hl opt">/</span>words
+<span class="hl slc"># oxygenates</span>
+<span class="hl slc"># oxymorons</span>
+<span class="hl slc"># paroxysms</span>
+
+<span class="hl slc"># ... followed by a character in range from &#39;a&#39; to &#39;n&#39; ...</span>
+<span class="hl kwc">grep</span> <span class="hl kwb">-E</span> <span class="hl str">&#39;[aeiou]xy.*[a-n]s&#39;</span> <span class="hl opt">/</span>usr<span class="hl opt">/</span>share<span class="hl opt">/</span>dict<span class="hl opt">/</span>words
+<span class="hl slc"># oxygenates</span>
+<span class="hl slc"># oxymorons</span>
+<span class="hl slc"># paroxysms</span>
+
+<span class="hl slc"># ... followed by a character NOT in range from &#39;a&#39; to &#39;n&#39; ...</span>
+<span class="hl kwc">grep</span> <span class="hl kwb">-E</span> <span class="hl str">&#39;[aeiou]xy.*[^a-n]s&#39;</span> <span class="hl opt">/</span>usr<span class="hl opt">/</span>share<span class="hl opt">/</span>dict<span class="hl opt">/</span>words
+<span class="hl slc"># Roxy&#39;s</span>
+<span class="hl slc"># apoplexy&#39;s</span>
+<span class="hl slc"># epoxy&#39;s</span>
+<span class="hl slc"># galaxy&#39;s</span>
+<span class="hl slc"># heterodoxy&#39;s</span>
+<span class="hl slc"># orthodoxy&#39;s</span>
+<span class="hl slc"># oxyacetylene&#39;s</span>
+<span class="hl slc"># oxygen&#39;s</span>
+<span class="hl slc"># oxygenation&#39;s</span>
+<span class="hl slc"># oxymoron&#39;s</span>
+<span class="hl slc"># paroxysm&#39;s</span>
+<span class="hl slc"># pixy&#39;s</span>
+<span class="hl slc"># proxy&#39;s</span>
+
+<span class="hl slc"># all words starting with a vowel followed by &#39;xy&#39;</span>
+<span class="hl kwc">grep</span> <span class="hl kwb">-E</span> <span class="hl str">&#39;^[aeiou]xy&#39;</span> <span class="hl opt">/</span>usr<span class="hl opt">/</span>share<span class="hl opt">/</span>dict<span class="hl opt">/</span>words
+<span class="hl slc"># oxyacetylene</span>
+<span class="hl slc"># oxyacetylene&#39;s</span>
+<span class="hl slc"># oxygen</span>
+<span class="hl slc"># oxygen&#39;s</span>
+<span class="hl slc"># oxygenate</span>
+<span class="hl slc"># oxygenated</span>
+<span class="hl slc"># oxygenates</span>
+<span class="hl slc"># oxygenating</span>
+<span class="hl slc"># oxygenation</span>
+<span class="hl slc"># oxygenation&#39;s</span>
+<span class="hl slc"># oxymora</span>
+<span class="hl slc"># oxymoron</span>
+<span class="hl slc"># oxymoron&#39;s</span>
+<span class="hl slc"># oxymorons</span>
+
+<span class="hl slc"># all words with a vowel followed by &#39;xy&#39; at the end of the word</span>
+<span class="hl kwc">grep</span> <span class="hl kwb">-E</span> <span class="hl str">&#39;[aeiou]xy$&#39;</span> <span class="hl opt">/</span>usr<span class="hl opt">/</span>share<span class="hl opt">/</span>dict<span class="hl opt">/</span>words
+<span class="hl slc"># Roxy</span>
+<span class="hl slc"># apoplexy</span>
+<span class="hl slc"># epoxy</span>
+<span class="hl slc"># foxy</span>
+<span class="hl slc"># galaxy</span>
+<span class="hl slc"># heterodoxy</span>
+<span class="hl slc"># orthodoxy</span>
+<span class="hl slc"># pixy</span>
+<span class="hl slc"># proxy</span>
+<span class="hl slc"># sexy</span>
+<span class="hl slc"># waxy</span>
+
+<span class="hl slc"># all words starting with a vowel and ending with &#39;xy&#39;</span>
+<span class="hl kwc">grep</span> <span class="hl kwb">-E</span> <span class="hl str">&#39;^[aeiou].*xy$&#39;</span> <span class="hl opt">/</span>usr<span class="hl opt">/</span>share<span class="hl opt">/</span>dict<span class="hl opt">/</span>words
+<span class="hl slc"># apoplexy</span>
+<span class="hl slc"># epoxy</span>
+<span class="hl slc"># orthodoxy</span>
+
+<span class="hl slc">## ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~</span>
+<span class="hl slc">## SPECIAL ESCAPES</span>
+<span class="hl slc">## ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~</span>
+
+<span class="hl slc"># &#39;o&#39; followed by a space and then &#39;w&#39; (POSIX)</span>
+<span class="hl kwb">printf</span> <span class="hl str">&#39;hello world&#39;</span> <span class="hl opt">|</span> <span class="hl kwc">grep</span> <span class="hl kwb">-E</span> <span class="hl str">&#39;o[[:space:]]w&#39;</span>
+<span class="hl slc"># hello world</span>
+
+<span class="hl slc"># &#39;o&#39; followed by a space and then &#39;w&#39; (GNU extension -- non-POSIX)</span>
+<span class="hl kwb">printf</span> <span class="hl str">&#39;hello world&#39;</span> <span class="hl opt">|</span> <span class="hl kwc">grep</span> <span class="hl kwb">-E</span> <span class="hl str">&#39;o\sw&#39;</span>
+<span class="hl slc"># hello world</span>
+
+<span class="hl slc"># &#39;e&#39; followed by a number of non-space and then &#39;o&#39; (POSIX)</span>
+<span class="hl kwb">printf</span> <span class="hl str">&#39;hello world&#39;</span> <span class="hl opt">|</span> <span class="hl kwc">grep</span> <span class="hl kwb">-E</span> <span class="hl str">&#39;e[^[:space:]]*o&#39;</span>
+<span class="hl slc"># hello world</span>
+
+<span class="hl slc"># &#39;e&#39; followed by a number of non-space and then &#39;o&#39; (GNU extension -- non-POSIX)</span>
+<span class="hl kwb">printf</span> <span class="hl str">&#39;hello world&#39;</span> <span class="hl opt">|</span> <span class="hl kwc">grep</span> <span class="hl kwb">-E</span> <span class="hl str">&#39;e\S*o&#39;</span>
+<span class="hl slc"># hello world</span>
+
+<span class="hl slc"># exact word &#39;two&#39; (GNU extension -- non-POSIX)</span>
+<span class="hl kwb">printf</span> <span class="hl str">&#39;one two three&#39;</span> <span class="hl opt">|</span> <span class="hl kwc">grep</span> <span class="hl kwb">-E</span> <span class="hl str">&#39;\&lt;two\&gt;&#39;</span>
+<span class="hl slc"># one two three</span>
+
+<span class="hl slc"># word starting with &#39;wo&#39; (GNU extension -- non-POSIX)</span>
+<span class="hl kwb">printf</span> <span class="hl str">&#39;one two three&#39;</span> <span class="hl opt">|</span> <span class="hl kwc">grep</span> <span class="hl kwb">-E</span> <span class="hl str">&#39;\&lt;wo&#39;</span>
+<span class="hl slc"># (does not match)</span>
+
+<span class="hl slc"># word starting with &#39;wo&#39; (GNU extension -- non-POSIX)</span>
+<span class="hl kwb">printf</span> <span class="hl str">&#39;one two three&#39;</span> <span class="hl opt">|</span> <span class="hl kwc">grep</span> <span class="hl kwb">-E</span> <span class="hl str">&#39;</span><span class="hl esc">\b</span><span class="hl str">wo&#39;</span>
+<span class="hl slc"># (does not match)</span>
+
+<span class="hl slc"># pattern &#39;wo&#39;</span>
+<span class="hl kwb">printf</span> <span class="hl str">&#39;one two three&#39;</span> <span class="hl opt">|</span> <span class="hl kwc">grep</span> <span class="hl kwb">-E</span> <span class="hl str">&#39;wo&#39;</span>
+<span class="hl slc"># one two three</span>
+
+<span class="hl slc"># word ending with &#39;tw&#39; (GNU extension -- non-POSIX)</span>
+<span class="hl kwb">printf</span> <span class="hl str">&#39;one two three&#39;</span> <span class="hl opt">|</span> <span class="hl kwc">grep</span> <span class="hl kwb">-E</span> <span class="hl str">&#39;tw\&gt;&#39;</span>
+<span class="hl slc"># (does not match)</span>
+
+<span class="hl slc"># word ending with &#39;tw&#39; (GNU extension -- non-POSIX)</span>
+<span class="hl kwb">printf</span> <span class="hl str">&#39;one two three&#39;</span> <span class="hl opt">|</span> <span class="hl kwc">grep</span> <span class="hl kwb">-E</span> <span class="hl str">&#39;tw</span><span class="hl esc">\b</span><span class="hl str">&#39;</span>
+<span class="hl slc"># (does not match)</span>
+
+<span class="hl slc"># pattern &#39;tw&#39;</span>
+<span class="hl kwb">printf</span> <span class="hl str">&#39;one two three&#39;</span> <span class="hl opt">|</span> <span class="hl kwc">grep</span> <span class="hl kwb">-E</span> <span class="hl str">&#39;tw&#39;</span>
+<span class="hl slc"># one two three</span>
+
+<span class="hl slc"># c function with empty arguments (POSIX)</span>
+<span class="hl kwb">printf</span> <span class="hl str">&#39;C_Function_4_Demonstration()&#39;</span> <span class="hl opt">|</span> <span class="hl kwc">grep</span> <span class="hl kwb">-E</span> <span class="hl str">&#39;\s*[_[:alnum:]]*\(\s*\)&#39;</span>
+<span class="hl slc"># C_Function_4_Demonstration()</span>
+
+<span class="hl slc"># c function with empty arguments (GNU extension -- non-POSIX)</span>
+<span class="hl kwb">printf</span> <span class="hl str">&#39;C_Function_4_Demonstration()&#39;</span> <span class="hl opt">|</span> <span class="hl kwc">grep</span> <span class="hl kwb">-E</span> <span class="hl str">&#39;\s*\w*\(\s*\)&#39;</span>
+<span class="hl slc"># C_Function_4_Demonstration()</span>
+
+<span class="hl slc">## ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~</span>
+<span class="hl slc">## BACK REFERENCES</span>
+<span class="hl slc">## ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~</span>
+
+<span class="hl slc"># a pattern followed by any number of characters and then the same pattern</span>
+<span class="hl kwc">grep</span> <span class="hl kwb">-E</span> <span class="hl str">&#39;([a-f][aeiou][a-f]).*\1&#39;</span> <span class="hl opt">/</span>usr<span class="hl opt">/</span>share<span class="hl opt">/</span>dict<span class="hl opt">/</span>words
+<span class="hl slc"># Deadhead</span>
+<span class="hl slc"># Deadhead&#39;s</span>
+<span class="hl slc"># deficiencies</span>
+<span class="hl slc"># inefficiencies</span>
+
+<span class="hl slc"># NOTE: Back references do not necessarily run in linear time</span>
+
+<span class="hl slc"># Extra</span>
+<span class="hl slc"># ~~~</span>
+<span class="hl slc"># Following example demonstrates a catastrophic backtracking case.</span>
+<span class="hl slc">#</span>
+<span class="hl slc"># grep (1) implements basic regular expressions using a Thompson NFA engine</span>
+<span class="hl slc"># </span>
+<span class="hl slc"># perl (1) implements the more powerful Perl Compatible Regular Expressions</span>
+<span class="hl slc"># (PCRE) using backtracking</span>
+<span class="hl slc"># </span>
+<span class="hl slc"># https://swtch.com/~rsc/regexp/regexp1.html</span>
+<span class="hl slc"># </span>
+<span class="hl slc"># run the following examples in grep and perl and compare their performances</span>
+<span class="hl kwb">echo</span> <span class="hl str">&#39;aaaaaaaaaaaaaaaaaaaaaaaaaaaaaa&#39;</span> <span class="hl opt">|</span> <span class="hl kwc">grep</span> <span class="hl kwb">-E</span>            <span class="hl str">&#39;a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?aaaaaaaaaaaaaaaaaaaaaaaaaaaaaa&#39;</span>
+<span class="hl kwb">echo</span> <span class="hl str">&#39;aaaaaaaaaaaaaaaaaaaaaaaaaaaaaa&#39;</span> <span class="hl opt">|</span> perl <span class="hl kwb">-ne</span> <span class="hl str">&#39;print if /a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?aaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/&#39;</span>
+</pre>
+</body>
+</html>
+<!--HTML generated by highlight 3.62, http://www.andre-simon.de/-->

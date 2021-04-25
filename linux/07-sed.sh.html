@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>07-sed.sh</title>
+<link rel="stylesheet" type="text/css" href="../highlight.css">
+</head>
+<body class="hl">
+<pre class="hl"><span class="hl slc">#!/bin/sh</span>
+<span class="hl slc"># see also `man sed` and `info sed`</span>
+
+<span class="hl slc">## ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~</span>
+<span class="hl slc">## SED</span>
+<span class="hl slc">## ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~</span>
+
+<span class="hl slc"># sed (1) - stream editor for filtering and transforming text</span>
+
+<span class="hl slc"># print 3 lines of text</span>
+<span class="hl kwb">printf</span> <span class="hl str">&#39;cat</span><span class="hl esc">\n</span><span class="hl str">dog</span><span class="hl esc">\n</span><span class="hl str">tree&#39;</span>
+<span class="hl slc"># cat</span>
+<span class="hl slc"># dog</span>
+<span class="hl slc"># tree</span>
+
+<span class="hl slc">## q command</span>
+
+<span class="hl slc"># execute a sed command (explicit)</span>
+<span class="hl kwb">printf</span> <span class="hl str">&#39;cat</span><span class="hl esc">\n</span><span class="hl str">dog</span><span class="hl esc">\n</span><span class="hl str">tree&#39;</span> <span class="hl opt">|</span> <span class="hl kwc">sed</span> <span class="hl kwb">-e</span> <span class="hl str">&#39;q&#39;</span>
+<span class="hl slc"># cat</span>
+
+<span class="hl slc"># execute a sed command (implicit)</span>
+<span class="hl kwb">printf</span> <span class="hl str">&#39;cat</span><span class="hl esc">\n</span><span class="hl str">dog</span><span class="hl esc">\n</span><span class="hl str">tree&#39;</span> <span class="hl opt">|</span> <span class="hl kwc">sed</span> <span class="hl str">&#39;q&#39;</span>
+<span class="hl slc"># cat</span>
+
+<span class="hl slc"># quit at 2nd line</span>
+<span class="hl kwb">printf</span> <span class="hl str">&#39;cat</span><span class="hl esc">\n</span><span class="hl str">dog</span><span class="hl esc">\n</span><span class="hl str">tree&#39;</span> <span class="hl opt">|</span> <span class="hl kwc">sed</span> <span class="hl str">&#39;2q&#39;</span>
+<span class="hl slc"># cat</span>
+<span class="hl slc"># dog</span>
+
+<span class="hl slc"># quit at line with &#39;do&#39; pattern</span>
+<span class="hl kwb">printf</span> <span class="hl str">&#39;cat</span><span class="hl esc">\n</span><span class="hl str">dog</span><span class="hl esc">\n</span><span class="hl str">tree&#39;</span> <span class="hl opt">|</span> <span class="hl kwc">sed</span> <span class="hl str">&#39;/do/q&#39;</span>
+<span class="hl slc"># cat</span>
+<span class="hl slc"># dog</span>
+
+<span class="hl slc">## p command</span>
+
+<span class="hl slc"># print each line (and automatic printing)</span>
+<span class="hl kwb">printf</span> <span class="hl str">&#39;cat</span><span class="hl esc">\n</span><span class="hl str">dog</span><span class="hl esc">\n</span><span class="hl str">tree&#39;</span> <span class="hl opt">|</span> <span class="hl kwc">sed</span> <span class="hl str">&#39;p&#39;</span>
+<span class="hl slc"># cat</span>
+<span class="hl slc"># cat</span>
+<span class="hl slc"># dog</span>
+<span class="hl slc"># dog</span>
+<span class="hl slc"># tree</span>
+<span class="hl slc"># tree</span>
+
+<span class="hl slc"># print 2nd line (and automatic printing)</span>
+<span class="hl kwb">printf</span> <span class="hl str">&#39;cat</span><span class="hl esc">\n</span><span class="hl str">dog</span><span class="hl esc">\n</span><span class="hl str">tree&#39;</span> <span class="hl opt">|</span> <span class="hl kwc">sed</span> <span class="hl str">&#39;2p&#39;</span>
+<span class="hl slc"># cat</span>
+<span class="hl slc"># dog</span>
+<span class="hl slc"># dog</span>
+<span class="hl slc"># tree</span>
+
+<span class="hl slc"># suppress automatic printing and print each line</span>
+<span class="hl kwb">printf</span> <span class="hl str">&#39;cat</span><span class="hl esc">\n</span><span class="hl str">dog</span><span class="hl esc">\n</span><span class="hl str">tree&#39;</span> <span class="hl opt">|</span> <span class="hl kwc">sed</span> <span class="hl kwb">-n</span> <span class="hl str">&#39;p&#39;</span>
+<span class="hl slc"># cat</span>
+<span class="hl slc"># dog</span>
+<span class="hl slc"># tree</span>
+
+<span class="hl slc"># print 2nd line</span>
+<span class="hl kwb">printf</span> <span class="hl str">&#39;cat</span><span class="hl esc">\n</span><span class="hl str">dog</span><span class="hl esc">\n</span><span class="hl str">tree&#39;</span> <span class="hl opt">|</span> <span class="hl kwc">sed</span> <span class="hl kwb">-n</span> <span class="hl str">&#39;2p&#39;</span>
+<span class="hl slc"># dog</span>
+
+<span class="hl slc"># print from 2nd line to 3rd line</span>
+<span class="hl kwb">printf</span> <span class="hl str">&#39;cat</span><span class="hl esc">\n</span><span class="hl str">dog</span><span class="hl esc">\n</span><span class="hl str">tree&#39;</span> <span class="hl opt">|</span> <span class="hl kwc">sed</span> <span class="hl kwb">-n</span> <span class="hl str">&#39;2,3p&#39;</span>
+<span class="hl slc"># dog</span>
+<span class="hl slc"># tree</span>
+
+<span class="hl slc"># print from 2nd line to end line</span>
+<span class="hl kwb">printf</span> <span class="hl str">&#39;cat</span><span class="hl esc">\n</span><span class="hl str">dog</span><span class="hl esc">\n</span><span class="hl str">tree&#39;</span> <span class="hl opt">|</span> <span class="hl kwc">sed</span> <span class="hl kwb">-n</span> <span class="hl str">&#39;2,</span><span class="hl ipl">$p</span><span class="hl str">&#39;</span>
+<span class="hl slc"># dog</span>
+<span class="hl slc"># tree</span>
+
+<span class="hl slc"># print end line</span>
+<span class="hl kwb">printf</span> <span class="hl str">&#39;cat</span><span class="hl esc">\n</span><span class="hl str">dog</span><span class="hl esc">\n</span><span class="hl str">tree&#39;</span> <span class="hl opt">|</span> <span class="hl kwc">sed</span> <span class="hl kwb">-n</span> <span class="hl str">&#39;</span><span class="hl ipl">$p</span><span class="hl str">&#39;</span>
+<span class="hl slc"># tree</span>
+
+<span class="hl slc"># print from &#39;dog&#39; pattern to 3rd line</span>
+<span class="hl kwb">printf</span> <span class="hl str">&#39;cat</span><span class="hl esc">\n</span><span class="hl str">dog</span><span class="hl esc">\n</span><span class="hl str">tree&#39;</span> <span class="hl opt">|</span> <span class="hl kwc">sed</span> <span class="hl kwb">-n</span> <span class="hl str">&#39;/dog/,3p&#39;</span>
+<span class="hl slc"># dog</span>
+<span class="hl slc"># tree</span>
+
+<span class="hl slc"># print from &#39;dog&#39; pattern to &#39;tree&#39; pattern</span>
+<span class="hl kwb">printf</span> <span class="hl str">&#39;cat</span><span class="hl esc">\n</span><span class="hl str">dog</span><span class="hl esc">\n</span><span class="hl str">tree&#39;</span> <span class="hl opt">|</span> <span class="hl kwc">sed</span> <span class="hl kwb">-n</span> <span class="hl str">&#39;/dog/,/tree/p&#39;</span>
+<span class="hl slc"># dog</span>
+<span class="hl slc"># tree</span>
+
+<span class="hl slc"># print each line and quit at 2nd line</span>
+<span class="hl kwb">printf</span> <span class="hl str">&#39;cat</span><span class="hl esc">\n</span><span class="hl str">dog</span><span class="hl esc">\n</span><span class="hl str">tree&#39;</span> <span class="hl opt">|</span> <span class="hl kwc">sed</span> <span class="hl kwb">-n</span> <span class="hl str">&#39;p;2q&#39;</span>
+<span class="hl slc"># cat</span>
+<span class="hl slc"># dog</span>
+
+<span class="hl slc"># print and quit at 2nd line</span>
+<span class="hl kwb">printf</span> <span class="hl str">&#39;cat</span><span class="hl esc">\n</span><span class="hl str">dog</span><span class="hl esc">\n</span><span class="hl str">tree&#39;</span> <span class="hl opt">|</span> <span class="hl kwc">sed</span> <span class="hl kwb">-n</span> <span class="hl str">&#39;2{p;q}&#39;</span>
+<span class="hl slc"># dog</span>
+
+<span class="hl slc">## d command</span>
+
+<span class="hl slc"># delete 2nd line</span>
+<span class="hl kwb">printf</span> <span class="hl str">&#39;cat</span><span class="hl esc">\n</span><span class="hl str">dog</span><span class="hl esc">\n</span><span class="hl str">tree&#39;</span> <span class="hl opt">|</span> <span class="hl kwc">sed</span> <span class="hl str">&#39;2d&#39;</span>
+<span class="hl slc"># cat</span>
+<span class="hl slc"># tree</span>
+
+<span class="hl slc"># delete from 2nd line to 3rd line</span>
+<span class="hl kwb">printf</span> <span class="hl str">&#39;cat</span><span class="hl esc">\n</span><span class="hl str">dog</span><span class="hl esc">\n</span><span class="hl str">tree&#39;</span> <span class="hl opt">|</span> <span class="hl kwc">sed</span> <span class="hl str">&#39;2,3d&#39;</span>
+<span class="hl slc"># cat</span>
+
+<span class="hl slc"># print from 1st line to 2nd line and delete from 2nd to 3rd line</span>
+<span class="hl kwb">printf</span> <span class="hl str">&#39;cat</span><span class="hl esc">\n</span><span class="hl str">dog</span><span class="hl esc">\n</span><span class="hl str">tree&#39;</span> <span class="hl opt">|</span> <span class="hl kwc">sed</span> <span class="hl kwb">-n</span> <span class="hl str">&#39;1,2p;2,3d&#39;</span>
+<span class="hl slc"># cat</span>
+<span class="hl slc"># dog</span>
+
+<span class="hl slc"># delete from 2nd to 3rd line and print from 1st to 2nd line</span>
+<span class="hl kwb">printf</span> <span class="hl str">&#39;cat</span><span class="hl esc">\n</span><span class="hl str">dog</span><span class="hl esc">\n</span><span class="hl str">tree&#39;</span> <span class="hl opt">|</span> <span class="hl kwc">sed</span> <span class="hl kwb">-n</span> <span class="hl str">&#39;2,3d;1,2p&#39;</span>
+<span class="hl slc"># cat</span>
+
+<span class="hl slc">## s command (most common)</span>
+
+<span class="hl slc"># substitute &#39;dog&#39; pattern with &#39;DOG&#39; pattern</span>
+<span class="hl kwb">printf</span> <span class="hl str">&#39;cat</span><span class="hl esc">\n</span><span class="hl str">dog</span><span class="hl esc">\n</span><span class="hl str">tree&#39;</span> <span class="hl opt">|</span> <span class="hl kwc">sed</span> <span class="hl str">&#39;s/dog/DOG/&#39;</span>
+<span class="hl slc"># cat</span>
+<span class="hl slc"># DOG</span>
+<span class="hl slc"># tree</span>
+
+<span class="hl slc"># substitute &#39;dog&#39; pattern with &#39;DOG&#39; pattern (using &#39;_&#39; as separator)</span>
+<span class="hl kwb">printf</span> <span class="hl str">&#39;cat</span><span class="hl esc">\n</span><span class="hl str">dog</span><span class="hl esc">\n</span><span class="hl str">tree&#39;</span> <span class="hl opt">|</span> <span class="hl kwc">sed</span> <span class="hl str">&#39;s_dog_DOG_&#39;</span>
+<span class="hl slc"># cat</span>
+<span class="hl slc"># DOG</span>
+<span class="hl slc"># tree</span>
+
+<span class="hl slc"># substitute &#39;dog&#39; pattern with &#39;DOG&#39; pattern (within a line)</span>
+<span class="hl kwb">printf</span> <span class="hl str">&#39;cat dog</span><span class="hl esc">\n</span><span class="hl str">dog</span><span class="hl esc">\n</span><span class="hl str">tree&#39;</span> <span class="hl opt">|</span> <span class="hl kwc">sed</span> <span class="hl str">&#39;s/dog/DOG/&#39;</span>
+<span class="hl slc"># cat DOG</span>
+<span class="hl slc"># DOG</span>
+<span class="hl slc"># tree</span>
+
+<span class="hl slc"># substitute &#39;dog&#39; pattern with &#39;DOG&#39; pattern (only first if there are multiple)</span>
+<span class="hl kwb">printf</span> <span class="hl str">&#39;cat</span><span class="hl esc">\n</span><span class="hl str">dog dog</span><span class="hl esc">\n</span><span class="hl str">tree&#39;</span> <span class="hl opt">|</span> <span class="hl kwc">sed</span> <span class="hl str">&#39;s/dog/DOG/&#39;</span>
+<span class="hl slc"># cat</span>
+<span class="hl slc"># DOG dog</span>
+<span class="hl slc"># tree</span>
+
+<span class="hl slc"># globally substitute &#39;dog&#39; pattern with &#39;DOG&#39; pattern</span>
+<span class="hl kwb">printf</span> <span class="hl str">&#39;cat</span><span class="hl esc">\n</span><span class="hl str">dog dog</span><span class="hl esc">\n</span><span class="hl str">tree&#39;</span> <span class="hl opt">|</span> <span class="hl kwc">sed</span> <span class="hl str">&#39;s/dog/DOG/g&#39;</span>
+<span class="hl slc"># cat</span>
+<span class="hl slc"># DOG DOG</span>
+<span class="hl slc"># tree</span>
+
+<span class="hl slc"># substitute 2nd &#39;dog&#39; pattern with &#39;DOG&#39; pattern</span>
+<span class="hl kwb">printf</span> <span class="hl str">&#39;cat</span><span class="hl esc">\n</span><span class="hl str">dog dog dog</span><span class="hl esc">\n</span><span class="hl str">tree&#39;</span> <span class="hl opt">|</span> <span class="hl kwc">sed</span> <span class="hl str">&#39;s/dog/DOG/2&#39;</span>
+<span class="hl slc"># cat</span>
+<span class="hl slc"># dog DOG dog</span>
+<span class="hl slc"># tree</span>
+
+<span class="hl slc"># substitute &#39;dog&#39; pattern with &#39;DOG&#39; pattern and print lines</span>
+<span class="hl kwb">printf</span> <span class="hl str">&#39;cat</span><span class="hl esc">\n</span><span class="hl str">dog dog</span><span class="hl esc">\n</span><span class="hl str">tree&#39;</span> <span class="hl opt">|</span> <span class="hl kwc">sed</span> <span class="hl str">&#39;s/dog/DOG/p&#39;</span>
+<span class="hl slc"># cat</span>
+<span class="hl slc"># DOG dog</span>
+<span class="hl slc"># DOG dog</span>
+<span class="hl slc"># tree</span>
+
+<span class="hl slc"># substitute &#39;dog&#39; pattern with &#39;DOG&#39; pattern and write lines to &#39;/tmp/out.txt&#39;</span>
+<span class="hl kwb">printf</span> <span class="hl str">&#39;cat</span><span class="hl esc">\n</span><span class="hl str">dog dog</span><span class="hl esc">\n</span><span class="hl str">tree&#39;</span> <span class="hl opt">|</span> <span class="hl kwc">sed</span> <span class="hl str">&#39;s/dog/DOG/w /tmp/out.txt&#39;</span>
+<span class="hl slc"># cat</span>
+<span class="hl slc"># DOG dog</span>
+<span class="hl slc"># tree</span>
+
+<span class="hl slc"># print content of &#39;/tmp/out.txt&#39;</span>
+<span class="hl kwc">cat</span> <span class="hl opt">/</span>tmp<span class="hl opt">/</span>out.txt
+<span class="hl slc"># DOG dog</span>
+
+<span class="hl slc"># substitute &#39;ls&#39; pattern with &#39;ls -lh&#39; pattern and execute lines</span>
+<span class="hl kwb">printf</span> <span class="hl str">&#39;ls /bin/echo&#39;</span> <span class="hl opt">|</span> <span class="hl kwc">sed</span> <span class="hl str">&#39;s/ls/ls -lh/e&#39;</span>
+<span class="hl slc"># -rwxr-xr-x 1 root root 31K Feb 18  2016 /bin/echo</span>
+
+<span class="hl slc"># remove trailing spaces</span>
+<span class="hl kwb">printf</span> <span class="hl str">&#39;hello world   	&#39;</span> <span class="hl opt">|</span> <span class="hl kwc">sed</span> <span class="hl str">&#39;s/\s\+$//&#39;</span> <span class="hl opt">&amp;&amp;</span> <span class="hl kwb">echo</span> <span class="hl str">&#39;|&#39;</span>
+<span class="hl slc"># hello world|</span>
+
+<span class="hl slc"># remove empty lines</span>
+<span class="hl kwb">printf</span> <span class="hl str">&#39;cat</span><span class="hl esc">\n	 \n</span><span class="hl str">tree&#39;</span> <span class="hl opt">|</span> <span class="hl kwc">sed</span> <span class="hl str">&#39;/^\s*$/d&#39;</span>
+<span class="hl slc"># cat</span>
+<span class="hl slc"># tree</span>
+</pre>
+</body>
+</html>
+<!--HTML generated by highlight 3.62, http://www.andre-simon.de/-->
