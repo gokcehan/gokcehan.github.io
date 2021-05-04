@@ -31,14 +31,7 @@ blockquote p {
   padding: 15px;
   background: #eee;
   border-radius: 5px;
-}
-
-blockquote p::before {
-  content: '\201C';
-}
-
-blockquote p::after {
-  content: '\201D';
+  border-left: 5px solid #333;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -54,6 +47,7 @@ blockquote p::after {
   }
   blockquote p {
     background: #333;
+    border-left: 5px solid #eee;
   }
   code {
     background: #333;
