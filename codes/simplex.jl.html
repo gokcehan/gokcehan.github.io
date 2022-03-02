@@ -1,129 +1,139 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
+
 <head>
-<meta charset="ISO-8859-1">
-<title>simplex.jl</title>
-<link rel="stylesheet" type="text/css" href="../highlight.css">
+  <meta charset="utf-8">
+  <meta name="color-scheme" content="light dark">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>simplex.jl</title>
+  <link rel="stylesheet" href="../style/code.css">
+  <link rel="stylesheet" href="../highlightjs/github.min.css" media="screen and (prefers-color-scheme: light)">
+  <link rel="stylesheet" href="../highlightjs/github-dark.min.css" media="screen and (prefers-color-scheme: dark)">
+  <script src="../highlightjs/highlight-julia.min.js"></script>
+  <script>hljs.highlightAll();</script>
 </head>
-<body class="hl">
-<pre class="hl"><span class="hl slc">#!/usr/bin/env julia</span>
-<span class="hl slc">#</span>
-<span class="hl slc"># simplex.jl</span>
-<span class="hl slc">#</span>
-<span class="hl slc"># Basic simplex and tableau implementations</span>
-<span class="hl slc">#</span>
 
-<span class="hl kwa">function</span> <span class="hl kwd">simplex</span><span class="hl opt">(</span>A<span class="hl opt">,</span> b<span class="hl opt">,</span> c<span class="hl opt">,</span> bi<span class="hl opt">)</span>
-    m<span class="hl opt">,</span> n <span class="hl opt">=</span> <span class="hl kwd">size</span><span class="hl opt">(</span>A<span class="hl opt">)</span>
-    inds <span class="hl opt">=</span> <span class="hl kwd">IntSet</span><span class="hl opt">(</span><span class="hl num">1</span> <span class="hl opt">:</span> n<span class="hl opt">)</span>
-    ni <span class="hl opt">=</span> <span class="hl kwd">setdiff</span><span class="hl opt">(</span>inds<span class="hl opt">,</span> bi<span class="hl opt">)</span>
+<body>
 
-    <span class="hl kwa">while true</span>
-        B <span class="hl opt">=</span> A<span class="hl opt">[:,</span> <span class="hl kwd">collect</span><span class="hl opt">(</span>bi<span class="hl opt">)]</span>
-        N <span class="hl opt">=</span> A<span class="hl opt">[:,</span> <span class="hl kwd">collect</span><span class="hl opt">(</span>ni<span class="hl opt">)]</span>
-        cb <span class="hl opt">=</span> c<span class="hl opt">[</span><span class="hl kwd">collect</span><span class="hl opt">(</span>bi<span class="hl opt">), :]</span>
-        cn <span class="hl opt">=</span> c<span class="hl opt">[</span><span class="hl kwd">collect</span><span class="hl opt">(</span>ni<span class="hl opt">), :]</span>
-        z_c <span class="hl opt">=</span> <span class="hl kwd">zeros</span><span class="hl opt">(</span>n<span class="hl opt">)</span>
+<pre><code class="language-julia">#!/usr/bin/env julia
+#
+# simplex.jl
+#
+# Basic simplex and tableau implementations
+#
 
-        <span class="hl slc"># step 1</span>
-        xb <span class="hl opt">=</span> B \ b
-        z <span class="hl opt">=</span> cb&#39; <span class="hl opt">*</span> xb
+function simplex(A, b, c, bi)
+    m, n = size(A)
+    inds = IntSet(1 : n)
+    ni = setdiff(inds, bi)
 
-        <span class="hl slc"># step 2</span>
-        w <span class="hl opt">=</span> cb&#39; <span class="hl opt">*</span> <span class="hl kwd">inv</span><span class="hl opt">(</span>B<span class="hl opt">)</span>
-        z_c<span class="hl opt">[</span><span class="hl kwd">collect</span><span class="hl opt">(</span>ni<span class="hl opt">)] =</span> w <span class="hl opt">*</span> N <span class="hl opt">-</span> cn&#39;
+    while true
+        B = A[:, collect(bi)]
+        N = A[:, collect(ni)]
+        cb = c[collect(bi), :]
+        cn = c[collect(ni), :]
+        z_c = zeros(n)
 
-        <span class="hl kwa">if</span> <span class="hl kwd">all</span><span class="hl opt">(</span>i <span class="hl opt">-&gt;</span> i <span class="hl opt">&lt;=</span> <span class="hl num">0</span><span class="hl opt">,</span> z_c<span class="hl opt">)</span>
-            <span class="hl kwd">info</span><span class="hl opt">(</span><span class="hl str">&quot;optimal solution is found&quot;</span><span class="hl opt">)</span>
-            <span class="hl kwd">info</span><span class="hl opt">(</span><span class="hl str">&quot;bi:</span> <span class="hl ipl">$bi</span><span class="hl str">&quot;</span><span class="hl opt">)</span>
-            x <span class="hl opt">=</span> <span class="hl kwd">zeros</span><span class="hl opt">(</span>n<span class="hl opt">)</span>
-            x<span class="hl opt">[</span><span class="hl kwd">collect</span><span class="hl opt">(</span>bi<span class="hl opt">)] =</span> xb
-            <span class="hl kwd">info</span><span class="hl opt">(</span><span class="hl str">&quot;x:</span> <span class="hl ipl">$x</span><span class="hl str">&quot;</span><span class="hl opt">)</span>
-            <span class="hl kwd">info</span><span class="hl opt">(</span><span class="hl str">&quot;z:</span> <span class="hl ipl">$z</span><span class="hl str">&quot;</span><span class="hl opt">)</span>
-            <span class="hl kwa">return</span>
-        <span class="hl kwa">end</span>
+        # step 1
+        xb = B \ b
+        z = cb&apos; * xb
 
-        k <span class="hl opt">=</span> <span class="hl kwd">indmax</span><span class="hl opt">(</span>z_c<span class="hl opt">)</span>
+        # step 2
+        w = cb&apos; * inv(B)
+        z_c[collect(ni)] = w * N - cn&apos;
 
-        <span class="hl slc"># step 3</span>
-        yk <span class="hl opt">=</span> <span class="hl kwd">inv</span><span class="hl opt">(</span>B<span class="hl opt">) *</span> A<span class="hl opt">[:,</span> k<span class="hl opt">]</span>
+        if all(i -&gt; i &lt;= 0, z_c)
+            info(&quot;optimal solution is found&quot;)
+            info(&quot;bi: $bi&quot;)
+            x = zeros(n)
+            x[collect(bi)] = xb
+            info(&quot;x: $x&quot;)
+            info(&quot;z: $z&quot;)
+            return
+        end
 
-        <span class="hl kwa">if</span> <span class="hl kwd">all</span><span class="hl opt">(</span>i <span class="hl opt">-&gt;</span> i <span class="hl opt">&lt;=</span> <span class="hl num">0</span><span class="hl opt">,</span> yk<span class="hl opt">)</span>
-            <span class="hl kwd">info</span><span class="hl opt">(</span><span class="hl str">&quot;optimal solution is unbounded&quot;</span><span class="hl opt">)</span>
-            <span class="hl kwa">return</span>
-        <span class="hl kwa">end</span>
+        k = indmax(z_c)
 
-        <span class="hl slc"># step 4</span>
-        rs <span class="hl opt">=</span> <span class="hl kwd">fill</span><span class="hl opt">(</span><span class="hl kwd">typemax</span><span class="hl opt">(</span><span class="hl kwb">Float64</span><span class="hl opt">),</span> m<span class="hl opt">)</span>
-        pos <span class="hl opt">=</span> <span class="hl kwd">find</span><span class="hl opt">(</span>i <span class="hl opt">-&gt;</span> i <span class="hl opt">&gt;</span> <span class="hl num">0</span><span class="hl opt">,</span> yk<span class="hl opt">)</span>
-        rs<span class="hl opt">[</span>pos<span class="hl opt">] =</span> xb<span class="hl opt">[</span>pos<span class="hl opt">] ./</span> yk<span class="hl opt">[</span>pos<span class="hl opt">]</span>
-        r <span class="hl opt">=</span> <span class="hl kwd">indmin</span><span class="hl opt">(</span>rs<span class="hl opt">)</span>
-        br <span class="hl opt">=</span> <span class="hl kwd">collect</span><span class="hl opt">(</span>bi<span class="hl opt">)[</span>r<span class="hl opt">]</span>
+        # step 3
+        yk = inv(B) * A[:, k]
 
-        <span class="hl kwd">info</span><span class="hl opt">(</span><span class="hl str">&quot;pivot:</span> <span class="hl ipl">$k</span> <span class="hl str">=&gt;</span> <span class="hl ipl">$br</span><span class="hl str">&quot;</span><span class="hl opt">)</span>
-        <span class="hl kwd">push</span><span class="hl opt">!(</span>bi<span class="hl opt">,</span> k<span class="hl opt">)</span>
-        <span class="hl kwd">push</span><span class="hl opt">!(</span>ni<span class="hl opt">,</span> br<span class="hl opt">)</span>
-        <span class="hl kwd">pop</span><span class="hl opt">!(</span>bi<span class="hl opt">,</span> br<span class="hl opt">)</span>
-        <span class="hl kwd">pop</span><span class="hl opt">!(</span>ni<span class="hl opt">,</span> k<span class="hl opt">)</span>
-    <span class="hl kwa">end</span>
-<span class="hl kwa">end</span>
+        if all(i -&gt; i &lt;= 0, yk)
+            info(&quot;optimal solution is unbounded&quot;)
+            return
+        end
 
-<span class="hl kwa">function</span> <span class="hl kwd">simplex_tableau</span><span class="hl opt">(</span>A<span class="hl opt">,</span> b<span class="hl opt">,</span> c<span class="hl opt">,</span> bi<span class="hl opt">)</span>
-    m<span class="hl opt">,</span> n <span class="hl opt">=</span> <span class="hl kwd">size</span><span class="hl opt">(</span>A<span class="hl opt">)</span>
-    T <span class="hl opt">= [</span><span class="hl num">1</span> <span class="hl opt">-</span>c&#39; <span class="hl num">0</span><span class="hl opt">;</span> <span class="hl kwd">zeros</span><span class="hl opt">(</span><span class="hl kwd">length</span><span class="hl opt">(</span>bi<span class="hl opt">))</span> A b<span class="hl opt">]</span>
+        # step 4
+        rs = fill(typemax(Float64), m)
+        pos = find(i -&gt; i &gt; 0, yk)
+        rs[pos] = xb[pos] ./ yk[pos]
+        r = indmin(rs)
+        br = collect(bi)[r]
 
-    <span class="hl kwa">while true</span>
-        <span class="hl kwd">display</span><span class="hl opt">(</span><span class="hl kwd">map</span><span class="hl opt">(</span>rationalize<span class="hl opt">,</span> T<span class="hl opt">))</span>
-        <span class="hl kwd">println</span><span class="hl opt">()</span>
-        <span class="hl kwd">println</span><span class="hl opt">()</span>
+        info(&quot;pivot: $k =&gt; $br&quot;)
+        push!(bi, k)
+        push!(ni, br)
+        pop!(bi, br)
+        pop!(ni, k)
+    end
+end
 
-        <span class="hl slc"># find entering variable k</span>
-        <span class="hl kwa">if</span> <span class="hl kwd">all</span><span class="hl opt">(</span>i <span class="hl opt">-&gt;</span> i <span class="hl opt">&lt;=</span> <span class="hl num">0</span><span class="hl opt">,</span> T<span class="hl opt">[</span><span class="hl num">1</span><span class="hl opt">,</span> <span class="hl num">2</span> <span class="hl opt">:</span> <span class="hl kwa">end</span> <span class="hl opt">-</span> <span class="hl num">1</span><span class="hl opt">])</span>
-            <span class="hl kwd">info</span><span class="hl opt">(</span><span class="hl str">&quot;optimal solution is found&quot;</span><span class="hl opt">)</span>
-            <span class="hl kwa">return</span>
-        <span class="hl kwa">end</span>
-        k <span class="hl opt">=</span> <span class="hl kwd">indmax</span><span class="hl opt">(</span>T<span class="hl opt">[</span><span class="hl num">1</span><span class="hl opt">,</span> <span class="hl num">2</span> <span class="hl opt">:</span> <span class="hl kwa">end</span> <span class="hl opt">-</span> <span class="hl num">1</span><span class="hl opt">])</span>
+function simplex_tableau(A, b, c, bi)
+    m, n = size(A)
+    T = [1 -c&apos; 0; zeros(length(bi)) A b]
 
-        <span class="hl slc"># find leaving variable r</span>
-        <span class="hl kwa">if</span> <span class="hl kwd">all</span><span class="hl opt">(</span>i <span class="hl opt">-&gt;</span> i <span class="hl opt">&lt;=</span> <span class="hl num">0</span><span class="hl opt">,</span> T<span class="hl opt">[</span><span class="hl num">2</span> <span class="hl opt">:</span> <span class="hl kwa">end</span><span class="hl opt">,</span> k <span class="hl opt">+</span> <span class="hl num">1</span><span class="hl opt">])</span>
-            <span class="hl kwd">info</span><span class="hl opt">(</span><span class="hl str">&quot;optimal solution is unbounded&quot;</span><span class="hl opt">)</span>
-            <span class="hl kwa">return</span>
-        <span class="hl kwa">end</span>
-        rs <span class="hl opt">=</span> <span class="hl kwd">fill</span><span class="hl opt">(</span><span class="hl kwd">typemax</span><span class="hl opt">(</span><span class="hl kwb">Float64</span><span class="hl opt">),</span> m<span class="hl opt">)</span>
-        pos <span class="hl opt">=</span> <span class="hl kwd">find</span><span class="hl opt">(</span>i <span class="hl opt">-&gt;</span> i <span class="hl opt">&gt;</span> <span class="hl num">0</span><span class="hl opt">,</span> T<span class="hl opt">[</span><span class="hl num">2</span> <span class="hl opt">:</span> <span class="hl kwa">end</span><span class="hl opt">,</span> k <span class="hl opt">+</span> <span class="hl num">1</span><span class="hl opt">])</span>
-        rs<span class="hl opt">[</span>pos<span class="hl opt">] =</span> T<span class="hl opt">[</span>pos<span class="hl opt">,</span> <span class="hl kwa">end</span><span class="hl opt">] ./</span> T<span class="hl opt">[</span>pos<span class="hl opt">,</span> k <span class="hl opt">+</span> <span class="hl num">1</span><span class="hl opt">]</span>
-        r <span class="hl opt">=</span> <span class="hl kwd">indmin</span><span class="hl opt">(</span>rs<span class="hl opt">)</span>
+    while true
+        display(map(rationalize, T))
+        println()
+        println()
 
-        <span class="hl slc"># pivot k and r</span>
-        T<span class="hl opt">[</span>r <span class="hl opt">+</span> <span class="hl num">1</span><span class="hl opt">, :] /=</span> T<span class="hl opt">[</span>r <span class="hl opt">+</span> <span class="hl num">1</span><span class="hl opt">,</span> k <span class="hl opt">+</span> <span class="hl num">1</span><span class="hl opt">]</span>
-        <span class="hl kwa">for</span> i <span class="hl opt">=</span> <span class="hl num">1</span> <span class="hl opt">:</span> m <span class="hl opt">+</span> <span class="hl num">1</span>
-            <span class="hl kwa">if</span> i <span class="hl opt">==</span> r <span class="hl opt">+</span> <span class="hl num">1</span>
-                <span class="hl kwa">continue</span>
-            <span class="hl kwa">end</span>
-            T<span class="hl opt">[</span>i<span class="hl opt">, :] -=</span> T<span class="hl opt">[</span>i<span class="hl opt">,</span> k <span class="hl opt">+</span> <span class="hl num">1</span><span class="hl opt">] *</span> T<span class="hl opt">[</span>r <span class="hl opt">+</span> <span class="hl num">1</span><span class="hl opt">, :]</span>
-        <span class="hl kwa">end</span>
+        # find entering variable k
+        if all(i -&gt; i &lt;= 0, T[1, 2 : end - 1])
+            info(&quot;optimal solution is found&quot;)
+            return
+        end
+        k = indmax(T[1, 2 : end - 1])
 
-        <span class="hl kwd">info</span><span class="hl opt">(</span><span class="hl str">&quot;pivot:</span> <span class="hl ipl">$k</span> <span class="hl str">=&gt;</span> <span class="hl ipl">$r</span><span class="hl str">&quot;</span><span class="hl opt">)</span>
-        <span class="hl kwd">println</span><span class="hl opt">()</span>
-    <span class="hl kwa">end</span>
-<span class="hl kwa">end</span>
+        # find leaving variable r
+        if all(i -&gt; i &lt;= 0, T[2 : end, k + 1])
+            info(&quot;optimal solution is unbounded&quot;)
+            return
+        end
+        rs = fill(typemax(Float64), m)
+        pos = find(i -&gt; i &gt; 0, T[2 : end, k + 1])
+        rs[pos] = T[pos, end] ./ T[pos, k + 1]
+        r = indmin(rs)
 
-<span class="hl kwa">using</span> Base<span class="hl opt">.</span>Test
+        # pivot k and r
+        T[r + 1, :] /= T[r + 1, k + 1]
+        for i = 1 : m + 1
+            if i == r + 1
+                continue
+            end
+            T[i, :] -= T[i, k + 1] * T[r + 1, :]
+        end
 
-A <span class="hl opt">= [</span><span class="hl num">2 3 1 0</span><span class="hl opt">; -</span><span class="hl num">1 1 0 1</span><span class="hl opt">]</span>
-b <span class="hl opt">= [</span><span class="hl num">6 1</span><span class="hl opt">]</span>&#39;
-c <span class="hl opt">= [-</span><span class="hl num">1</span> <span class="hl opt">-</span><span class="hl num">3 0 0</span><span class="hl opt">]</span>&#39;
-bi <span class="hl opt">=</span> <span class="hl kwd">IntSet</span><span class="hl opt">([</span><span class="hl num">3</span><span class="hl opt">,</span> <span class="hl num">4</span><span class="hl opt">])</span>
+        info(&quot;pivot: $k =&gt; $r&quot;)
+        println()
+    end
+end
 
-<span class="hl kwd">simplex</span><span class="hl opt">(</span>A<span class="hl opt">,</span> b<span class="hl opt">,</span> c<span class="hl opt">,</span> bi<span class="hl opt">)</span>
+using Base.Test
 
-A <span class="hl opt">= [</span><span class="hl num">1 1 2 1 0 0</span><span class="hl opt">;</span> <span class="hl num">1 1</span> <span class="hl opt">-</span><span class="hl num">1 0 1 0</span><span class="hl opt">; -</span><span class="hl num">1 1 1 0 0 1</span><span class="hl opt">]</span>
-b <span class="hl opt">= [</span><span class="hl num">9 2 4</span><span class="hl opt">]</span>&#39;
-c <span class="hl opt">= [</span><span class="hl num">1 1</span> <span class="hl opt">-</span><span class="hl num">4 0 0 0</span><span class="hl opt">]</span>&#39;
-bi <span class="hl opt">=</span> <span class="hl kwd">IntSet</span><span class="hl opt">([</span><span class="hl num">4</span><span class="hl opt">,</span> <span class="hl num">5</span><span class="hl opt">,</span> <span class="hl num">6</span><span class="hl opt">])</span>
+A = [2 3 1 0; -1 1 0 1]
+b = [6 1]&apos;
+c = [-1 -3 0 0]&apos;
+bi = IntSet([3, 4])
 
-<span class="hl kwd">simplex_tableau</span><span class="hl opt">(</span>A<span class="hl opt">,</span> b<span class="hl opt">,</span> c<span class="hl opt">,</span> bi<span class="hl opt">)</span>
-</pre>
+simplex(A, b, c, bi)
+
+A = [1 1 2 1 0 0; 1 1 -1 0 1 0; -1 1 1 0 0 1]
+b = [9 2 4]&apos;
+c = [1 1 -4 0 0 0]&apos;
+bi = IntSet([4, 5, 6])
+
+simplex_tableau(A, b, c, bi)
+</code></pre>
+
 </body>
+
 </html>
-<!--HTML generated by highlight 3.62, http://www.andre-simon.de/-->

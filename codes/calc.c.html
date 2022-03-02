@@ -1,117 +1,127 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
+
 <head>
-<meta charset="ISO-8859-1">
-<title>calc.c</title>
-<link rel="stylesheet" type="text/css" href="../highlight.css">
+  <meta charset="utf-8">
+  <meta name="color-scheme" content="light dark">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>calc.c</title>
+  <link rel="stylesheet" href="../style/code.css">
+  <link rel="stylesheet" href="../highlightjs/github.min.css" media="screen and (prefers-color-scheme: light)">
+  <link rel="stylesheet" href="../highlightjs/github-dark.min.css" media="screen and (prefers-color-scheme: dark)">
+  <script src="../highlightjs/highlight-c.min.js"></script>
+  <script>hljs.highlightAll();</script>
 </head>
-<body class="hl">
-<pre class="hl"><span class="hl slc">//</span>
-<span class="hl slc">// calc.c</span>
-<span class="hl slc">//</span>
-<span class="hl slc">// Calculator for simple expressions</span>
-<span class="hl slc">//</span>
-<span class="hl slc">// The expression grammar is as follows:</span>
-<span class="hl slc">//</span>
-<span class="hl slc">//     E ::= T {+ T}</span>
-<span class="hl slc">//     T ::= F {* F}</span>
-<span class="hl slc">//     F ::= ( E ) | Int</span>
-<span class="hl slc">//</span>
-<span class="hl slc">// Expressions are parsed and evaluated on the fly.</span>
-<span class="hl slc">//</span>
 
-<span class="hl ppc">#include &lt;stdio.h&gt;</span>
-<span class="hl ppc">#include &lt;ctype.h&gt;</span>
+<body>
 
-<span class="hl ppc">#define MAXLINE 1000</span>
+<pre><code class="language-c">//
+// calc.c
+//
+// Calculator for simple expressions
+//
+// The expression grammar is as follows:
+//
+//     E ::= T {+ T}
+//     T ::= F {* F}
+//     F ::= ( E ) | Int
+//
+// Expressions are parsed and evaluated on the fly.
+//
 
-<span class="hl kwb">int</span> <span class="hl kwd">expr</span><span class="hl opt">(</span><span class="hl kwb">void</span><span class="hl opt">);</span>
-<span class="hl kwb">int</span> <span class="hl kwd">term</span><span class="hl opt">(</span><span class="hl kwb">void</span><span class="hl opt">);</span>
-<span class="hl kwb">int</span> <span class="hl kwd">fact</span><span class="hl opt">(</span><span class="hl kwb">void</span><span class="hl opt">);</span>
-<span class="hl kwb">int</span> <span class="hl kwd">scan</span><span class="hl opt">(</span><span class="hl kwb">char</span> <span class="hl opt">*</span>s<span class="hl opt">,</span> <span class="hl kwb">int</span> lim<span class="hl opt">);</span>
+#include &lt;stdio.h&gt;
+#include &lt;ctype.h&gt;
 
-<span class="hl kwb">char</span> <span class="hl opt">*</span>curr<span class="hl opt">;</span>
+#define MAXLINE 1000
 
-<span class="hl slc">// E ::= T {+ T}</span>
-<span class="hl kwb">int</span> <span class="hl kwd">expr</span><span class="hl opt">(</span><span class="hl kwb">void</span><span class="hl opt">)</span>
-<span class="hl opt">{</span>
-    <span class="hl kwb">int</span> result <span class="hl opt">=</span> <span class="hl kwd">term</span><span class="hl opt">();</span>
-    <span class="hl kwa">while</span> <span class="hl opt">(*</span>curr <span class="hl opt">==</span> <span class="hl str">&#39;+&#39;</span><span class="hl opt">) {</span>
-        <span class="hl opt">++</span>curr<span class="hl opt">;</span>
-        result <span class="hl opt">+=</span> <span class="hl kwd">term</span><span class="hl opt">();</span>
-    <span class="hl opt">}</span>
-    <span class="hl kwa">return</span> result<span class="hl opt">;</span>
-<span class="hl opt">}</span>
+int expr(void);
+int term(void);
+int fact(void);
+int scan(char *s, int lim);
 
-<span class="hl slc">// T ::= F {* F}</span>
-<span class="hl kwb">int</span> <span class="hl kwd">term</span><span class="hl opt">(</span><span class="hl kwb">void</span><span class="hl opt">)</span>
-<span class="hl opt">{</span>
-    <span class="hl kwb">int</span> result <span class="hl opt">=</span> <span class="hl kwd">fact</span><span class="hl opt">();</span>
-    <span class="hl kwa">while</span> <span class="hl opt">(*</span>curr <span class="hl opt">==</span> <span class="hl str">&#39;*&#39;</span><span class="hl opt">) {</span>
-        <span class="hl opt">++</span>curr<span class="hl opt">;</span>
-        result <span class="hl opt">*=</span> <span class="hl kwd">fact</span><span class="hl opt">();</span>
-    <span class="hl opt">}</span>
-    <span class="hl kwa">return</span> result<span class="hl opt">;</span>
-<span class="hl opt">}</span>
+char *curr;
 
-<span class="hl slc">// F ::= ( E ) | Int</span>
-<span class="hl kwb">int</span> <span class="hl kwd">fact</span><span class="hl opt">(</span><span class="hl kwb">void</span><span class="hl opt">)</span>
-<span class="hl opt">{</span>
-    <span class="hl kwb">int</span> result<span class="hl opt">;</span>
+// E ::= T {+ T}
+int expr(void)
+{
+    int result = term();
+    while (*curr == &apos;+&apos;) {
+        ++curr;
+        result += term();
+    }
+    return result;
+}
 
-    <span class="hl kwa">if</span> <span class="hl opt">(*</span>curr <span class="hl opt">==</span> <span class="hl str">&#39;(&#39;</span><span class="hl opt">) {</span>
-        <span class="hl opt">++</span>curr<span class="hl opt">;</span>
-        result <span class="hl opt">=</span> <span class="hl kwd">expr</span><span class="hl opt">();</span>
-        <span class="hl kwa">if</span> <span class="hl opt">(*</span>curr <span class="hl opt">==</span> <span class="hl str">&#39;)&#39;</span><span class="hl opt">) {</span>
-            <span class="hl opt">++</span>curr<span class="hl opt">;</span>
-        <span class="hl opt">}</span> <span class="hl kwa">else</span> <span class="hl opt">{</span>
-            <span class="hl kwd">printf</span><span class="hl opt">(</span><span class="hl str">&quot;error: expected &#39;)&#39;</span><span class="hl esc">\n</span><span class="hl str">&quot;</span><span class="hl opt">);</span>
-            <span class="hl kwa">return</span> <span class="hl num">0</span><span class="hl opt">;</span>
-        <span class="hl opt">}</span>
-        <span class="hl kwa">return</span> result<span class="hl opt">;</span>
-    <span class="hl opt">}</span> <span class="hl kwa">else if</span> <span class="hl opt">(</span><span class="hl kwd">isdigit</span><span class="hl opt">(*</span>curr<span class="hl opt">)) {</span>
-        result <span class="hl opt">= *</span>curr <span class="hl opt">-</span> <span class="hl str">&#39;0&#39;</span><span class="hl opt">;</span>
-        <span class="hl opt">++</span>curr<span class="hl opt">;</span>
-        <span class="hl kwa">while</span> <span class="hl opt">(</span><span class="hl kwd">isdigit</span><span class="hl opt">(*</span>curr<span class="hl opt">)) {</span>
-            result <span class="hl opt">=</span> result <span class="hl opt">*</span> <span class="hl num">10</span> <span class="hl opt">+ (*</span>curr <span class="hl opt">-</span> <span class="hl str">&#39;0&#39;</span><span class="hl opt">);</span>
-            <span class="hl opt">++</span>curr<span class="hl opt">;</span>
-        <span class="hl opt">}</span>
-        <span class="hl kwa">return</span> result<span class="hl opt">;</span>
-    <span class="hl opt">}</span> <span class="hl kwa">else</span> <span class="hl opt">{</span>
-        <span class="hl kwd">printf</span><span class="hl opt">(</span><span class="hl str">&quot;error: expected a parenthesis or a number at:</span> <span class="hl ipl">%c</span><span class="hl str"></span><span class="hl esc">\n</span><span class="hl str">&quot;</span><span class="hl opt">, *</span>curr<span class="hl opt">);</span>
-        <span class="hl kwa">return</span> <span class="hl num">0</span><span class="hl opt">;</span>
-    <span class="hl opt">}</span>
-<span class="hl opt">}</span>
+// T ::= F {* F}
+int term(void)
+{
+    int result = fact();
+    while (*curr == &apos;*&apos;) {
+        ++curr;
+        result *= fact();
+    }
+    return result;
+}
 
-<span class="hl kwb">int</span> <span class="hl kwd">scan</span><span class="hl opt">(</span><span class="hl kwb">char</span> <span class="hl opt">*</span>s<span class="hl opt">,</span> <span class="hl kwb">int</span> lim<span class="hl opt">)</span>
-<span class="hl opt">{</span>
-    <span class="hl kwb">int</span> i<span class="hl opt">,</span> c<span class="hl opt">;</span>
+// F ::= ( E ) | Int
+int fact(void)
+{
+    int result;
 
-    i <span class="hl opt">=</span> <span class="hl num">0</span><span class="hl opt">;</span>
-    <span class="hl kwa">while</span> <span class="hl opt">(--</span>lim <span class="hl opt">&gt;</span> <span class="hl num">0</span> <span class="hl opt">&amp;&amp; (</span>c <span class="hl opt">=</span> <span class="hl kwd">getchar</span><span class="hl opt">()) !=</span> EOF <span class="hl opt">&amp;&amp;</span> c <span class="hl opt">!=</span> <span class="hl str">&#39;</span><span class="hl esc">\n</span><span class="hl str">&#39;</span><span class="hl opt">) {</span>
-        <span class="hl kwa">if</span> <span class="hl opt">(!</span><span class="hl kwd">isspace</span><span class="hl opt">(</span>c<span class="hl opt">)) {</span>
-            s<span class="hl opt">[</span>i<span class="hl opt">++] =</span> c<span class="hl opt">;</span>
-        <span class="hl opt">}</span>
-    <span class="hl opt">}</span>
-    <span class="hl kwa">if</span> <span class="hl opt">(</span>c <span class="hl opt">==</span> <span class="hl str">&#39;</span><span class="hl esc">\n</span><span class="hl str">&#39;</span><span class="hl opt">) {</span>
-        s<span class="hl opt">[</span>i<span class="hl opt">++] =</span> c<span class="hl opt">;</span>
-    <span class="hl opt">}</span>
-    s<span class="hl opt">[</span>i<span class="hl opt">] =</span> <span class="hl str">&#39;\0&#39;</span><span class="hl opt">;</span>
-    <span class="hl kwa">return</span> i<span class="hl opt">;</span>
-<span class="hl opt">}</span>
+    if (*curr == &apos;(&apos;) {
+        ++curr;
+        result = expr();
+        if (*curr == &apos;)&apos;) {
+            ++curr;
+        } else {
+            printf(&quot;error: expected &apos;)&apos;\n&quot;);
+            return 0;
+        }
+        return result;
+    } else if (isdigit(*curr)) {
+        result = *curr - &apos;0&apos;;
+        ++curr;
+        while (isdigit(*curr)) {
+            result = result * 10 + (*curr - &apos;0&apos;);
+            ++curr;
+        }
+        return result;
+    } else {
+        printf(&quot;error: expected a parenthesis or a number at: %c\n&quot;, *curr);
+        return 0;
+    }
+}
 
-<span class="hl kwb">int</span> <span class="hl kwd">main</span><span class="hl opt">(</span><span class="hl kwb">void</span><span class="hl opt">)</span>
-<span class="hl opt">{</span>
-    <span class="hl kwb">char</span> line<span class="hl opt">[</span>MAXLINE<span class="hl opt">];</span>
+int scan(char *s, int lim)
+{
+    int i, c;
 
-    <span class="hl kwd">printf</span><span class="hl opt">(</span><span class="hl str">&quot;&gt; &quot;</span><span class="hl opt">);</span>
-    <span class="hl kwa">while</span> <span class="hl opt">(</span><span class="hl kwd">scan</span><span class="hl opt">(</span>line<span class="hl opt">,</span> MAXLINE<span class="hl opt">)) {</span>
-        curr <span class="hl opt">=</span> line<span class="hl opt">;</span>
-        <span class="hl kwd">printf</span><span class="hl opt">(</span><span class="hl str">&quot;=</span> <span class="hl ipl">%d</span><span class="hl str"></span><span class="hl esc">\n</span><span class="hl str">&gt; &quot;</span><span class="hl opt">,</span> <span class="hl kwd">expr</span><span class="hl opt">());</span>
-    <span class="hl opt">}</span>
-    <span class="hl kwa">return</span> <span class="hl num">0</span><span class="hl opt">;</span>
-<span class="hl opt">}</span>
-</pre>
+    i = 0;
+    while (--lim &gt; 0 &amp;&amp; (c = getchar()) != EOF &amp;&amp; c != &apos;\n&apos;) {
+        if (!isspace(c)) {
+            s[i++] = c;
+        }
+    }
+    if (c == &apos;\n&apos;) {
+        s[i++] = c;
+    }
+    s[i] = &apos;\0&apos;;
+    return i;
+}
+
+int main(void)
+{
+    char line[MAXLINE];
+
+    printf(&quot;&gt; &quot;);
+    while (scan(line, MAXLINE)) {
+        curr = line;
+        printf(&quot;= %d\n&gt; &quot;, expr());
+    }
+    return 0;
+}
+</code></pre>
+
 </body>
+
 </html>
-<!--HTML generated by highlight 3.62, http://www.andre-simon.de/-->

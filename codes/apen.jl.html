@@ -1,59 +1,69 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
+
 <head>
-<meta charset="ISO-8859-1">
-<title>apen.jl</title>
-<link rel="stylesheet" type="text/css" href="../highlight.css">
+  <meta charset="utf-8">
+  <meta name="color-scheme" content="light dark">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>apen.jl</title>
+  <link rel="stylesheet" href="../style/code.css">
+  <link rel="stylesheet" href="../highlightjs/github.min.css" media="screen and (prefers-color-scheme: light)">
+  <link rel="stylesheet" href="../highlightjs/github-dark.min.css" media="screen and (prefers-color-scheme: dark)">
+  <script src="../highlightjs/highlight-julia.min.js"></script>
+  <script>hljs.highlightAll();</script>
 </head>
-<body class="hl">
-<pre class="hl"><span class="hl slc">#!/usr/bin/env julia</span>
-<span class="hl slc">#</span>
-<span class="hl slc"># apen.jl</span>
-<span class="hl slc">#</span>
-<span class="hl slc"># Approximate entropy calculation</span>
-<span class="hl slc">#</span>
 
-<span class="hl kwa">function</span> <span class="hl kwd">apen</span><span class="hl opt">(</span>data<span class="hl opt">,</span> window<span class="hl opt">,</span> level<span class="hl opt">)</span>
-    u <span class="hl opt">=</span> data
-    N <span class="hl opt">=</span> <span class="hl kwd">length</span><span class="hl opt">(</span>u<span class="hl opt">)</span>
+<body>
 
-    phi <span class="hl opt">=</span> <span class="hl kwd">zeros</span><span class="hl opt">(</span><span class="hl num">2</span><span class="hl opt">)</span>
-    <span class="hl kwa">for</span> k <span class="hl opt">=</span> <span class="hl num">1</span><span class="hl opt">:</span><span class="hl num">2</span>
-        m <span class="hl opt">=</span> window <span class="hl opt">+ (</span>k <span class="hl opt">-</span> <span class="hl num">1</span><span class="hl opt">)</span>
-        r <span class="hl opt">=</span> level
+<pre><code class="language-julia">#!/usr/bin/env julia
+#
+# apen.jl
+#
+# Approximate entropy calculation
+#
 
-        len <span class="hl opt">= (</span>N <span class="hl opt">-</span> m<span class="hl opt">) +</span> <span class="hl num">1</span>
-        x <span class="hl opt">=</span> <span class="hl kwd">zeros</span><span class="hl opt">(</span>len<span class="hl opt">,</span> m<span class="hl opt">)</span>
-        <span class="hl kwa">for</span> i <span class="hl opt">=</span> <span class="hl num">1</span><span class="hl opt">:</span>len
-            <span class="hl kwa">for</span> j <span class="hl opt">=</span> <span class="hl num">1</span><span class="hl opt">:</span>m
-                x<span class="hl opt">[</span>i<span class="hl opt">,</span>j<span class="hl opt">] =</span> u<span class="hl opt">[(</span>i<span class="hl opt">+</span>j<span class="hl opt">)-</span><span class="hl num">1</span><span class="hl opt">]</span>
-            <span class="hl kwa">end</span>
-        <span class="hl kwa">end</span>
+function apen(data, window, level)
+    u = data
+    N = length(u)
 
-        C <span class="hl opt">=</span> <span class="hl kwd">zeros</span><span class="hl opt">(</span>len<span class="hl opt">)</span>
-        <span class="hl kwa">for</span> i <span class="hl opt">=</span> <span class="hl num">1</span><span class="hl opt">:</span>len
-            count <span class="hl opt">=</span> <span class="hl num">0</span>
-            <span class="hl kwa">for</span> j <span class="hl opt">=</span> <span class="hl num">1</span><span class="hl opt">:</span>len
-                <span class="hl kwa">if</span> <span class="hl kwd">maximum</span><span class="hl opt">(</span><span class="hl kwd">abs</span><span class="hl opt">(</span>x<span class="hl opt">[</span>i<span class="hl opt">,:] -</span> x<span class="hl opt">[</span>j<span class="hl opt">,:])) &lt;</span> r
-                    count <span class="hl opt">+=</span> <span class="hl num">1</span>
-                <span class="hl kwa">end</span>
-            <span class="hl kwa">end</span>
-            C<span class="hl opt">[</span>i<span class="hl opt">] =</span> count <span class="hl opt">/</span> len
-        <span class="hl kwa">end</span>
+    phi = zeros(2)
+    for k = 1:2
+        m = window + (k - 1)
+        r = level
 
-        phi<span class="hl opt">[</span>k<span class="hl opt">] =</span> <span class="hl kwd">sum</span><span class="hl opt">(</span><span class="hl kwd">log</span><span class="hl opt">(</span>C<span class="hl opt">)) /</span> len
-    <span class="hl kwa">end</span>
+        len = (N - m) + 1
+        x = zeros(len, m)
+        for i = 1:len
+            for j = 1:m
+                x[i,j] = u[(i+j)-1]
+            end
+        end
 
-    phi<span class="hl opt">[</span><span class="hl num">1</span><span class="hl opt">] -</span> phi<span class="hl opt">[</span><span class="hl num">2</span><span class="hl opt">]</span>
-<span class="hl kwa">end</span>
+        C = zeros(len)
+        for i = 1:len
+            count = 0
+            for j = 1:len
+                if maximum(abs(x[i,:] - x[j,:])) &lt; r
+                    count += 1
+                end
+            end
+            C[i] = count / len
+        end
 
-<span class="hl slc"># example from wikipedia page:</span>
-<span class="hl slc"># https://en.wikipedia.org/wiki/Approximate_entropy</span>
-u <span class="hl opt">=</span> <span class="hl kwd">repmat</span><span class="hl opt">([</span><span class="hl num">85</span><span class="hl opt">,</span><span class="hl num">80</span><span class="hl opt">,</span><span class="hl num">89</span><span class="hl opt">],</span> <span class="hl num">17</span><span class="hl opt">)</span>
-m <span class="hl opt">=</span> <span class="hl num">2</span>
-r <span class="hl opt">=</span> <span class="hl num">3</span>
-<span class="hl kwd">println</span><span class="hl opt">(</span><span class="hl kwd">apen</span><span class="hl opt">(</span>u<span class="hl opt">,</span> m<span class="hl opt">,</span> r<span class="hl opt">))</span>
-</pre>
+        phi[k] = sum(log(C)) / len
+    end
+
+    phi[1] - phi[2]
+end
+
+# example from wikipedia page:
+# https://en.wikipedia.org/wiki/Approximate_entropy
+u = repmat([85,80,89], 17)
+m = 2
+r = 3
+println(apen(u, m, r))
+</code></pre>
+
 </body>
+
 </html>
-<!--HTML generated by highlight 3.62, http://www.andre-simon.de/-->

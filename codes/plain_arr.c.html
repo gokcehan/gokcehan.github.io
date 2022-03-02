@@ -1,72 +1,82 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
+
 <head>
-<meta charset="ISO-8859-1">
-<title>plain_arr.c</title>
-<link rel="stylesheet" type="text/css" href="../highlight.css">
+  <meta charset="utf-8">
+  <meta name="color-scheme" content="light dark">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>plain_arr.c</title>
+  <link rel="stylesheet" href="../style/code.css">
+  <link rel="stylesheet" href="../highlightjs/github.min.css" media="screen and (prefers-color-scheme: light)">
+  <link rel="stylesheet" href="../highlightjs/github-dark.min.css" media="screen and (prefers-color-scheme: dark)">
+  <script src="../highlightjs/highlight-c.min.js"></script>
+  <script>hljs.highlightAll();</script>
 </head>
-<body class="hl">
-<pre class="hl"><span class="hl slc">//</span>
-<span class="hl slc">// plain_arr.c</span>
-<span class="hl slc">//</span>
-<span class="hl slc">// Plain array</span>
-<span class="hl slc">//</span>
 
-<span class="hl ppc">#include &lt;stdio.h&gt;</span>
-<span class="hl ppc">#include &lt;stdlib.h&gt;</span>
+<body>
 
-<span class="hl ppc">#define LIMIT 100</span>
+<pre><code class="language-c">//
+// plain_arr.c
+//
+// Plain array
+//
 
-<span class="hl kwb">int</span> a <span class="hl opt">=</span> <span class="hl num">0</span><span class="hl opt">;</span>
-<span class="hl kwb">int</span> b <span class="hl opt">=</span> <span class="hl num">1</span><span class="hl opt">;</span>
+#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
 
-<span class="hl kwb">int</span> <span class="hl kwd">get</span><span class="hl opt">(</span><span class="hl kwb">void</span><span class="hl opt">)</span>
-<span class="hl opt">{</span>
-    <span class="hl kwb">int</span> tmp <span class="hl opt">=</span> a<span class="hl opt">;</span>
-    a <span class="hl opt">=</span> b<span class="hl opt">;</span>
-    b <span class="hl opt">=</span> tmp <span class="hl opt">+</span> b<span class="hl opt">;</span>
-    <span class="hl kwa">return</span> tmp<span class="hl opt">;</span>
-<span class="hl opt">}</span>
+#define LIMIT 100
 
-<span class="hl kwb">void</span> <span class="hl kwd">process</span><span class="hl opt">(</span><span class="hl kwb">int</span> i<span class="hl opt">)</span>
-<span class="hl opt">{</span>
-    <span class="hl kwd">printf</span><span class="hl opt">(</span><span class="hl str">&quot;</span><span class="hl ipl">%d</span><span class="hl str"></span><span class="hl esc">\n</span><span class="hl str">&quot;</span><span class="hl opt">,</span> i<span class="hl opt">);</span>
-<span class="hl opt">}</span>
+int a = 0;
+int b = 1;
 
-<span class="hl kwb">int</span> <span class="hl kwd">main</span><span class="hl opt">(</span><span class="hl kwb">int</span> argc<span class="hl opt">,</span> <span class="hl kwb">char</span> <span class="hl opt">*</span>argv<span class="hl opt">[])</span>
-<span class="hl opt">{</span>
-    <span class="hl kwb">int</span> i<span class="hl opt">,</span> num<span class="hl opt">;</span>
+int get(void)
+{
+    int tmp = a;
+    a = b;
+    b = tmp + b;
+    return tmp;
+}
 
-    <span class="hl kwb">int</span> limit <span class="hl opt">=</span> argc <span class="hl opt">&lt;</span> <span class="hl num">2</span> <span class="hl opt">?</span> LIMIT <span class="hl opt">:</span> <span class="hl kwd">atoi</span><span class="hl opt">(</span>argv<span class="hl opt">[</span><span class="hl num">1</span><span class="hl opt">]);</span>
+void process(int i)
+{
+    printf(&quot;%d\n&quot;, i);
+}
 
-    <span class="hl kwb">int</span> len <span class="hl opt">=</span> <span class="hl num">0</span><span class="hl opt">;</span>
-    <span class="hl kwb">int</span> cap <span class="hl opt">=</span> <span class="hl num">2</span><span class="hl opt">;</span>
-    <span class="hl kwb">int</span> <span class="hl opt">*</span>buf <span class="hl opt">=</span> <span class="hl kwd">malloc</span><span class="hl opt">(</span>cap <span class="hl opt">*</span> <span class="hl kwa">sizeof</span><span class="hl opt">(</span><span class="hl kwb">int</span><span class="hl opt">));</span>
+int main(int argc, char *argv[])
+{
+    int i, num;
 
-    <span class="hl kwa">while</span> <span class="hl opt">((</span>num <span class="hl opt">=</span> <span class="hl kwd">get</span><span class="hl opt">()) &lt;</span> limit<span class="hl opt">) {</span>
-        <span class="hl kwa">if</span> <span class="hl opt">(</span>cap <span class="hl opt">&lt;=</span> len<span class="hl opt">) {</span>
-            buf <span class="hl opt">=</span> <span class="hl kwd">realloc</span><span class="hl opt">(</span>buf<span class="hl opt">, (</span>cap <span class="hl opt">*=</span> <span class="hl num">2</span><span class="hl opt">) *</span> <span class="hl kwa">sizeof</span><span class="hl opt">(</span><span class="hl kwb">int</span><span class="hl opt">));</span>
-        <span class="hl opt">}</span>
-        buf<span class="hl opt">[</span>len<span class="hl opt">++] =</span> num<span class="hl opt">;</span>
-    <span class="hl opt">}</span>
+    int limit = argc &lt; 2 ? LIMIT : atoi(argv[1]);
 
-    <span class="hl kwa">for</span> <span class="hl opt">(</span>i <span class="hl opt">=</span> <span class="hl num">0</span><span class="hl opt">;</span> i <span class="hl opt">&lt;</span> len<span class="hl opt">; ++</span>i<span class="hl opt">) {</span>
-        <span class="hl kwd">process</span><span class="hl opt">(</span>buf<span class="hl opt">[</span>i<span class="hl opt">]);</span>
-    <span class="hl opt">}</span>
+    int len = 0;
+    int cap = 2;
+    int *buf = malloc(cap * sizeof(int));
 
-    <span class="hl kwa">for</span> <span class="hl opt">(</span>i <span class="hl opt">=</span> len<span class="hl opt">-</span><span class="hl num">1</span><span class="hl opt">;</span> i <span class="hl opt">&gt;</span> <span class="hl num">0</span><span class="hl opt">; --</span>i<span class="hl opt">) {</span>
-        buf<span class="hl opt">[</span>i<span class="hl opt">] -=</span> buf<span class="hl opt">[</span>i<span class="hl opt">-</span><span class="hl num">1</span><span class="hl opt">];</span>
-    <span class="hl opt">}</span>
+    while ((num = get()) &lt; limit) {
+        if (cap &lt;= len) {
+            buf = realloc(buf, (cap *= 2) * sizeof(int));
+        }
+        buf[len++] = num;
+    }
 
-    <span class="hl kwa">for</span> <span class="hl opt">(</span>i <span class="hl opt">=</span> len<span class="hl opt">-</span><span class="hl num">1</span><span class="hl opt">;</span> i <span class="hl opt">&gt;=</span> <span class="hl num">0</span><span class="hl opt">; --</span>i<span class="hl opt">) {</span>
-        <span class="hl kwd">process</span><span class="hl opt">(</span>buf<span class="hl opt">[--</span>len<span class="hl opt">]);</span>
-    <span class="hl opt">}</span>
+    for (i = 0; i &lt; len; ++i) {
+        process(buf[i]);
+    }
 
-    <span class="hl kwd">free</span><span class="hl opt">(</span>buf<span class="hl opt">);</span>
+    for (i = len-1; i &gt; 0; --i) {
+        buf[i] -= buf[i-1];
+    }
 
-    <span class="hl kwa">return</span> <span class="hl num">0</span><span class="hl opt">;</span>
-<span class="hl opt">}</span>
-</pre>
+    for (i = len-1; i &gt;= 0; --i) {
+        process(buf[--len]);
+    }
+
+    free(buf);
+
+    return 0;
+}
+</code></pre>
+
 </body>
+
 </html>
-<!--HTML generated by highlight 3.62, http://www.andre-simon.de/-->

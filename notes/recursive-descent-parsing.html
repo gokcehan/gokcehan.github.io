@@ -3,15 +3,23 @@
 
 <head>
   <meta charset="utf-8">
+  <meta name="color-scheme" content="light dark">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Recursive Descent Parsing</title>
-  <link rel="stylesheet" type="text/css" href="../style.css">
-  <link rel="stylesheet" type="text/css" href="../highlight.css">
+  <link rel="stylesheet" href="../style/base.css">
+  <link rel="stylesheet" href="../highlightjs/github.min.css" media="screen and (prefers-color-scheme: light)">
+  <link rel="stylesheet" href="../highlightjs/github-dark.min.css" media="screen and (prefers-color-scheme: dark)">
+  <script src="../highlightjs/highlight-c.min.js"></script>
+  <script>hljs.highlightAll();</script>
 </head>
 
 <body>
 
-<h1>Recursive Descent Parsing</h1>
+<header>
+  <h1>Recursive Descent Parsing</h1>
+</header>
+
+<main>
 
 <p>
 Parsing is an important problem in computer science that comes up quite often.
@@ -24,11 +32,10 @@ In this post, a recursive descent parser for a very simple expression grammar is
 Let's first write an arithmetic expression grammar in a naive way:
 </p>
 
-<pre>
-E -> E + T | T
-T -> T * F | F
-F -> ( E ) | Int
-</pre>
+<pre><code>E -&gt; E + T | T
+T -&gt; T * F | F
+F -&gt; ( E ) | Int
+</code></pre>
 
 <p>
 In this grammar there are no <code>-</code> and <code>/</code> operators, negative numbers, and floating numbers for simplicity.
@@ -47,9 +54,8 @@ It means the parser is going to deadlock unless we do something about it.
 In general, left recursive grammars have the following rules:
 </p>
 
-<pre>
-A -> Ab | c
-</pre>
+<pre><code>A -&gt; Ab | c
+</code></pre>
 
 <p>
 This is called direct left recursion meaning a non-terminal exists as the left most element in its own derivation.
@@ -61,11 +67,10 @@ Note that recursion is acceptable in grammars as long as it's not left recursion
 Let's try to convert the rules to have right recursion instead:
 </p>
 
-<pre>
-E -> T + E | T
-T -> F * T | F
-F -> ( E ) | Int
-</pre>
+<pre><code>E -&gt; T + E | T
+T -&gt; F * T | F
+F -&gt; ( E ) | Int
+</code></pre>
 
 <p>
 As a side note, keep in mind that this modification also changes the left/right associativity of parse trees.
@@ -85,22 +90,20 @@ We don't usually want that as it will basically increase the complexity.
 In general, backtracking occurs when there are common initial elements in derivations of a rule as such:
 </p>
 
-<pre>
-A -> Bc | Bd
-</pre>
+<pre><code>A -&gt; Bc | Bd
+</code></pre>
 
 <p>
 The solution is to factor out the common part to a new rule, namely left factoring.
 Rewriting our grammar after left factoring we get:
 </p>
 
-<pre>
-E  -> T E'
-E' -> + T E' | eps
-T  -> F T'
-T' -> * F T' | eps
-F  -> ( E )  | Int
-</pre>
+<pre><code>E  -&gt; T E&apos;
+E&apos; -&gt; + T E&apos; | eps
+T  -&gt; F T&apos;
+T&apos; -&gt; * F T&apos; | eps
+F  -&gt; ( E )  | Int
+</code></pre>
 
 <p>
 Now I should mention that many people go directly from version 1 of our grammar to version 3 or sometimes even directly come up with version 3.
@@ -113,11 +116,10 @@ This is perfectly acceptable and the only reason I have went through this burden
 Lastly we convert the above Context-free grammar (CFG) to its Extended Backus-Naur Form (EBNF):
 </p>
 
-<pre>
-E ::= T {+ T}
+<pre><code>E ::= T {+ T}
 T ::= F {* F}
 F ::= ( E ) | Int
-</pre>
+</code></pre>
 
 <p>
 Since repetitions are possible with EBNF, we are able to merge some of the rules.
@@ -131,24 +133,23 @@ First thing to do before parsing is to get the input from the user.
 For this purpose, we use a scanning routine that will read a single line from stdin discarding all the whitespace:
 </p>
 
-<pre class="hl">
-<span class="hl kwb">int</span> <span class="hl kwd">scan</span><span class="hl opt">(</span><span class="hl kwb">char</span> <span class="hl opt">*</span>s<span class="hl opt">,</span> <span class="hl kwb">int</span> lim<span class="hl opt">)</span>
-<span class="hl opt">{</span>
-    <span class="hl kwb">int</span> i<span class="hl opt">,</span> c<span class="hl opt">;</span>
+<pre><code class="language-c">int scan(char *s, int lim)
+{
+    int i, c;
 
-    i <span class="hl opt">=</span> <span class="hl num">0</span><span class="hl opt">;</span>
-    <span class="hl kwa">while</span> <span class="hl opt">(--</span>lim <span class="hl opt">&gt;</span> <span class="hl num">0</span> <span class="hl opt">&amp;&amp; (</span>c <span class="hl opt">=</span> <span class="hl kwd">getchar</span><span class="hl opt">()) !=</span> EOF <span class="hl opt">&amp;&amp;</span> c <span class="hl opt">!=</span> <span class="hl str">&#39;</span><span class="hl esc">\n</span><span class="hl str">&#39;</span><span class="hl opt">) {</span>
-        <span class="hl kwa">if</span> <span class="hl opt">(!</span><span class="hl kwd">isspace</span><span class="hl opt">(</span>c<span class="hl opt">)) {</span>
-            s<span class="hl opt">[</span>i<span class="hl opt">++] =</span> c<span class="hl opt">;</span>
-        <span class="hl opt">}</span>
-    <span class="hl opt">}</span>
-    <span class="hl kwa">if</span> <span class="hl opt">(</span>c <span class="hl opt">==</span> <span class="hl str">&#39;</span><span class="hl esc">\n</span><span class="hl str">&#39;</span><span class="hl opt">) {</span>
-        s<span class="hl opt">[</span>i<span class="hl opt">++] =</span> c<span class="hl opt">;</span>
-    <span class="hl opt">}</span>
-    s<span class="hl opt">[</span>i<span class="hl opt">] =</span> <span class="hl str">&#39;\0&#39;</span><span class="hl opt">;</span>
-    <span class="hl kwa">return</span> i<span class="hl opt">;</span>
-<span class="hl opt">}</span>
-</pre>
+    i = 0;
+    while (--lim &gt; 0 &amp;&amp; (c = getchar()) != EOF &amp;&amp; c != &apos;\n&apos;) {
+        if (!isspace(c)) {
+            s[i++] = c;
+        }
+    }
+    if (c == &apos;\n&apos;) {
+        s[i++] = c;
+    }
+    s[i] = &apos;\0&apos;;
+    return i;
+}
+</code></pre>
 
 <p>
 By removing all whitespace from the input, we minimize the need for a seperate lexer.
@@ -161,23 +162,22 @@ The only thing required for tokenization is to parse consecutive digits as a sin
 Main routine consists of a loop for reading the input, evaluating the expression, and printing the result, which is usually referred as Read-Eval-Print Loop (REPL):
 </p>
 
-<pre class="hl">
-<span class="hl ppc">#define MAXLINE 1000</span>
+<pre><code class="language-c">#define MAXLINE 1000
 
-<span class="hl kwb">char</span> <span class="hl opt">*</span>curr<span class="hl opt">;</span>
+char *curr;
 
-<span class="hl kwb">int</span> <span class="hl kwd">main</span><span class="hl opt">(</span><span class="hl kwb">void</span><span class="hl opt">)</span>
-<span class="hl opt">{</span>
-    <span class="hl kwb">char</span> line<span class="hl opt">[</span>MAXLINE<span class="hl opt">];</span>
+int main(void)
+{
+    char line[MAXLINE];
 
-    <span class="hl kwd">printf</span><span class="hl opt">(</span><span class="hl str">&quot;&gt; &quot;</span><span class="hl opt">);</span>
-    <span class="hl kwa">while</span> <span class="hl opt">(</span><span class="hl kwd">scan</span><span class="hl opt">(</span>line<span class="hl opt">,</span> MAXLINE<span class="hl opt">)) {</span>
-        curr <span class="hl opt">=</span> line<span class="hl opt">;</span>
-        <span class="hl kwd">printf</span><span class="hl opt">(</span><span class="hl str">&quot;=</span> <span class="hl ipl">%d</span><span class="hl str"></span><span class="hl esc">\n</span><span class="hl str">&gt; &quot;</span><span class="hl opt">,</span> <span class="hl kwd">expr</span><span class="hl opt">());</span>
-    <span class="hl opt">}</span>
-    <span class="hl kwa">return</span> <span class="hl num">0</span><span class="hl opt">;</span>
-<span class="hl opt">}</span>
-</pre>
+    printf(&quot;&gt; &quot;);
+    while (scan(line, MAXLINE)) {
+        curr = line;
+        printf(&quot;= %d\n&gt; &quot;, expr());
+    }
+    return 0;
+}
+</code></pre>
 
 <p>
 The current input char <code>*curr</code> is held as a global variable to be shared between parsing functions.
@@ -189,18 +189,17 @@ The current input char <code>*curr</code> is held as a global variable to be sha
 Expression parsing rule is pretty straightforward to implement:
 </p>
 
-<pre class="hl">
-<span class="hl slc">// E ::= T {+ T}</span>
-<span class="hl kwb">int</span> <span class="hl kwd">expr</span><span class="hl opt">(</span><span class="hl kwb">void</span><span class="hl opt">)</span>
-<span class="hl opt">{</span>
-    <span class="hl kwb">int</span> result <span class="hl opt">=</span> <span class="hl kwd">term</span><span class="hl opt">();</span>
-    <span class="hl kwa">while</span> <span class="hl opt">(*</span>curr <span class="hl opt">==</span> <span class="hl str">&#39;+&#39;</span><span class="hl opt">) {</span>
-        <span class="hl opt">++</span>curr<span class="hl opt">;</span>
-        result <span class="hl opt">+=</span> <span class="hl kwd">term</span><span class="hl opt">();</span>
-    <span class="hl opt">}</span>
-    <span class="hl kwa">return</span> result<span class="hl opt">;</span>
-<span class="hl opt">}</span>
-</pre>
+<pre><code class="language-c">// E ::= T {+ T}
+int expr(void)
+{
+    int result = term();
+    while (*curr == &apos;+&apos;) {
+        ++curr;
+        result += term();
+    }
+    return result;
+}
+</code></pre>
 
 <p>
 Expressions are terms connected with the plus operator.
@@ -214,18 +213,17 @@ This repetition is implemented with a simple loop.
 Term parsing rule is almost the same as the expression rule:
 </p>
 
-<pre class="hl">
-<span class="hl slc">// T ::= F {* F}</span>
-<span class="hl kwb">int</span> <span class="hl kwd">term</span><span class="hl opt">(</span><span class="hl kwb">void</span><span class="hl opt">)</span>
-<span class="hl opt">{</span>
-    <span class="hl kwb">int</span> result <span class="hl opt">=</span> <span class="hl kwd">fact</span><span class="hl opt">();</span>
-    <span class="hl kwa">while</span> <span class="hl opt">(*</span>curr <span class="hl opt">==</span> <span class="hl str">&#39;*&#39;</span><span class="hl opt">) {</span>
-        <span class="hl opt">++</span>curr<span class="hl opt">;</span>
-        result <span class="hl opt">*=</span> <span class="hl kwd">fact</span><span class="hl opt">();</span>
-    <span class="hl opt">}</span>
-    <span class="hl kwa">return</span> result<span class="hl opt">;</span>
-<span class="hl opt">}</span>
-</pre>
+<pre><code class="language-c">// T ::= F {* F}
+int term(void)
+{
+    int result = fact();
+    while (*curr == &apos;*&apos;) {
+        ++curr;
+        result *= fact();
+    }
+    return result;
+}
+</code></pre>
 
 <p>
 Since term parsing is done while parsing expressions, precedence of <code>*</code> operator is higher than <code>+</code> operator just like in the grammar.
@@ -237,36 +235,35 @@ Since term parsing is done while parsing expressions, precedence of <code>*</cod
 Factor parsing is the most complicated of the three:
 </p>
 
-<pre class="hl">
-<span class="hl slc">// F ::= ( E ) | Int</span>
-<span class="hl kwb">int</span> <span class="hl kwd">fact</span><span class="hl opt">(</span><span class="hl kwb">void</span><span class="hl opt">)</span>
-<span class="hl opt">{</span>
-    <span class="hl kwb">int</span> result<span class="hl opt">;</span>
+<pre><code class="language-c">// F ::= ( E ) | Int
+int fact(void)
+{
+    int result;
 
-    <span class="hl kwa">if</span> <span class="hl opt">(*</span>curr <span class="hl opt">==</span> <span class="hl str">&#39;(&#39;</span><span class="hl opt">) {</span>
-        <span class="hl opt">++</span>curr<span class="hl opt">;</span>
-        result <span class="hl opt">=</span> <span class="hl kwd">expr</span><span class="hl opt">();</span>
-        <span class="hl kwa">if</span> <span class="hl opt">(*</span>curr <span class="hl opt">==</span> <span class="hl str">&#39;)&#39;</span><span class="hl opt">) {</span>
-            <span class="hl opt">++</span>curr<span class="hl opt">;</span>
-        <span class="hl opt">}</span> <span class="hl kwa">else</span> <span class="hl opt">{</span>
-            <span class="hl kwd">printf</span><span class="hl opt">(</span><span class="hl str">&quot;error: expected &#39;)&#39;</span><span class="hl esc">\n</span><span class="hl str">&quot;</span><span class="hl opt">);</span>
-            <span class="hl kwa">return</span> <span class="hl num">0</span><span class="hl opt">;</span>
-        <span class="hl opt">}</span>
-        <span class="hl kwa">return</span> result<span class="hl opt">;</span>
-    <span class="hl opt">}</span> <span class="hl kwa">else if</span> <span class="hl opt">(</span><span class="hl kwd">isdigit</span><span class="hl opt">(*</span>curr<span class="hl opt">)) {</span>
-        result <span class="hl opt">= *</span>curr <span class="hl opt">-</span> <span class="hl str">&#39;0&#39;</span><span class="hl opt">;</span>
-        <span class="hl opt">++</span>curr<span class="hl opt">;</span>
-        <span class="hl kwa">while</span> <span class="hl opt">(</span><span class="hl kwd">isdigit</span><span class="hl opt">(*</span>curr<span class="hl opt">)) {</span>
-            result <span class="hl opt">=</span> result <span class="hl opt">*</span> <span class="hl num">10</span> <span class="hl opt">+ (*</span>curr <span class="hl opt">-</span> <span class="hl str">&#39;0&#39;</span><span class="hl opt">);</span>
-            <span class="hl opt">++</span>curr<span class="hl opt">;</span>
-        <span class="hl opt">}</span>
-        <span class="hl kwa">return</span> result<span class="hl opt">;</span>
-    <span class="hl opt">}</span> <span class="hl kwa">else</span> <span class="hl opt">{</span>
-        <span class="hl kwd">printf</span><span class="hl opt">(</span><span class="hl str">&quot;error: expected a parenthesis or a number at:</span> <span class="hl ipl">%c</span><span class="hl str"></span><span class="hl esc">\n</span><span class="hl str">&quot;</span><span class="hl opt">, *</span>curr<span class="hl opt">);</span>
-        <span class="hl kwa">return</span> <span class="hl num">0</span><span class="hl opt">;</span>
-    <span class="hl opt">}</span>
-<span class="hl opt">}</span>
-</pre>
+    if (*curr == &apos;(&apos;) {
+        ++curr;
+        result = expr();
+        if (*curr == &apos;)&apos;) {
+            ++curr;
+        } else {
+            printf(&quot;error: expected &apos;)&apos;\n&quot;);
+            return 0;
+        }
+        return result;
+    } else if (isdigit(*curr)) {
+        result = *curr - &apos;0&apos;;
+        ++curr;
+        while (isdigit(*curr)) {
+            result = result * 10 + (*curr - &apos;0&apos;);
+            ++curr;
+        }
+        return result;
+    } else {
+        printf(&quot;error: expected a parenthesis or a number at: %c\n&quot;, *curr);
+        return 0;
+    }
+}
+</code></pre>
 
 <p>
 Factor parsing checks the current character to decide whether to parse a parenthesis expression or a number.
@@ -275,13 +272,13 @@ Number parsing is done as long as there are digits.
 </p>
 
 <p>
-  <a href="../codes/calc.c">calc.c</a> ( <a href="../codes/calc.c.html">.html</a> )
+  <a href="../codes/calc.c">calc.c</a> &middot; <a href="../codes/calc.c.html">html</a>
 </p>
 
-<hr>
+</main>
 
 <footer>
-<a href="/">home</a> &middot; <a href="https://github.com/gokcehan">github</a> &middot; gokcehankara (at) gmail (dot) com 
+  <a href="/">home</a> &middot; <a href="https://github.com/gokcehan">github</a> &middot; gokcehankara (at) gmail (dot) com
 </footer>
 
 </body>

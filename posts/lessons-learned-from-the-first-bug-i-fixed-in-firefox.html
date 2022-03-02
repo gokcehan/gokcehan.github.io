@@ -3,17 +3,24 @@
 
 <head>
   <meta charset="utf-8">
+  <meta name="color-scheme" content="light dark">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Lessons Learned from the First Bug I Fixed in Firefox</title>
-  <link rel="stylesheet" type="text/css" href="../style.css">
-  <link rel="stylesheet" type="text/css" href="../highlight.css">
+  <link rel="stylesheet" href="../style/base.css">
+  <link rel="stylesheet" href="../highlightjs/github.min.css" media="screen and (prefers-color-scheme: light)">
+  <link rel="stylesheet" href="../highlightjs/github-dark.min.css" media="screen and (prefers-color-scheme: dark)">
+  <script src="../highlightjs/highlight-cpp.min.js"></script>
+  <script>hljs.highlightAll();</script>
 </head>
 
 <body>
 
-<h1>Lessons Learned from the First Bug I Fixed in Firefox</h1>
+<header>
+  <h1>Lessons Learned from the First Bug I Fixed in Firefox</h1>
+  <time>2014-09-26</time>
+</header>
 
-<time>2014-09-26</time>
+<main>
 
 <p>
 I had a long standing desire to contribute to Firefox code and this summer I finally had the chance to do so.
@@ -39,11 +46,9 @@ At first I wasn't able to comprehend how the code was actually working since it 
 Luckily, the leaking variable was already mentioned in the report so I was able to see the bug without understanding much of the code itself.
 </p> 
 
-<blockquote>
 <p>
-Sometimes you don't need to understand how the code works, it may be enough just to recognize the bug
-</p>
-</blockquote>
+<strong>Sometimes you don't need to understand how the code works, it may be enough just to recognize the bug.</strong>
+</p> 
 
 <p>
 The particular function I have worked on was a 300 hundred lines beast.
@@ -52,29 +57,28 @@ It was leaking memory at early returns.
 High level conceptual overview of the function looks like this:
 </p>
 
-<pre class="hl">
-<span class="hl kwb">static int</span>
-<span class="hl kwd">dosprintf</span><span class="hl opt">(..)</span>
-<span class="hl opt">{</span>
-    Resource<span class="hl opt">*</span> resource <span class="hl opt">=</span> <span class="hl kwd">allocate</span><span class="hl opt">(..);</span>
+<pre><code class="language-cpp">static int
+dosprintf(...)
+{
+    Resource* resource = allocate(...);
 
-    <span class="hl slc">// ..</span>
-    <span class="hl slc">// 100 lines later</span>
-    <span class="hl slc">// ..</span>
+    // ...
+    // 100 lines later
+    // ...
 
-    <span class="hl kwa">if</span> <span class="hl opt">(..) {</span>
-        <span class="hl kwa">return</span> <span class="hl opt">-</span><span class="hl num">1</span><span class="hl opt">;</span>
-        <span class="hl slc">// oops, we forgot to free the resource here</span>
-    <span class="hl opt">}</span>
+    if (...) {
+        return -1;
+        // oops, we forgot to free the resource here
+    }
 
-    <span class="hl slc">// ..</span>
-    <span class="hl slc">// 200 lines later</span>
-    <span class="hl slc">// ..</span>
+    // ...
+    // 200 lines later
+    // ...
 
-    <span class="hl kwd">free</span><span class="hl opt">(</span>resource<span class="hl opt">);</span> <span class="hl slc">// like this</span>
-    <span class="hl kwa">return</span> <span class="hl opt">-</span><span class="hl num">1</span><span class="hl opt">;</span>
-<span class="hl opt">}</span>
-</pre>
+    free(resource); // like this
+    return -1;
+}
+</code></pre>
 
 <p>
 This is a classical example for why people use <a href="https://en.wikipedia.org/wiki/Resource_Acquisition_Is_Initialization">RAII</a> idiom in C++ and this was already the suggestion in the first comment by the mentor.
@@ -82,44 +86,43 @@ Since the bug wasn't touched for about 2 months, I started working on it without
 My first attempt looked like this:
 </p> 
 
-<pre class="hl">
-<span class="hl kwb">struct</span> ResourceHandler
-<span class="hl opt">{</span>
-    Resource<span class="hl opt">*</span> resource<span class="hl opt">;</span>
+<pre><code class="language-cpp">struct ResourceHandler
+{
+    Resource* resource;
 
-    <span class="hl kwd">ResourceHandler</span><span class="hl opt">(..)</span>
-    <span class="hl opt">{</span>
-        resource <span class="hl opt">=</span> <span class="hl kwd">allocate</span><span class="hl opt">(..);</span>
-    <span class="hl opt">}</span>
+    ResourceHandler(...)
+    {
+        resource = allocate(...);
+    }
 
-    <span class="hl opt">~</span><span class="hl kwd">ResourceHandler</span><span class="hl opt">() {</span>
-        <span class="hl kwd">free</span><span class="hl opt">(</span>resource<span class="hl opt">);</span>
-    <span class="hl opt">}</span>
-<span class="hl opt">};</span>
+    ~ResourceHandler() {
+        free(resource);
+    }
+};
 
-<span class="hl kwb">static int</span>
-<span class="hl kwd">dosprintf</span><span class="hl opt">(..)</span>
-<span class="hl opt">{</span>
-    ResourceHandler <span class="hl kwd">handle</span><span class="hl opt">(..);</span>
-    Resource<span class="hl opt">*</span> resource <span class="hl opt">=</span> handle<span class="hl opt">.</span>resource<span class="hl opt">;</span>
+static int
+dosprintf(...)
+{
+    ResourceHandler handle(...);
+    Resource* resource = handle.resource;
 
-    <span class="hl slc">// ..</span>
-    <span class="hl slc">// 100 lines later</span>
-    <span class="hl slc">// ..</span>
+    // ...
+    // 100 lines later
+    // ...
 
-    <span class="hl kwa">if</span> <span class="hl opt">(..) {</span>
-        <span class="hl slc">// now we don&#39;t need to manually free resource here</span>
-        <span class="hl kwa">return</span> <span class="hl opt">-</span><span class="hl num">1</span><span class="hl opt">;</span>
-    <span class="hl opt">}</span>
+    if (...) {
+        // now we don&apos;t need to manually free resource here
+        return -1;
+    }
 
-    <span class="hl slc">// ..</span>
-    <span class="hl slc">// 200 lines later</span>
-    <span class="hl slc">// ..</span>
+    // ...
+    // 200 lines later
+    // ...
 
-    <span class="hl slc">// as well as here</span>
-    <span class="hl kwa">return</span> <span class="hl opt">-</span><span class="hl num">1</span><span class="hl opt">;</span>
-<span class="hl opt">}</span>
-</pre>
+    // as well as here
+    return -1;
+}
+</code></pre>
 
 <p>
 In the review, I was told to simplify the constructor since I was getting all the arguments of the allocator and construct the object inside the handler while I could simply take the pointer of the constructed object to be more generic.
@@ -127,11 +130,9 @@ There was also a problem with my destructor.
 The way this allocator works was to allocate the memory on the stack when the number of items are small and on the heap when its large, so only in the latter case it was required to free the memory.
 </p>
 
-<blockquote>
 <p>
-Even the simplest stuff can take a lot of time especially the first time, don't get discouraged by this
+<strong>Even the simplest stuff can take a lot of time especially the first time, don't get discouraged by this.</strong>
 </p>
-</blockquote>
 
 <p>
 There was also another suggestion that I could use a unique pointer here instead of adding an extra class.
@@ -141,11 +142,9 @@ I was told that the usage examples for <code>mozilla::UniquePtr</code> class is 
 I found the file and start reading.
 </p> 
 
-<blockquote>
 <p>
-You may probably be required to read some existing code and get used to conventions
-</p>
-</blockquote>
+<strong>You may probably be required to read some existing code and get used to conventions.</strong>
+</p> 
 
 <p>
 So <code>mozilla::UniquePtr</code> takes two template parameters, one for the type itself and the other for the deletion operator to free the resource.
@@ -164,11 +163,9 @@ Unlike a standard vector, <code>mozilla::Vector</code> takes an additional templ
 After reading a little bit about <code>mozilla::Vector</code>, I have sent a new version of the patch using <code>mozilla::Vector</code> accordingly.
 </p> 
 
-<blockquote>
 <p>
-Be ready to make radical changes to your patch several times
-</p>
-</blockquote>
+<strong>Be ready to make radical changes to your patch several times.</strong>
+</p> 
 
 <p>
 At first, I was returning the resource vector by value from the allocate function.
@@ -177,41 +174,40 @@ For this case, the compiler would have to copy the vector before the function re
 My mentor sent a review immediately afterwards in which he told me to pass the resource vector as an out parameter instead, so in the end my updated patch looked something like this:
 </p>
 
-<pre class="hl">
-<span class="hl kwc">typedef</span> Vector<span class="hl opt">&lt;</span>Resource<span class="hl opt">,</span> NAS_DEFAULT_NUM<span class="hl opt">,</span> SystemAllocPolicy<span class="hl opt">&gt;</span> ResourceVector<span class="hl opt">;</span>
+<pre><code class="language-cpp">typedef Vector&lt;Resource, NAS_DEFAULT_NUM, SystemAllocPolicy&gt; ResourceVector;
 
-<span class="hl slc">// ..</span>
+// ...
 
-<span class="hl kwb">static void</span>
-<span class="hl kwd">allocate</span><span class="hl opt">(..,</span> ResourceVector<span class="hl opt">&amp;</span> res<span class="hl opt">)</span>
-<span class="hl opt">{</span>
-    <span class="hl slc">// fill the vector without</span>
-    <span class="hl slc">// explicitly managing heap or stack data</span>
-<span class="hl opt">}</span>
+static void
+allocate(..., ResourceVector&amp; res)
+{
+    // fill the vector without
+    // explicitly managing heap or stack data
+}
 
-<span class="hl kwb">static int</span>
-<span class="hl kwd">dosprintf</span><span class="hl opt">(..)</span>
-<span class="hl opt">{</span>
-    ResourceVector res<span class="hl opt">;</span>
-    <span class="hl kwd">allocate</span><span class="hl opt">(..,</span> res<span class="hl opt">);</span>
+static int
+dosprintf(...)
+{
+    ResourceVector res;
+    allocate(..., res);
 
-    <span class="hl slc">// ..</span>
-    <span class="hl slc">// 100 lines later</span>
-    <span class="hl slc">// ..</span>
+    // ...
+    // 100 lines later
+    // ...
 
-    <span class="hl kwa">if</span> <span class="hl opt">(..) {</span>
-        <span class="hl slc">// Vector should free the memory here</span>
-        <span class="hl kwa">return</span> <span class="hl opt">-</span><span class="hl num">1</span><span class="hl opt">;</span>
-    <span class="hl opt">}</span>
+    if (...) {
+        // Vector should free the memory here
+        return -1;
+    }
 
-    <span class="hl slc">// ..</span>
-    <span class="hl slc">// 200 lines later</span>
-    <span class="hl slc">// ..</span>
+    // ...
+    // 200 lines later
+    // ...
 
-    <span class="hl slc">// as well as here</span>
-    <span class="hl kwa">return</span> <span class="hl opt">-</span><span class="hl num">1</span><span class="hl opt">;</span>
-<span class="hl opt">}</span>
-</pre>
+    // as well as here
+    return -1;
+}
+</code></pre>
 
 <p>
 Now a somewhat interesting thing about this patch was that, since it wasn't required anymore to manually manage memory for heap and stack allocation cases in the allocation function as well as memory freeing in the <code>dosprintf</code> function, it was actually reducing the amount of code.
@@ -219,11 +215,9 @@ Just to be specific, this was a -37 / +20 lines patch.
 Therefore I was quite satisfied with how the things worked out in the end.
 </p>
 
-<blockquote>
 <p>
-Believe it or not, if your patch removes some code this is often a good thing
+<strong>Believe it or not, if your patch removes some code this is often a good thing.</strong>
 </p>
-</blockquote>
 
 <p>
 Discussions so far had involved another module peer as well, so my mentor decided to flag him for the review afterwards.
@@ -236,33 +230,29 @@ He told me that he will fix these locally and push the patch afterwards.
 He also asked for my name and contact, which apparently I had forgotten to add to the patch.
 </p>
 
-<blockquote>
 <p>
-Reviews can take some time, so ideally you should work on multiple bugs at the same time
+<strong>Reviews can take some time, so ideally you should work on multiple bugs at the same time.</strong>
 </p>
-</blockquote>
 
 <p>
 Last week, about 2 weeks after the patch was merged, I received an email from this bug.
 Apparently, we had forgotten to change the return value in some conditional while we were tying our modified allocator function to the rest, in fact this was only on the final version of the patch after style fixes which I blamefully only skimmed through.
-It was was causing an uninitialized variable error so someone had reported a <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1070689">follow-up bug</a>:
+It was was causing an uninitialized variable error so someone had reported a <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1070689">follow-up bug</a>.
 </p>
 
-<blockquote>
 <p>
-Things can come out of the grave at any time
+<strong>Things can come out of the grave at any time.</strong>
 </p>
-</blockquote>
 
 <p>
 In the previous bug, we had already talked about changing the return type of functions from <code>int</code> to <code>bool</code> but then decided to leave it to a future bug afterwards.
-I took this chance to send a patch for this earlier today. We will see how it goes..
+I took this chance to send a patch for this earlier today. We will see how it goes.
 </p>
 
-<hr>
+</main>
 
 <footer>
-<a href="/">home</a> &middot; <a href="https://github.com/gokcehan">github</a> &middot; gokcehankara (at) gmail (dot) com 
+  <a href="/">home</a> &middot; <a href="https://github.com/gokcehan">github</a> &middot; gokcehankara (at) gmail (dot) com
 </footer>
 
 </body>

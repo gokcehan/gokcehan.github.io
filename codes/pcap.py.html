@@ -1,149 +1,159 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
+
 <head>
-<meta charset="ISO-8859-1">
-<title>pcap.py</title>
-<link rel="stylesheet" type="text/css" href="../highlight.css">
+  <meta charset="utf-8">
+  <meta name="color-scheme" content="light dark">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>pcap.py</title>
+  <link rel="stylesheet" href="../style/code.css">
+  <link rel="stylesheet" href="../highlightjs/github.min.css" media="screen and (prefers-color-scheme: light)">
+  <link rel="stylesheet" href="../highlightjs/github-dark.min.css" media="screen and (prefers-color-scheme: dark)">
+  <script src="../highlightjs/highlight-python.min.js"></script>
+  <script>hljs.highlightAll();</script>
 </head>
-<body class="hl">
-<pre class="hl"><span class="hl slc">#!/usr/bin/env python3</span>
-<span class="hl slc">#</span>
-<span class="hl slc"># pcap.py</span>
-<span class="hl slc">#</span>
-<span class="hl slc"># Pcap file decoder for the standard TCP/IP stack</span>
-<span class="hl slc">#</span>
-<span class="hl slc"># This is a basic decoder for TCP packets composed of IP and ETH packets within</span>
-<span class="hl slc"># a pcap file. Other types of packets are simply denoted with &#39;UNK&#39; and are not</span>
-<span class="hl slc"># decoded any further. This is used for post-mortem analysis of network traffic</span>
-<span class="hl slc"># captured beforehand.</span>
-<span class="hl slc">#</span>
-<span class="hl slc"># As an example use, `tcpdump` can be used to capture packets to a pcap file:</span>
-<span class="hl slc">#</span>
-<span class="hl slc">#     sudo tcpdump -w example.pcap</span>
-<span class="hl slc">#</span>
-<span class="hl slc"># Output file can then be given to this script to print the decoded output:</span>
-<span class="hl slc">#</span>
-<span class="hl slc">#     ./pcap.py example.pcap</span>
-<span class="hl slc">#</span>
-<span class="hl slc"># An example output of this script is as follows:</span>
-<span class="hl slc"># </span>
-<span class="hl slc">#     -- ETH Layer -- Tue Jun  5 10:52:34 2012 -- 54 bytes</span>
-<span class="hl slc">#             src: 00:12:cf:e5:54:a0</span>
-<span class="hl slc">#             dst: 00:1f:3c:23:db:d3</span>
-<span class="hl slc">#             typ: 8</span>
-<span class="hl slc">#             -- IP Layer --</span>
-<span class="hl slc">#                     src: 192.168.10.226</span>
-<span class="hl slc">#                     dst: 192.168.11.12</span>
-<span class="hl slc">#                     typ: 6</span>
-<span class="hl slc">#                     -- TCP Layer --</span>
-<span class="hl slc">#                             src: 64332</span>
-<span class="hl slc">#                             dst: 5888</span>
-<span class="hl slc">#                             seq: 1492699879</span>
-<span class="hl slc">#                             ack: 3729068838</span>
-<span class="hl slc">#                             dat: b&#39;&#39;</span>
-<span class="hl slc">#     -- ETH Layer -- Tue Jun  5 10:52:35 2012 -- 60 bytes</span>
-<span class="hl slc">#             src: 00:1f:3c:23:db:d3</span>
-<span class="hl slc">#             dst: 00:12:cf:e5:54:a0</span>
-<span class="hl slc">#             typ: 8</span>
-<span class="hl slc">#             -- IP Layer --</span>
-<span class="hl slc">#                     src: 192.168.11.12</span>
-<span class="hl slc">#                     dst: 192.168.10.226</span>
-<span class="hl slc">#                     typ: 6</span>
-<span class="hl slc">#                     -- TCP Layer --</span>
-<span class="hl slc">#                             src: 5888</span>
-<span class="hl slc">#                             dst: 64332</span>
-<span class="hl slc">#                             seq: 3729068838</span>
-<span class="hl slc">#                             ack: 1509477095</span>
-<span class="hl slc">#                             dat: b&#39;\x00\x00\x00\x00\x00\x00&#39;</span>
-<span class="hl slc">#</span>
-<span class="hl slc"># Indentation follows packet levels so that you can utilize folding feature in</span>
-<span class="hl slc"># your text editor to display packets at the desired level. Following settings</span>
-<span class="hl slc"># are used for vim editor:</span>
-<span class="hl slc">#</span>
-<span class="hl slc">#     set foldmethod=indent</span>
-<span class="hl slc">#     set foldenable</span>
-<span class="hl slc">#     set foldlevel=0 &quot; only show packets</span>
-<span class="hl slc">#     set foldlevel=1 &quot; decode ETH layer</span>
-<span class="hl slc">#     set foldlevel=2 &quot; decode IP layer</span>
-<span class="hl slc">#     set foldlevel=3 &quot; decode TCP layer</span>
-<span class="hl slc">#</span>
-<span class="hl slc"># You can also directly read from stdin as follows:</span>
-<span class="hl slc">#</span>
-<span class="hl slc">#     ./pcap example.pcap | vim -</span>
-<span class="hl slc">#</span>
+
+<body>
+
+<pre><code class="language-python">#!/usr/bin/env python3
+#
+# pcap.py
+#
+# Pcap file decoder for the standard TCP/IP stack
+#
+# This is a basic decoder for TCP packets composed of IP and ETH packets within
+# a pcap file. Other types of packets are simply denoted with &apos;UNK&apos; and are not
+# decoded any further. This is used for post-mortem analysis of network traffic
+# captured beforehand.
+#
+# As an example use, `tcpdump` can be used to capture packets to a pcap file:
+#
+#     sudo tcpdump -w example.pcap
+#
+# Output file can then be given to this script to print the decoded output:
+#
+#     ./pcap.py example.pcap
+#
+# An example output of this script is as follows:
+# 
+#     -- ETH Layer -- Tue Jun  5 10:52:34 2012 -- 54 bytes
+#             src: 00:12:cf:e5:54:a0
+#             dst: 00:1f:3c:23:db:d3
+#             typ: 8
+#             -- IP Layer --
+#                     src: 192.168.10.226
+#                     dst: 192.168.11.12
+#                     typ: 6
+#                     -- TCP Layer --
+#                             src: 64332
+#                             dst: 5888
+#                             seq: 1492699879
+#                             ack: 3729068838
+#                             dat: b&apos;&apos;
+#     -- ETH Layer -- Tue Jun  5 10:52:35 2012 -- 60 bytes
+#             src: 00:1f:3c:23:db:d3
+#             dst: 00:12:cf:e5:54:a0
+#             typ: 8
+#             -- IP Layer --
+#                     src: 192.168.11.12
+#                     dst: 192.168.10.226
+#                     typ: 6
+#                     -- TCP Layer --
+#                             src: 5888
+#                             dst: 64332
+#                             seq: 3729068838
+#                             ack: 1509477095
+#                             dat: b&apos;\x00\x00\x00\x00\x00\x00&apos;
+#
+# Indentation follows packet levels so that you can utilize folding feature in
+# your text editor to display packets at the desired level. Following settings
+# are used for vim editor:
+#
+#     set foldmethod=indent
+#     set foldenable
+#     set foldlevel=0 &quot; only show packets
+#     set foldlevel=1 &quot; decode ETH layer
+#     set foldlevel=2 &quot; decode IP layer
+#     set foldlevel=3 &quot; decode TCP layer
+#
+# You can also directly read from stdin as follows:
+#
+#     ./pcap example.pcap | vim -
+#
 
 
-<span class="hl kwa">import</span> sys
-<span class="hl kwa">import</span> time
-<span class="hl kwa">import</span> struct
+import sys
+import time
+import struct
 
-<span class="hl kwa">if</span> <span class="hl kwb">len</span><span class="hl opt">(</span>sys<span class="hl opt">.</span>argv<span class="hl opt">) &lt;</span> <span class="hl num">2</span><span class="hl opt">:</span>
-    sys<span class="hl opt">.</span>stderr<span class="hl opt">.</span><span class="hl kwd">write</span><span class="hl opt">(</span><span class="hl str">&#39;usage: {} [PCAP_FILE]</span><span class="hl esc">\n</span><span class="hl str">&#39;</span><span class="hl opt">.</span><span class="hl kwd">format</span><span class="hl opt">(</span>sys<span class="hl opt">.</span>argv<span class="hl opt">[</span><span class="hl num">0</span><span class="hl opt">]))</span>
-    sys<span class="hl opt">.</span><span class="hl kwd">exit</span><span class="hl opt">(</span><span class="hl num">1</span><span class="hl opt">)</span>
+if len(sys.argv) &lt; 2:
+    sys.stderr.write(&apos;usage: {} [PCAP_FILE]\n&apos;.format(sys.argv[0]))
+    sys.exit(1)
 
-<span class="hl kwa">def</span> <span class="hl kwd">decode_eth</span><span class="hl opt">(</span>packet<span class="hl opt">):</span>
-    src <span class="hl opt">=</span> struct<span class="hl opt">.</span><span class="hl kwd">unpack</span><span class="hl opt">(</span><span class="hl str">&#39;6B&#39;</span><span class="hl opt">,</span> packet<span class="hl opt">[</span><span class="hl num">0</span><span class="hl opt">:</span><span class="hl num">6</span><span class="hl opt">])</span>
-    dst <span class="hl opt">=</span> struct<span class="hl opt">.</span><span class="hl kwd">unpack</span><span class="hl opt">(</span><span class="hl str">&#39;6B&#39;</span><span class="hl opt">,</span> packet<span class="hl opt">[</span><span class="hl num">6</span><span class="hl opt">:</span><span class="hl num">12</span><span class="hl opt">])</span>
-    typ <span class="hl opt">=</span> struct<span class="hl opt">.</span><span class="hl kwd">unpack</span><span class="hl opt">(</span><span class="hl str">&#39;H&#39;</span><span class="hl opt">,</span> packet<span class="hl opt">[</span><span class="hl num">12</span><span class="hl opt">:</span><span class="hl num">14</span><span class="hl opt">])[</span><span class="hl num">0</span><span class="hl opt">]</span>
-    <span class="hl kwa">return</span> src<span class="hl opt">,</span> dst<span class="hl opt">,</span> typ
+def decode_eth(packet):
+    src = struct.unpack(&apos;6B&apos;, packet[0:6])
+    dst = struct.unpack(&apos;6B&apos;, packet[6:12])
+    typ = struct.unpack(&apos;H&apos;, packet[12:14])[0]
+    return src, dst, typ
 
-<span class="hl kwa">def</span> <span class="hl kwd">decode_ip</span><span class="hl opt">(</span>packet<span class="hl opt">):</span>
-    typ <span class="hl opt">=</span> struct<span class="hl opt">.</span><span class="hl kwd">unpack</span><span class="hl opt">(</span><span class="hl str">&#39;B&#39;</span><span class="hl opt">,</span> packet<span class="hl opt">[</span><span class="hl num">9</span><span class="hl opt">:</span><span class="hl num">10</span><span class="hl opt">])[</span><span class="hl num">0</span><span class="hl opt">]</span>
-    src <span class="hl opt">=</span> struct<span class="hl opt">.</span><span class="hl kwd">unpack</span><span class="hl opt">(</span><span class="hl str">&#39;4B&#39;</span><span class="hl opt">,</span> packet<span class="hl opt">[</span><span class="hl num">12</span><span class="hl opt">:</span><span class="hl num">16</span><span class="hl opt">])</span>
-    dst <span class="hl opt">=</span> struct<span class="hl opt">.</span><span class="hl kwd">unpack</span><span class="hl opt">(</span><span class="hl str">&#39;4B&#39;</span><span class="hl opt">,</span> packet<span class="hl opt">[</span><span class="hl num">16</span><span class="hl opt">:</span><span class="hl num">20</span><span class="hl opt">])</span>
-    <span class="hl kwa">return</span> src<span class="hl opt">,</span> dst<span class="hl opt">,</span> typ
+def decode_ip(packet):
+    typ = struct.unpack(&apos;B&apos;, packet[9:10])[0]
+    src = struct.unpack(&apos;4B&apos;, packet[12:16])
+    dst = struct.unpack(&apos;4B&apos;, packet[16:20])
+    return src, dst, typ
 
-<span class="hl kwa">def</span> <span class="hl kwd">decode_tcp</span><span class="hl opt">(</span>packet<span class="hl opt">):</span>
-    src <span class="hl opt">=</span> struct<span class="hl opt">.</span><span class="hl kwd">unpack</span><span class="hl opt">(</span><span class="hl str">&#39;H&#39;</span><span class="hl opt">,</span> packet<span class="hl opt">[</span><span class="hl num">0</span><span class="hl opt">:</span><span class="hl num">2</span><span class="hl opt">])[</span><span class="hl num">0</span><span class="hl opt">]</span>
-    dst <span class="hl opt">=</span> struct<span class="hl opt">.</span><span class="hl kwd">unpack</span><span class="hl opt">(</span><span class="hl str">&#39;H&#39;</span><span class="hl opt">,</span> packet<span class="hl opt">[</span><span class="hl num">2</span><span class="hl opt">:</span><span class="hl num">4</span><span class="hl opt">])[</span><span class="hl num">0</span><span class="hl opt">]</span>
-    seq <span class="hl opt">=</span> struct<span class="hl opt">.</span><span class="hl kwd">unpack</span><span class="hl opt">(</span><span class="hl str">&#39;I&#39;</span><span class="hl opt">,</span> packet<span class="hl opt">[</span><span class="hl num">4</span><span class="hl opt">:</span><span class="hl num">8</span><span class="hl opt">])[</span><span class="hl num">0</span><span class="hl opt">]</span>
-    ack <span class="hl opt">=</span> struct<span class="hl opt">.</span><span class="hl kwd">unpack</span><span class="hl opt">(</span><span class="hl str">&#39;I&#39;</span><span class="hl opt">,</span> packet<span class="hl opt">[</span><span class="hl num">8</span><span class="hl opt">:</span><span class="hl num">12</span><span class="hl opt">])[</span><span class="hl num">0</span><span class="hl opt">]</span>
-    <span class="hl kwa">return</span> src<span class="hl opt">,</span> dst<span class="hl opt">,</span> seq<span class="hl opt">,</span> ack
+def decode_tcp(packet):
+    src = struct.unpack(&apos;H&apos;, packet[0:2])[0]
+    dst = struct.unpack(&apos;H&apos;, packet[2:4])[0]
+    seq = struct.unpack(&apos;I&apos;, packet[4:8])[0]
+    ack = struct.unpack(&apos;I&apos;, packet[8:12])[0]
+    return src, dst, seq, ack
 
-with <span class="hl kwb">open</span><span class="hl opt">(</span>sys<span class="hl opt">.</span>argv<span class="hl opt">[</span><span class="hl num">1</span><span class="hl opt">],</span> <span class="hl str">&#39;rb&#39;</span><span class="hl opt">)</span> <span class="hl kwa">as</span> f<span class="hl opt">:</span>
-    bom<span class="hl opt">,</span> major<span class="hl opt">,</span> minor<span class="hl opt">,</span> off<span class="hl opt">,</span> cap<span class="hl opt">,</span> typ <span class="hl opt">=</span> struct<span class="hl opt">.</span><span class="hl kwd">unpack</span><span class="hl opt">(</span><span class="hl str">&#39;IHHQII&#39;</span><span class="hl opt">,</span> f<span class="hl opt">.</span><span class="hl kwd">read</span><span class="hl opt">(</span><span class="hl num">24</span><span class="hl opt">))</span>
-    <span class="hl kwa">if</span> typ <span class="hl opt">!=</span> <span class="hl num">1</span><span class="hl opt">:</span>
-        sys<span class="hl opt">.</span>stderr<span class="hl opt">.</span><span class="hl kwd">write</span><span class="hl opt">(</span><span class="hl str">&#39;error: only ethernet frame is supported</span><span class="hl esc">\n</span><span class="hl str">&#39;</span><span class="hl opt">)</span>
-        sys<span class="hl opt">.</span><span class="hl kwd">exit</span><span class="hl opt">(</span><span class="hl num">1</span><span class="hl opt">)</span>
+with open(sys.argv[1], &apos;rb&apos;) as f:
+    bom, major, minor, off, cap, typ = struct.unpack(&apos;IHHQII&apos;, f.read(24))
+    if typ != 1:
+        sys.stderr.write(&apos;error: only ethernet frame is supported\n&apos;)
+        sys.exit(1)
 
-    <span class="hl kwa">while True</span><span class="hl opt">:</span>
-        header <span class="hl opt">=</span> f<span class="hl opt">.</span><span class="hl kwd">read</span><span class="hl opt">(</span><span class="hl num">16</span><span class="hl opt">)</span>
-        <span class="hl kwa">if not</span> header<span class="hl opt">:</span>
-            <span class="hl kwa">break</span>
+    while True:
+        header = f.read(16)
+        if not header:
+            break
 
-        sec<span class="hl opt">,</span> msec<span class="hl opt">,</span> real<span class="hl opt">,</span> size <span class="hl opt">=</span> struct<span class="hl opt">.</span><span class="hl kwd">unpack</span><span class="hl opt">(</span><span class="hl str">&#39;IIII&#39;</span><span class="hl opt">,</span> header<span class="hl opt">)</span>
-        <span class="hl kwa">print</span><span class="hl opt">(</span><span class="hl str">&#39;-- ETH Layer --&#39;</span><span class="hl opt">,</span> time<span class="hl opt">.</span><span class="hl kwd">ctime</span><span class="hl opt">(</span>sec<span class="hl opt">),</span> <span class="hl str">&#39;--&#39;</span><span class="hl opt">,</span> size<span class="hl opt">,</span> <span class="hl str">&#39;bytes&#39;</span><span class="hl opt">)</span>
-        packet <span class="hl opt">=</span> f<span class="hl opt">.</span><span class="hl kwd">read</span><span class="hl opt">(</span>size<span class="hl opt">)</span>
+        sec, msec, real, size = struct.unpack(&apos;IIII&apos;, header)
+        print(&apos;-- ETH Layer --&apos;, time.ctime(sec), &apos;--&apos;, size, &apos;bytes&apos;)
+        packet = f.read(size)
 
-        eth_src<span class="hl opt">,</span> eth_dst<span class="hl opt">,</span> eth_typ <span class="hl opt">=</span> <span class="hl kwd">decode_eth</span><span class="hl opt">(</span>packet<span class="hl opt">)</span>
-        <span class="hl kwa">print</span><span class="hl opt">(</span><span class="hl str">&#39;</span><span class="hl esc">\t</span><span class="hl str">src:&#39;</span><span class="hl opt">,</span> <span class="hl str">&#39;:&#39;</span><span class="hl opt">.</span><span class="hl kwd">join</span><span class="hl opt">(</span><span class="hl str">&quot;</span><span class="hl ipl">%0</span><span class="hl str">2x&quot;</span> <span class="hl opt">%</span> i <span class="hl kwa">for</span> i <span class="hl kwa">in</span> eth_src<span class="hl opt">))</span>
-        <span class="hl kwa">print</span><span class="hl opt">(</span><span class="hl str">&#39;</span><span class="hl esc">\t</span><span class="hl str">dst:&#39;</span><span class="hl opt">,</span> <span class="hl str">&#39;:&#39;</span><span class="hl opt">.</span><span class="hl kwd">join</span><span class="hl opt">(</span><span class="hl str">&quot;</span><span class="hl ipl">%0</span><span class="hl str">2x&quot;</span> <span class="hl opt">%</span> i <span class="hl kwa">for</span> i <span class="hl kwa">in</span> eth_dst<span class="hl opt">))</span>
-        <span class="hl kwa">print</span><span class="hl opt">(</span><span class="hl str">&#39;</span><span class="hl esc">\t</span><span class="hl str">typ:&#39;</span><span class="hl opt">,</span> eth_typ<span class="hl opt">)</span>
+        eth_src, eth_dst, eth_typ = decode_eth(packet)
+        print(&apos;\tsrc:&apos;, &apos;:&apos;.join(&quot;%02x&quot; % i for i in eth_src))
+        print(&apos;\tdst:&apos;, &apos;:&apos;.join(&quot;%02x&quot; % i for i in eth_dst))
+        print(&apos;\ttyp:&apos;, eth_typ)
 
-        <span class="hl kwa">if</span> eth_typ <span class="hl opt">!=</span> <span class="hl num">8</span><span class="hl opt">:</span>
-            <span class="hl kwa">print</span><span class="hl opt">(</span><span class="hl str">&#39;</span><span class="hl esc">\t</span><span class="hl str">-- UNK Layer --&#39;</span><span class="hl opt">)</span>
-            <span class="hl kwa">print</span><span class="hl opt">(</span><span class="hl str">&#39;</span><span class="hl esc">\t\t</span><span class="hl str">dat:&#39;</span><span class="hl opt">,</span> packet<span class="hl opt">[</span><span class="hl num">14</span><span class="hl opt">:])</span>
-            <span class="hl kwa">continue</span>
+        if eth_typ != 8:
+            print(&apos;\t-- UNK Layer --&apos;)
+            print(&apos;\t\tdat:&apos;, packet[14:])
+            continue
 
-        ip_src<span class="hl opt">,</span> ip_dst<span class="hl opt">,</span> ip_typ <span class="hl opt">=</span> <span class="hl kwd">decode_ip</span><span class="hl opt">(</span>packet<span class="hl opt">[</span><span class="hl num">14</span><span class="hl opt">:])</span>
-        <span class="hl kwa">print</span><span class="hl opt">(</span><span class="hl str">&#39;</span><span class="hl esc">\t</span><span class="hl str">-- IP Layer --&#39;</span><span class="hl opt">)</span>
-        <span class="hl kwa">print</span><span class="hl opt">(</span><span class="hl str">&#39;</span><span class="hl esc">\t\t</span><span class="hl str">src:&#39;</span><span class="hl opt">,</span> <span class="hl str">&#39;.&#39;</span><span class="hl opt">.</span><span class="hl kwd">join</span><span class="hl opt">(</span><span class="hl kwb">str</span><span class="hl opt">(</span>i<span class="hl opt">)</span> <span class="hl kwa">for</span> i <span class="hl kwa">in</span> ip_src<span class="hl opt">))</span>
-        <span class="hl kwa">print</span><span class="hl opt">(</span><span class="hl str">&#39;</span><span class="hl esc">\t\t</span><span class="hl str">dst:&#39;</span><span class="hl opt">,</span> <span class="hl str">&#39;.&#39;</span><span class="hl opt">.</span><span class="hl kwd">join</span><span class="hl opt">(</span><span class="hl kwb">str</span><span class="hl opt">(</span>i<span class="hl opt">)</span> <span class="hl kwa">for</span> i <span class="hl kwa">in</span> ip_dst<span class="hl opt">))</span>
-        <span class="hl kwa">print</span><span class="hl opt">(</span><span class="hl str">&#39;</span><span class="hl esc">\t\t</span><span class="hl str">typ:&#39;</span><span class="hl opt">,</span> ip_typ<span class="hl opt">)</span>
+        ip_src, ip_dst, ip_typ = decode_ip(packet[14:])
+        print(&apos;\t-- IP Layer --&apos;)
+        print(&apos;\t\tsrc:&apos;, &apos;.&apos;.join(str(i) for i in ip_src))
+        print(&apos;\t\tdst:&apos;, &apos;.&apos;.join(str(i) for i in ip_dst))
+        print(&apos;\t\ttyp:&apos;, ip_typ)
 
-        <span class="hl kwa">if</span> ip_typ <span class="hl opt">!=</span> <span class="hl num">6</span><span class="hl opt">:</span>
-            <span class="hl kwa">print</span><span class="hl opt">(</span><span class="hl str">&#39;</span><span class="hl esc">\t\t</span><span class="hl str">-- UNK Layer --&#39;</span><span class="hl opt">)</span>
-            <span class="hl kwa">print</span><span class="hl opt">(</span><span class="hl str">&#39;</span><span class="hl esc">\t\t\t</span><span class="hl str">dat:&#39;</span><span class="hl opt">,</span> packet<span class="hl opt">[</span><span class="hl num">34</span><span class="hl opt">:])</span>
-            <span class="hl kwa">continue</span>
+        if ip_typ != 6:
+            print(&apos;\t\t-- UNK Layer --&apos;)
+            print(&apos;\t\t\tdat:&apos;, packet[34:])
+            continue
 
-        tcp_src<span class="hl opt">,</span> tcp_dst<span class="hl opt">,</span> tcp_seq<span class="hl opt">,</span> tcp_ack <span class="hl opt">=</span> <span class="hl kwd">decode_tcp</span><span class="hl opt">(</span>packet<span class="hl opt">[</span><span class="hl num">34</span><span class="hl opt">:])</span>
-        <span class="hl kwa">print</span><span class="hl opt">(</span><span class="hl str">&#39;</span><span class="hl esc">\t\t</span><span class="hl str">-- TCP Layer --&#39;</span><span class="hl opt">)</span>
-        <span class="hl kwa">print</span><span class="hl opt">(</span><span class="hl str">&#39;</span><span class="hl esc">\t\t\t</span><span class="hl str">src:&#39;</span><span class="hl opt">,</span> tcp_src<span class="hl opt">)</span>
-        <span class="hl kwa">print</span><span class="hl opt">(</span><span class="hl str">&#39;</span><span class="hl esc">\t\t\t</span><span class="hl str">dst:&#39;</span><span class="hl opt">,</span> tcp_dst<span class="hl opt">)</span>
-        <span class="hl kwa">print</span><span class="hl opt">(</span><span class="hl str">&#39;</span><span class="hl esc">\t\t\t</span><span class="hl str">seq:&#39;</span><span class="hl opt">,</span> tcp_seq<span class="hl opt">)</span>
-        <span class="hl kwa">print</span><span class="hl opt">(</span><span class="hl str">&#39;</span><span class="hl esc">\t\t\t</span><span class="hl str">ack:&#39;</span><span class="hl opt">,</span> tcp_ack<span class="hl opt">)</span>
-        <span class="hl kwa">print</span><span class="hl opt">(</span><span class="hl str">&#39;</span><span class="hl esc">\t\t\t</span><span class="hl str">dat:&#39;</span><span class="hl opt">,</span> packet<span class="hl opt">[</span><span class="hl num">54</span><span class="hl opt">:])</span>
-</pre>
+        tcp_src, tcp_dst, tcp_seq, tcp_ack = decode_tcp(packet[34:])
+        print(&apos;\t\t-- TCP Layer --&apos;)
+        print(&apos;\t\t\tsrc:&apos;, tcp_src)
+        print(&apos;\t\t\tdst:&apos;, tcp_dst)
+        print(&apos;\t\t\tseq:&apos;, tcp_seq)
+        print(&apos;\t\t\tack:&apos;, tcp_ack)
+        print(&apos;\t\t\tdat:&apos;, packet[54:])
+</code></pre>
+
 </body>
+
 </html>
-<!--HTML generated by highlight 3.62, http://www.andre-simon.de/-->

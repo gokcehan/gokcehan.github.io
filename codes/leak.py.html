@@ -1,62 +1,72 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
+
 <head>
-<meta charset="ISO-8859-1">
-<title>leak.py</title>
-<link rel="stylesheet" type="text/css" href="../highlight.css">
+  <meta charset="utf-8">
+  <meta name="color-scheme" content="light dark">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>leak.py</title>
+  <link rel="stylesheet" href="../style/code.css">
+  <link rel="stylesheet" href="../highlightjs/github.min.css" media="screen and (prefers-color-scheme: light)">
+  <link rel="stylesheet" href="../highlightjs/github-dark.min.css" media="screen and (prefers-color-scheme: dark)">
+  <script src="../highlightjs/highlight-python.min.js"></script>
+  <script>hljs.highlightAll();</script>
 </head>
-<body class="hl">
-<pre class="hl"><span class="hl slc">#!/usr/bin/env python</span>
-<span class="hl slc">#</span>
-<span class="hl slc"># leak.py</span>
-<span class="hl slc">#</span>
-<span class="hl slc"># A toy memory leak detector for ltrace</span>
-<span class="hl slc">#</span>
-<span class="hl slc"># This is a proof of concept work for detecting memory leaks from the output of</span>
-<span class="hl slc"># ltrace. The idea is to simply trace malloc and free calls in an execution and</span>
-<span class="hl slc"># report non-freed allocations in the end. Other allocation methods are not</span>
-<span class="hl slc"># added to keep it simple.</span>
-<span class="hl slc">#</span>
-<span class="hl slc"># This can only detect the existence of leaks without showing the location of</span>
-<span class="hl slc"># the allocations in the source code. Also, since this is a dynamic analysis</span>
-<span class="hl slc"># method, absence of leaks does not necessarily mean the program is leak free</span>
-<span class="hl slc"># for all execution paths. Therefore, this is not very useful in practice.</span>
-<span class="hl slc">#</span>
-<span class="hl slc"># To run the script, you need to redirect ltrace output from stderr to stdout,</span>
-<span class="hl slc"># and then redirect regular output to null device, and pipe stdout to this</span>
-<span class="hl slc"># script. An example for `ls` command is shown below:</span>
-<span class="hl slc">#</span>
-<span class="hl slc">#     ltrace ls 2&gt;&amp;1 &gt;/dev/null | ./leak.py</span>
-<span class="hl slc">#</span>
 
-<span class="hl kwa">import</span> re
-<span class="hl kwa">import</span> sys
+<body>
 
-lines <span class="hl opt">=</span> <span class="hl kwb">filter</span><span class="hl opt">(</span><span class="hl kwa">lambda</span> l<span class="hl opt">:</span> <span class="hl str">&#39;malloc&#39;</span> <span class="hl kwa">in</span> l <span class="hl kwa">or</span> <span class="hl str">&#39;free&#39;</span> <span class="hl kwa">in</span> l<span class="hl opt">,</span> sys<span class="hl opt">.</span>stdin<span class="hl opt">)</span>
+<pre><code class="language-python">#!/usr/bin/env python
+#
+# leak.py
+#
+# A toy memory leak detector for ltrace
+#
+# This is a proof of concept work for detecting memory leaks from the output of
+# ltrace. The idea is to simply trace malloc and free calls in an execution and
+# report non-freed allocations in the end. Other allocation methods are not
+# added to keep it simple.
+#
+# This can only detect the existence of leaks without showing the location of
+# the allocations in the source code. Also, since this is a dynamic analysis
+# method, absence of leaks does not necessarily mean the program is leak free
+# for all execution paths. Therefore, this is not very useful in practice.
+#
+# To run the script, you need to redirect ltrace output from stderr to stdout,
+# and then redirect regular output to null device, and pipe stdout to this
+# script. An example for `ls` command is shown below:
+#
+#     ltrace ls 2&gt;&amp;1 &gt;/dev/null | ./leak.py
+#
 
-<span class="hl kwa">print</span> <span class="hl str">&#39;</span><span class="hl esc">\n</span><span class="hl str">These are all the malloc and free calls in the execution&#39;</span>
-<span class="hl kwa">for</span> line <span class="hl kwa">in</span> lines<span class="hl opt">:</span>
-    <span class="hl kwa">print</span> line<span class="hl opt">,</span>
+import re
+import sys
 
-mems <span class="hl opt">= {}</span>
-<span class="hl kwa">for</span> line <span class="hl kwa">in</span> lines<span class="hl opt">:</span>
-    toks <span class="hl opt">=</span> line<span class="hl opt">.</span><span class="hl kwd">split</span><span class="hl opt">()</span>
+lines = filter(lambda l: &apos;malloc&apos; in l or &apos;free&apos; in l, sys.stdin)
 
-    <span class="hl slc"># malloc(size) = addr</span>
-    <span class="hl kwa">if</span> <span class="hl str">&#39;malloc&#39;</span> <span class="hl kwa">in</span> toks<span class="hl opt">[</span><span class="hl num">0</span><span class="hl opt">]:</span>
-        size <span class="hl opt">=</span> re<span class="hl opt">.</span><span class="hl kwd">search</span><span class="hl opt">(</span>r<span class="hl str">&#39;malloc\((.*)\)&#39;</span><span class="hl opt">,</span> toks<span class="hl opt">[</span><span class="hl num">0</span><span class="hl opt">]).</span><span class="hl kwd">group</span><span class="hl opt">(</span><span class="hl num">1</span><span class="hl opt">)</span>
-        addr <span class="hl opt">=</span> toks<span class="hl opt">[</span><span class="hl num">2</span><span class="hl opt">]</span>
-        mems<span class="hl opt">[</span>addr<span class="hl opt">] =</span> size
+print &apos;\nThese are all the malloc and free calls in the execution&apos;
+for line in lines:
+    print line,
 
-    <span class="hl slc"># free(addr) = &lt;void&gt;</span>
-    <span class="hl kwa">elif</span> <span class="hl str">&#39;free&#39;</span> <span class="hl kwa">in</span> toks<span class="hl opt">[</span><span class="hl num">0</span><span class="hl opt">]:</span>
-        addr <span class="hl opt">=</span> re<span class="hl opt">.</span><span class="hl kwd">search</span><span class="hl opt">(</span>r<span class="hl str">&#39;free\((.*)\)&#39;</span><span class="hl opt">,</span> toks<span class="hl opt">[</span><span class="hl num">0</span><span class="hl opt">]).</span><span class="hl kwd">group</span><span class="hl opt">(</span><span class="hl num">1</span><span class="hl opt">)</span>
-        mems<span class="hl opt">.</span><span class="hl kwd">pop</span><span class="hl opt">(</span>addr<span class="hl opt">,</span> <span class="hl kwa">None</span><span class="hl opt">)</span>
+mems = {}
+for line in lines:
+    toks = line.split()
 
-<span class="hl kwa">print</span> <span class="hl str">&#39;</span><span class="hl esc">\n</span><span class="hl str">Execution ended with the following non-freed allocations&#39;</span>
-<span class="hl kwa">for</span> k<span class="hl opt">,</span> v <span class="hl kwa">in</span> mems<span class="hl opt">.</span><span class="hl kwd">iteritems</span><span class="hl opt">():</span>
-    <span class="hl kwa">print</span> <span class="hl str">&#39;leaked&#39;</span><span class="hl opt">,</span> v<span class="hl opt">,</span> <span class="hl str">&#39;bytes of memory at&#39;</span><span class="hl opt">,</span> k
-</pre>
+    # malloc(size) = addr
+    if &apos;malloc&apos; in toks[0]:
+        size = re.search(r&apos;malloc\((.*)\)&apos;, toks[0]).group(1)
+        addr = toks[2]
+        mems[addr] = size
+
+    # free(addr) = &lt;void&gt;
+    elif &apos;free&apos; in toks[0]:
+        addr = re.search(r&apos;free\((.*)\)&apos;, toks[0]).group(1)
+        mems.pop(addr, None)
+
+print &apos;\nExecution ended with the following non-freed allocations&apos;
+for k, v in mems.iteritems():
+    print &apos;leaked&apos;, v, &apos;bytes of memory at&apos;, k
+</code></pre>
+
 </body>
+
 </html>
-<!--HTML generated by highlight 3.62, http://www.andre-simon.de/-->

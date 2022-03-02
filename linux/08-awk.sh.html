@@ -1,306 +1,316 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
+
 <head>
-<meta charset="ISO-8859-1">
-<title>08-awk.sh</title>
-<link rel="stylesheet" type="text/css" href="../highlight.css">
+  <meta charset="utf-8">
+  <meta name="color-scheme" content="light dark">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>08-awk.sh</title>
+  <link rel="stylesheet" href="../style/code.css">
+  <link rel="stylesheet" href="../highlightjs/github.min.css" media="screen and (prefers-color-scheme: light)">
+  <link rel="stylesheet" href="../highlightjs/github-dark.min.css" media="screen and (prefers-color-scheme: dark)">
+  <script src="../highlightjs/highlight-bash.min.js"></script>
+  <script>hljs.highlightAll();</script>
 </head>
-<body class="hl">
-<pre class="hl"><span class="hl slc">#!/bin/sh</span>
-<span class="hl slc"># see also `man awk`</span>
 
-<span class="hl slc">## ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~</span>
-<span class="hl slc">## AWK</span>
-<span class="hl slc">## ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~</span>
+<body>
 
-<span class="hl slc"># awk (1) - pattern scanning and text processing language</span>
+<pre><code class="language-bash">#!/bin/sh
+# see also `man awk`
 
-<span class="hl slc"># print each line (implicit)</span>
-<span class="hl kwc">awk</span> <span class="hl str">&#39;{ print }&#39;</span> <span class="hl opt">/</span>etc<span class="hl opt">/</span>passwd <span class="hl opt">|</span> <span class="hl kwc">head</span>
-<span class="hl slc"># root:x:0:0:root:/root:/bin/bash</span>
-<span class="hl slc"># daemon:x:1:1:daemon:/usr/sbin:/usr/sbin/nologin</span>
-<span class="hl slc"># bin:x:2:2:bin:/bin:/usr/sbin/nologin</span>
-<span class="hl slc"># sys:x:3:3:sys:/dev:/usr/sbin/nologin</span>
-<span class="hl slc"># sync:x:4:65534:sync:/bin:/bin/sync</span>
-<span class="hl slc"># games:x:5:60:games:/usr/games:/usr/sbin/nologin</span>
-<span class="hl slc"># man:x:6:12:man:/var/cache/man:/usr/sbin/nologin</span>
-<span class="hl slc"># lp:x:7:7:lp:/var/spool/lpd:/usr/sbin/nologin</span>
-<span class="hl slc"># mail:x:8:8:mail:/var/mail:/usr/sbin/nologin</span>
-<span class="hl slc"># news:x:9:9:news:/var/spool/news:/usr/sbin/nologin</span>
+## ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+## AWK
+## ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-<span class="hl slc"># print each line (explicit)</span>
-<span class="hl kwc">awk</span> <span class="hl str">&#39;{ print</span> <span class="hl ipl">$0</span> <span class="hl str">}&#39;</span> <span class="hl opt">/</span>etc<span class="hl opt">/</span>passwd <span class="hl opt">|</span> <span class="hl kwc">head</span>
-<span class="hl slc"># root:x:0:0:root:/root:/bin/bash</span>
-<span class="hl slc"># daemon:x:1:1:daemon:/usr/sbin:/usr/sbin/nologin</span>
-<span class="hl slc"># bin:x:2:2:bin:/bin:/usr/sbin/nologin</span>
-<span class="hl slc"># sys:x:3:3:sys:/dev:/usr/sbin/nologin</span>
-<span class="hl slc"># sync:x:4:65534:sync:/bin:/bin/sync</span>
-<span class="hl slc"># games:x:5:60:games:/usr/games:/usr/sbin/nologin</span>
-<span class="hl slc"># man:x:6:12:man:/var/cache/man:/usr/sbin/nologin</span>
-<span class="hl slc"># lp:x:7:7:lp:/var/spool/lpd:/usr/sbin/nologin</span>
-<span class="hl slc"># mail:x:8:8:mail:/var/mail:/usr/sbin/nologin</span>
-<span class="hl slc"># news:x:9:9:news:/var/spool/news:/usr/sbin/nologin</span>
+# awk (1) - pattern scanning and text processing language
 
-<span class="hl slc"># print each line (stdin)</span>
-<span class="hl kwc">head</span> <span class="hl opt">/</span>etc<span class="hl opt">/</span>passwd <span class="hl opt">|</span> <span class="hl kwc">awk</span> <span class="hl str">&#39;{ print</span> <span class="hl ipl">$0</span> <span class="hl str">}&#39;</span>
-<span class="hl slc"># root:x:0:0:root:/root:/bin/bash</span>
-<span class="hl slc"># daemon:x:1:1:daemon:/usr/sbin:/usr/sbin/nologin</span>
-<span class="hl slc"># bin:x:2:2:bin:/bin:/usr/sbin/nologin</span>
-<span class="hl slc"># sys:x:3:3:sys:/dev:/usr/sbin/nologin</span>
-<span class="hl slc"># sync:x:4:65534:sync:/bin:/bin/sync</span>
-<span class="hl slc"># games:x:5:60:games:/usr/games:/usr/sbin/nologin</span>
-<span class="hl slc"># man:x:6:12:man:/var/cache/man:/usr/sbin/nologin</span>
-<span class="hl slc"># lp:x:7:7:lp:/var/spool/lpd:/usr/sbin/nologin</span>
-<span class="hl slc"># mail:x:8:8:mail:/var/mail:/usr/sbin/nologin</span>
-<span class="hl slc"># news:x:9:9:news:/var/spool/news:/usr/sbin/nologin</span>
+# print each line (implicit)
+awk &apos;{ print }&apos; /etc/passwd | head
+# root:x:0:0:root:/root:/bin/bash
+# daemon:x:1:1:daemon:/usr/sbin:/usr/sbin/nologin
+# bin:x:2:2:bin:/bin:/usr/sbin/nologin
+# sys:x:3:3:sys:/dev:/usr/sbin/nologin
+# sync:x:4:65534:sync:/bin:/bin/sync
+# games:x:5:60:games:/usr/games:/usr/sbin/nologin
+# man:x:6:12:man:/var/cache/man:/usr/sbin/nologin
+# lp:x:7:7:lp:/var/spool/lpd:/usr/sbin/nologin
+# mail:x:8:8:mail:/var/mail:/usr/sbin/nologin
+# news:x:9:9:news:/var/spool/news:/usr/sbin/nologin
 
-<span class="hl slc"># print 1st field at each line (fields separated with spaces by default)</span>
-<span class="hl kwc">head</span> <span class="hl opt">/</span>etc<span class="hl opt">/</span>passwd <span class="hl opt">|</span> <span class="hl kwc">awk</span> <span class="hl str">&#39;{ print</span> <span class="hl ipl">$1</span> <span class="hl str">}&#39;</span>
-<span class="hl slc"># root:x:0:0:root:/root:/bin/bash</span>
-<span class="hl slc"># daemon:x:1:1:daemon:/usr/sbin:/usr/sbin/nologin</span>
-<span class="hl slc"># bin:x:2:2:bin:/bin:/usr/sbin/nologin</span>
-<span class="hl slc"># sys:x:3:3:sys:/dev:/usr/sbin/nologin</span>
-<span class="hl slc"># sync:x:4:65534:sync:/bin:/bin/sync</span>
-<span class="hl slc"># games:x:5:60:games:/usr/games:/usr/sbin/nologin</span>
-<span class="hl slc"># man:x:6:12:man:/var/cache/man:/usr/sbin/nologin</span>
-<span class="hl slc"># lp:x:7:7:lp:/var/spool/lpd:/usr/sbin/nologin</span>
-<span class="hl slc"># mail:x:8:8:mail:/var/mail:/usr/sbin/nologin</span>
-<span class="hl slc"># news:x:9:9:news:/var/spool/news:/usr/sbin/nologin</span>
+# print each line (explicit)
+awk &apos;{ print $0 }&apos; /etc/passwd | head
+# root:x:0:0:root:/root:/bin/bash
+# daemon:x:1:1:daemon:/usr/sbin:/usr/sbin/nologin
+# bin:x:2:2:bin:/bin:/usr/sbin/nologin
+# sys:x:3:3:sys:/dev:/usr/sbin/nologin
+# sync:x:4:65534:sync:/bin:/bin/sync
+# games:x:5:60:games:/usr/games:/usr/sbin/nologin
+# man:x:6:12:man:/var/cache/man:/usr/sbin/nologin
+# lp:x:7:7:lp:/var/spool/lpd:/usr/sbin/nologin
+# mail:x:8:8:mail:/var/mail:/usr/sbin/nologin
+# news:x:9:9:news:/var/spool/news:/usr/sbin/nologin
 
-<span class="hl slc"># print 1st field at each line (fields separated with &#39;:&#39;)</span>
-<span class="hl kwc">head</span> <span class="hl opt">/</span>etc<span class="hl opt">/</span>passwd <span class="hl opt">|</span> <span class="hl kwc">awk</span> <span class="hl kwb">-F</span><span class="hl opt">:</span> <span class="hl str">&#39;{ print</span> <span class="hl ipl">$1</span> <span class="hl str">}&#39;</span>
-<span class="hl slc"># root</span>
-<span class="hl slc"># daemon</span>
-<span class="hl slc"># bin</span>
-<span class="hl slc"># sys</span>
-<span class="hl slc"># sync</span>
-<span class="hl slc"># games</span>
-<span class="hl slc"># man</span>
-<span class="hl slc"># lp</span>
-<span class="hl slc"># mail</span>
-<span class="hl slc"># news</span>
+# print each line (stdin)
+head /etc/passwd | awk &apos;{ print $0 }&apos;
+# root:x:0:0:root:/root:/bin/bash
+# daemon:x:1:1:daemon:/usr/sbin:/usr/sbin/nologin
+# bin:x:2:2:bin:/bin:/usr/sbin/nologin
+# sys:x:3:3:sys:/dev:/usr/sbin/nologin
+# sync:x:4:65534:sync:/bin:/bin/sync
+# games:x:5:60:games:/usr/games:/usr/sbin/nologin
+# man:x:6:12:man:/var/cache/man:/usr/sbin/nologin
+# lp:x:7:7:lp:/var/spool/lpd:/usr/sbin/nologin
+# mail:x:8:8:mail:/var/mail:/usr/sbin/nologin
+# news:x:9:9:news:/var/spool/news:/usr/sbin/nologin
 
-<span class="hl slc"># print 1st and 7th fields with given format</span>
-<span class="hl kwc">head</span> <span class="hl opt">/</span>etc<span class="hl opt">/</span>passwd <span class="hl opt">|</span> <span class="hl kwc">awk</span> <span class="hl kwb">-F</span><span class="hl opt">:</span> <span class="hl str">&#39;{ printf &quot;%-20s%s</span><span class="hl esc">\n</span><span class="hl str">&quot;,</span> <span class="hl ipl">$1</span><span class="hl str">,</span> <span class="hl ipl">$7</span> <span class="hl str">}&#39;</span>
-<span class="hl slc"># root                /bin/bash</span>
-<span class="hl slc"># daemon              /usr/sbin/nologin</span>
-<span class="hl slc"># bin                 /usr/sbin/nologin</span>
-<span class="hl slc"># sys                 /usr/sbin/nologin</span>
-<span class="hl slc"># sync                /bin/sync</span>
-<span class="hl slc"># games               /usr/sbin/nologin</span>
-<span class="hl slc"># man                 /usr/sbin/nologin</span>
-<span class="hl slc"># lp                  /usr/sbin/nologin</span>
-<span class="hl slc"># mail                /usr/sbin/nologin</span>
-<span class="hl slc"># news                /usr/sbin/nologin</span>
+# print 1st field at each line (fields separated with spaces by default)
+head /etc/passwd | awk &apos;{ print $1 }&apos;
+# root:x:0:0:root:/root:/bin/bash
+# daemon:x:1:1:daemon:/usr/sbin:/usr/sbin/nologin
+# bin:x:2:2:bin:/bin:/usr/sbin/nologin
+# sys:x:3:3:sys:/dev:/usr/sbin/nologin
+# sync:x:4:65534:sync:/bin:/bin/sync
+# games:x:5:60:games:/usr/games:/usr/sbin/nologin
+# man:x:6:12:man:/var/cache/man:/usr/sbin/nologin
+# lp:x:7:7:lp:/var/spool/lpd:/usr/sbin/nologin
+# mail:x:8:8:mail:/var/mail:/usr/sbin/nologin
+# news:x:9:9:news:/var/spool/news:/usr/sbin/nologin
 
-<span class="hl slc"># print 1st field at each line (fields separated with &#39;:&#39; using FS variable)</span>
-<span class="hl kwc">head</span> <span class="hl opt">/</span>etc<span class="hl opt">/</span>passwd <span class="hl opt">|</span> <span class="hl kwc">awk</span> <span class="hl str">&#39;BEGIN { FS=&quot;:&quot; } { print</span> <span class="hl ipl">$1</span> <span class="hl str">}&#39;</span>
-<span class="hl slc"># root</span>
-<span class="hl slc"># daemon</span>
-<span class="hl slc"># bin</span>
-<span class="hl slc"># sys</span>
-<span class="hl slc"># sync</span>
-<span class="hl slc"># games</span>
-<span class="hl slc"># man</span>
-<span class="hl slc"># lp</span>
-<span class="hl slc"># mail</span>
-<span class="hl slc"># news</span>
+# print 1st field at each line (fields separated with &apos;:&apos;)
+head /etc/passwd | awk -F: &apos;{ print $1 }&apos;
+# root
+# daemon
+# bin
+# sys
+# sync
+# games
+# man
+# lp
+# mail
+# news
 
-<span class="hl slc"># print argument count at the beginning</span>
-<span class="hl kwc">awk</span> <span class="hl str">&#39;BEGIN { print ARGC }&#39;</span> <span class="hl opt">/</span>etc<span class="hl opt">/</span>passwd
-<span class="hl slc"># 2</span>
+# print 1st and 7th fields with given format
+head /etc/passwd | awk -F: &apos;{ printf &quot;%-20s%s\n&quot;, $1, $7 }&apos;
+# root                /bin/bash
+# daemon              /usr/sbin/nologin
+# bin                 /usr/sbin/nologin
+# sys                 /usr/sbin/nologin
+# sync                /bin/sync
+# games               /usr/sbin/nologin
+# man                 /usr/sbin/nologin
+# lp                  /usr/sbin/nologin
+# mail                /usr/sbin/nologin
+# news                /usr/sbin/nologin
 
-<span class="hl slc"># print arguments at the beginning</span>
-<span class="hl kwc">awk</span> <span class="hl str">&#39;BEGIN { for (i = 0; i &lt; ARGC; i++) print ARGV[i] }&#39;</span> <span class="hl opt">/</span>etc<span class="hl opt">/</span>passwd
-<span class="hl slc"># awk</span>
-<span class="hl slc"># /etc/passwd</span>
+# print 1st field at each line (fields separated with &apos;:&apos; using FS variable)
+head /etc/passwd | awk &apos;BEGIN { FS=&quot;:&quot; } { print $1 }&apos;
+# root
+# daemon
+# bin
+# sys
+# sync
+# games
+# man
+# lp
+# mail
+# news
 
-<span class="hl slc"># print arguments at the beginning (multi-line syntax)</span>
-<span class="hl kwc">awk</span> <span class="hl str">&#39;</span>
-<span class="hl str">BEGIN {</span>
-<span class="hl str">    for (i = 0; i &lt; ARGC; i++) {</span>
-<span class="hl str">        print ARGV[i]</span>
-<span class="hl str">    }</span>
-<span class="hl str">}&#39;</span> <span class="hl opt">/</span>etc<span class="hl opt">/</span>passwd
-<span class="hl slc"># awk</span>
-<span class="hl slc"># /etc/passwd</span>
+# print argument count at the beginning
+awk &apos;BEGIN { print ARGC }&apos; /etc/passwd
+# 2
 
-<span class="hl slc"># print value of &#39;HOME&#39; environment variable</span>
-<span class="hl kwc">awk</span> <span class="hl str">&#39;BEGIN { print ENVIRON[&quot;HOME&quot;] }&#39;</span>
-<span class="hl slc"># /home/gokce</span>
+# print arguments at the beginning
+awk &apos;BEGIN { for (i = 0; i &lt; ARGC; i++) print ARGV[i] }&apos; /etc/passwd
+# awk
+# /etc/passwd
 
-<span class="hl slc"># print number of records and number of fields (records are lines by default)</span>
-<span class="hl kwc">head</span> <span class="hl opt">/</span>etc<span class="hl opt">/</span>passwd <span class="hl opt">|</span> <span class="hl kwc">awk</span> <span class="hl kwb">-F</span><span class="hl opt">:</span> <span class="hl str">&#39;{ printf &quot;%d - %d</span><span class="hl esc">\n</span><span class="hl str">&quot;, NR, NF }&#39;</span>
-<span class="hl slc"># 1 - 7</span>
-<span class="hl slc"># 2 - 7</span>
-<span class="hl slc"># 3 - 7</span>
-<span class="hl slc"># 4 - 7</span>
-<span class="hl slc"># 5 - 7</span>
-<span class="hl slc"># 6 - 7</span>
-<span class="hl slc"># 7 - 7</span>
-<span class="hl slc"># 8 - 7</span>
-<span class="hl slc"># 9 - 7</span>
-<span class="hl slc"># 10 - 7</span>
+# print arguments at the beginning (multi-line syntax)
+awk &apos;
+BEGIN {
+    for (i = 0; i &lt; ARGC; i++) {
+        print ARGV[i]
+    }
+}&apos; /etc/passwd
+# awk
+# /etc/passwd
 
-<span class="hl slc"># print lines with &#39;bash&#39; pattern (implicit printing)</span>
-<span class="hl kwc">cat</span> <span class="hl opt">/</span>etc<span class="hl opt">/</span>passwd <span class="hl opt">|</span> <span class="hl kwc">awk</span> <span class="hl kwb">-F</span><span class="hl opt">:</span> <span class="hl str">&#39;/bash/&#39;</span>
-<span class="hl slc"># root:x:0:0:root:/root:/bin/bash</span>
-<span class="hl slc"># gokce:x:1000:1000:gokce,,,:/home/gokce:/bin/bash</span>
+# print value of &apos;HOME&apos; environment variable
+awk &apos;BEGIN { print ENVIRON[&quot;HOME&quot;] }&apos;
+# /home/gokce
 
-<span class="hl slc"># print lines with &#39;bash&#39; pattern (explicit printing)</span>
-<span class="hl kwc">cat</span> <span class="hl opt">/</span>etc<span class="hl opt">/</span>passwd <span class="hl opt">|</span> <span class="hl kwc">awk</span> <span class="hl kwb">-F</span><span class="hl opt">:</span> <span class="hl str">&#39;/bash/ { print</span> <span class="hl ipl">$0</span> <span class="hl str">}&#39;</span>
-<span class="hl slc"># root:x:0:0:root:/root:/bin/bash</span>
-<span class="hl slc"># gokce:x:1000:1000:gokce,,,:/home/gokce:/bin/bash</span>
+# print number of records and number of fields (records are lines by default)
+head /etc/passwd | awk -F: &apos;{ printf &quot;%d - %d\n&quot;, NR, NF }&apos;
+# 1 - 7
+# 2 - 7
+# 3 - 7
+# 4 - 7
+# 5 - 7
+# 6 - 7
+# 7 - 7
+# 8 - 7
+# 9 - 7
+# 10 - 7
 
-<span class="hl slc"># print 1st field of each line with &#39;bash&#39; pattern</span>
-<span class="hl kwc">cat</span> <span class="hl opt">/</span>etc<span class="hl opt">/</span>passwd <span class="hl opt">|</span> <span class="hl kwc">awk</span> <span class="hl kwb">-F</span><span class="hl opt">:</span> <span class="hl str">&#39;/bash/ { print</span> <span class="hl ipl">$1</span> <span class="hl str">}&#39;</span>
-<span class="hl slc"># root</span>
-<span class="hl slc"># gokce</span>
+# print lines with &apos;bash&apos; pattern (implicit printing)
+cat /etc/passwd | awk -F: &apos;/bash/&apos;
+# root:x:0:0:root:/root:/bin/bash
+# gokce:x:1000:1000:gokce,,,:/home/gokce:/bin/bash
 
-<span class="hl slc"># print 1st field of each line where 7th field is &#39;/bin/bash&#39;</span>
-<span class="hl kwc">cat</span> <span class="hl opt">/</span>etc<span class="hl opt">/</span>passwd <span class="hl opt">|</span> <span class="hl kwc">awk</span> <span class="hl kwb">-F</span><span class="hl opt">:</span> <span class="hl str">&#39;</span><span class="hl ipl">$7</span> <span class="hl str">== &quot;/bin/bash&quot; { print</span> <span class="hl ipl">$1</span> <span class="hl str">}&#39;</span>
-<span class="hl slc"># root</span>
-<span class="hl slc"># gokce</span>
+# print lines with &apos;bash&apos; pattern (explicit printing)
+cat /etc/passwd | awk -F: &apos;/bash/ { print $0 }&apos;
+# root:x:0:0:root:/root:/bin/bash
+# gokce:x:1000:1000:gokce,,,:/home/gokce:/bin/bash
 
-<span class="hl slc"># print 1st field of each line from 1st line to 5th line</span>
-<span class="hl kwc">cat</span> <span class="hl opt">/</span>etc<span class="hl opt">/</span>passwd <span class="hl opt">|</span> <span class="hl kwc">awk</span> <span class="hl kwb">-F</span><span class="hl opt">:</span> <span class="hl str">&#39;NR == 1, NR == 5 { print</span> <span class="hl ipl">$1</span> <span class="hl str">}&#39;</span>
-<span class="hl slc"># root</span>
-<span class="hl slc"># daemon</span>
-<span class="hl slc"># bin</span>
-<span class="hl slc"># sys</span>
-<span class="hl slc"># sync</span>
+# print 1st field of each line with &apos;bash&apos; pattern
+cat /etc/passwd | awk -F: &apos;/bash/ { print $1 }&apos;
+# root
+# gokce
 
-<span class="hl slc"># increment &#39;numlines&#39; at each line and print at the end</span>
-<span class="hl kwc">cat</span> <span class="hl opt">/</span>etc<span class="hl opt">/</span>passwd <span class="hl opt">|</span> <span class="hl kwc">awk</span> <span class="hl str">&#39;</span>
-<span class="hl str">{ numlines++ }</span>
-<span class="hl str">END { print numlines }&#39;</span>
-<span class="hl slc"># 41</span>
+# print 1st field of each line where 7th field is &apos;/bin/bash&apos;
+cat /etc/passwd | awk -F: &apos;$7 == &quot;/bin/bash&quot; { print $1 }&apos;
+# root
+# gokce
 
-<span class="hl slc"># count number of users for each shell</span>
-<span class="hl kwc">cat</span> <span class="hl opt">/</span>etc<span class="hl opt">/</span>passwd <span class="hl opt">|</span> <span class="hl kwc">awk</span> <span class="hl kwb">-F</span><span class="hl opt">:</span> <span class="hl str">&#39;</span>
-<span class="hl str">{ shell[</span><span class="hl ipl">$7</span><span class="hl str">]++ }</span>
-<span class="hl str">END { for (i in shell) printf &quot;%-20s%d</span><span class="hl esc">\n</span><span class="hl str">&quot;, i, shell[i] }&#39;</span>
-<span class="hl slc"># /bin/sync           1</span>
-<span class="hl slc"># /bin/bash           2</span>
-<span class="hl slc"># /bin/false          22</span>
-<span class="hl slc"># /usr/sbin/nologin   16</span>
+# print 1st field of each line from 1st line to 5th line
+cat /etc/passwd | awk -F: &apos;NR == 1, NR == 5 { print $1 }&apos;
+# root
+# daemon
+# bin
+# sys
+# sync
 
-<span class="hl slc"># run external &#39;date&#39; command and read its stdout</span>
-<span class="hl kwc">awk</span> <span class="hl str">&#39;BEGIN {</span>
-<span class="hl str">    &quot;date&quot; | getline line</span>
-<span class="hl str">    print line</span>
-<span class="hl str">    close(&quot;date&quot;)</span>
-<span class="hl str">}&#39;</span>
-<span class="hl slc"># Thu Oct 13 21:04:58 EEST 2016</span>
+# increment &apos;numlines&apos; at each line and print at the end
+cat /etc/passwd | awk &apos;
+{ numlines++ }
+END { print numlines }&apos;
+# 41
 
-<span class="hl slc"># run external &#39;date -u&#39; command and read its stdout</span>
-<span class="hl kwc">awk</span> <span class="hl str">&#39;BEGIN {</span>
-<span class="hl str">    cmd = &quot;date -u&quot;</span>
-<span class="hl str">    cmd | getline line</span>
-<span class="hl str">    print line</span>
-<span class="hl str">    close(cmd)</span>
-<span class="hl str">}&#39;</span>
-<span class="hl slc"># Thu Oct 13 18:05:03 UTC 2016</span>
+# count number of users for each shell
+cat /etc/passwd | awk -F: &apos;
+{ shell[$7]++ }
+END { for (i in shell) printf &quot;%-20s%d\n&quot;, i, shell[i] }&apos;
+# /bin/sync           1
+# /bin/bash           2
+# /bin/false          22
+# /usr/sbin/nologin   16
 
-<span class="hl slc"># run external &#39;cat&#39; command and write to its stdin</span>
-<span class="hl kwc">awk</span> <span class="hl str">&#39;BEGIN {</span>
-<span class="hl str">    print &quot;hello world&quot; | &quot;cat&quot;</span>
-<span class="hl str">    close(&quot;cat&quot;)</span>
-<span class="hl str">}&#39;</span>
-<span class="hl slc"># hello world</span>
+# run external &apos;date&apos; command and read its stdout
+awk &apos;BEGIN {
+    &quot;date&quot; | getline line
+    print line
+    close(&quot;date&quot;)
+}&apos;
+# Thu Oct 13 21:04:58 EEST 2016
 
-<span class="hl slc"># run a shell command by writing to &#39;sh&#39; stdin</span>
-<span class="hl kwc">awk</span> <span class="hl str">&#39;BEGIN {</span>
-<span class="hl str">    print &quot;ls -l /bin/echo&quot; | &quot;sh&quot;</span>
-<span class="hl str">    close(&quot;sh&quot;)</span>
-<span class="hl str">}&#39;</span>
-<span class="hl slc"># -rwxr-xr-x 1 root root 31376 Feb 18  2016 /bin/echo</span>
+# run external &apos;date -u&apos; command and read its stdout
+awk &apos;BEGIN {
+    cmd = &quot;date -u&quot;
+    cmd | getline line
+    print line
+    close(cmd)
+}&apos;
+# Thu Oct 13 18:05:03 UTC 2016
 
-<span class="hl slc"># run a shell command</span>
-<span class="hl kwc">awk</span> <span class="hl str">&#39;BEGIN { system(&quot;ls -l /bin/echo&quot;) }&#39;</span>
-<span class="hl slc"># -rwxr-xr-x 1 root root 31376 Feb 18  2016 /bin/echo</span>
+# run external &apos;cat&apos; command and write to its stdin
+awk &apos;BEGIN {
+    print &quot;hello world&quot; | &quot;cat&quot;
+    close(&quot;cat&quot;)
+}&apos;
+# hello world
 
-<span class="hl slc"># define a &#39;fact&#39; function and use it to calculate factorial of 5</span>
-<span class="hl kwc">awk</span> <span class="hl str">&#39;</span>
-<span class="hl str">BEGIN {</span>
-<span class="hl str">    print fact(5)</span>
-<span class="hl str">}</span>
-<span class="hl str"></span>
-<span class="hl str">function fact(n) {</span>
-<span class="hl str">    if (n &lt; 2)</span>
-<span class="hl str">        return 1;</span>
-<span class="hl str">    return n * fact(n-1);</span>
-<span class="hl str">}&#39;</span>
-<span class="hl slc"># 120</span>
+# run a shell command by writing to &apos;sh&apos; stdin
+awk &apos;BEGIN {
+    print &quot;ls -l /bin/echo&quot; | &quot;sh&quot;
+    close(&quot;sh&quot;)
+}&apos;
+# -rwxr-xr-x 1 root root 31376 Feb 18  2016 /bin/echo
 
-<span class="hl slc"># calculate mean of random numbers</span>
-<span class="hl kwc">seq</span> <span class="hl num">100</span> <span class="hl opt">|</span> shuf <span class="hl opt">|</span> <span class="hl kwc">head</span> <span class="hl opt">|</span> <span class="hl kwc">awk</span> <span class="hl str">&#39;</span>
-<span class="hl str">{ sum +=</span> <span class="hl ipl">$0</span> <span class="hl str">} </span>
-<span class="hl str">END { print sum / NR }&#39;</span>
-<span class="hl slc"># 72.7</span>
+# run a shell command
+awk &apos;BEGIN { system(&quot;ls -l /bin/echo&quot;) }&apos;
+# -rwxr-xr-x 1 root root 31376 Feb 18  2016 /bin/echo
 
-<span class="hl slc"># define &#39;mean&#39; as alias (escape &#39;$&#39; characters inside double quotes)</span>
-<span class="hl kwb">alias</span> mean<span class="hl opt">=</span><span class="hl str">&quot;awk &#39;{ sum += \</span><span class="hl ipl">$0</span> <span class="hl str">} END { print sum / NR }&#39;&quot;</span>
+# define a &apos;fact&apos; function and use it to calculate factorial of 5
+awk &apos;
+BEGIN {
+    print fact(5)
+}
 
-<span class="hl slc"># use &#39;mean&#39; alias</span>
-<span class="hl kwc">seq</span> <span class="hl num">100</span> <span class="hl opt">|</span> shuf <span class="hl opt">|</span> <span class="hl kwc">head</span> <span class="hl opt">|</span> mean
-<span class="hl slc"># 49.2</span>
+function fact(n) {
+    if (n &lt; 2)
+        return 1;
+    return n * fact(n-1);
+}&apos;
+# 120
 
-<span class="hl slc"># calculate stdev of random numbers</span>
-<span class="hl kwc">seq</span> <span class="hl num">100</span> <span class="hl opt">|</span> shuf <span class="hl opt">|</span> <span class="hl kwc">head</span> <span class="hl opt">|</span> <span class="hl kwc">awk</span> <span class="hl str">&#39;</span>
-<span class="hl str">{ sum +=</span> <span class="hl ipl">$0</span><span class="hl str">; sumsq +=</span> <span class="hl ipl">$0</span><span class="hl str">^2 }</span>
-<span class="hl str">END { print sqrt(NR * sumsq - sum^2) / NR; }&#39;</span>
-<span class="hl slc"># 29.3966</span>
+# calculate mean of random numbers
+seq 100 | shuf | head | awk &apos;
+{ sum += $0 } 
+END { print sum / NR }&apos;
+# 72.7
 
-<span class="hl slc"># define &#39;stdev&#39; as alias (escape &#39;$&#39; characters inside double quotes)</span>
-<span class="hl kwb">alias</span> stdev<span class="hl opt">=</span><span class="hl str">&quot;awk &#39;{ sum += \</span><span class="hl ipl">$0</span><span class="hl str">; sumsq += \</span><span class="hl ipl">$0</span><span class="hl str">^2 } END { print sqrt(NR * sumsq - sum^2) / NR; }&#39;&quot;</span>
+# define &apos;mean&apos; as alias (escape &apos;$&apos; characters inside double quotes)
+alias mean=&quot;awk &apos;{ sum += \$0 } END { print sum / NR }&apos;&quot;
 
-<span class="hl slc"># use &#39;stdev&#39; alias</span>
-<span class="hl kwc">seq</span> <span class="hl num">100</span> <span class="hl opt">|</span> shuf <span class="hl opt">|</span> <span class="hl kwc">head</span> <span class="hl opt">|</span> stdev
-<span class="hl slc"># 27.7027</span>
+# use &apos;mean&apos; alias
+seq 100 | shuf | head | mean
+# 49.2
 
-<span class="hl slc"># generate a text with 100 random words from 20 random words</span>
-shuf <span class="hl opt">/</span>usr<span class="hl opt">/</span>share<span class="hl opt">/</span>dict<span class="hl opt">/</span>words <span class="hl opt">|</span> <span class="hl kwc">head</span> <span class="hl kwb">-20</span> <span class="hl opt">|</span> shuf <span class="hl kwb">-r</span> <span class="hl opt">|</span> <span class="hl kwc">head</span> <span class="hl kwb">-100</span> <span class="hl opt">|</span> <span class="hl kwc">fmt</span>
-<span class="hl slc"># updating poignantly poignantly lobotomies Intel&#39;s seesaw&#39;s baas vise&#39;s</span>
-<span class="hl slc"># hurray&#39;s Intel&#39;s Grampians Grampians settlement whooshing intertwines</span>
-<span class="hl slc"># Terrell lobotomies baas tiny Turing hurray&#39;s lobotomies hurray&#39;s idea&#39;s</span>
-<span class="hl slc"># underwriter&#39;s Grampians seesaw&#39;s Turing Intel&#39;s whooshing vise&#39;s idea&#39;s</span>
-<span class="hl slc"># Terrell baas underwriter&#39;s whooshing Turing Gorbachev freshets pluckier</span>
-<span class="hl slc"># settlement lobotomies baas Terrell settlement pluckier freshets pluckier</span>
-<span class="hl slc"># underwriter&#39;s Terrell baas lobotomies pluckier poignantly intertwines</span>
-<span class="hl slc"># tiny idea&#39;s settlement pluckier tiny Terrell baas settlement pluckier</span>
-<span class="hl slc"># idea&#39;s freshets vise&#39;s updating Grampians underwriter&#39;s settlement</span>
-<span class="hl slc"># intertwines hurray&#39;s poignantly vise&#39;s underwriter&#39;s updating baas idea&#39;s</span>
-<span class="hl slc"># intertwines Turing underwriter&#39;s underwriter&#39;s Grampians vise&#39;s baas</span>
-<span class="hl slc"># Terrell Terrell poignantly Grampians hurray&#39;s seesaw&#39;s pluckier Turing</span>
-<span class="hl slc"># lobotomies poignantly Terrell freshets underwriter&#39;s tiny</span>
+# calculate stdev of random numbers
+seq 100 | shuf | head | awk &apos;
+{ sum += $0; sumsq += $0^2 }
+END { print sqrt(NR * sumsq - sum^2) / NR; }&apos;
+# 29.3966
 
-<span class="hl slc"># word frequency (adapted from &#39;Effective awk Programming&#39; by &#39;Arnold Robbins&#39;)</span>
-shuf <span class="hl opt">/</span>usr<span class="hl opt">/</span>share<span class="hl opt">/</span>dict<span class="hl opt">/</span>words <span class="hl opt">|</span> <span class="hl kwc">head</span> <span class="hl kwb">-20</span> <span class="hl opt">|</span> shuf <span class="hl kwb">-r</span> <span class="hl opt">|</span> <span class="hl kwc">head</span> <span class="hl kwb">-100</span> <span class="hl opt">|</span> <span class="hl kwc">fmt</span> <span class="hl opt">|</span> <span class="hl kwc">awk</span> <span class="hl str">&#39;</span>
-<span class="hl str">{</span>
-<span class="hl str"></span>    <span class="hl ipl">$0</span> <span class="hl str">= tolower(</span><span class="hl ipl">$0</span><span class="hl str">)</span>
-<span class="hl str">    gsub(/[^[:alnum:]_[:blank:]]/, &quot;&quot;,</span> <span class="hl ipl">$0</span><span class="hl str">)</span>
-<span class="hl str">    for (i = 1; i &lt;= NF; i++) {</span>
-<span class="hl str">        freq[</span><span class="hl ipl">$i</span><span class="hl str">]++</span>
-<span class="hl str">        if (maxlen &lt; length(</span><span class="hl ipl">$i</span><span class="hl str">)) {</span>
-<span class="hl str">            maxlen = length(</span><span class="hl ipl">$i</span><span class="hl str">)</span>
-<span class="hl str">        }</span>
-<span class="hl str">    }</span>
-<span class="hl str">}</span>
-<span class="hl str"></span>
-<span class="hl str">END {</span>
-<span class="hl str">    sort = &quot;sort -k2 -rn | head -n 5&quot;</span>
-<span class="hl str">    for (word in freq) {</span>
-<span class="hl str">        printf &quot;%-*s%d</span><span class="hl esc">\n</span><span class="hl str">&quot;, maxlen, word, freq[word] | sort</span>
-<span class="hl str">    }</span>
-<span class="hl str">    close(sort)</span>
-<span class="hl str">}&#39;</span>
-<span class="hl slc"># walmarts    11</span>
-<span class="hl slc"># hogs        7</span>
-<span class="hl slc"># trousseaux  6</span>
-<span class="hl slc"># trees       6</span>
-<span class="hl slc"># priming     6</span>
-</pre>
+# define &apos;stdev&apos; as alias (escape &apos;$&apos; characters inside double quotes)
+alias stdev=&quot;awk &apos;{ sum += \$0; sumsq += \$0^2 } END { print sqrt(NR * sumsq - sum^2) / NR; }&apos;&quot;
+
+# use &apos;stdev&apos; alias
+seq 100 | shuf | head | stdev
+# 27.7027
+
+# generate a text with 100 random words from 20 random words
+shuf /usr/share/dict/words | head -20 | shuf -r | head -100 | fmt
+# updating poignantly poignantly lobotomies Intel&apos;s seesaw&apos;s baas vise&apos;s
+# hurray&apos;s Intel&apos;s Grampians Grampians settlement whooshing intertwines
+# Terrell lobotomies baas tiny Turing hurray&apos;s lobotomies hurray&apos;s idea&apos;s
+# underwriter&apos;s Grampians seesaw&apos;s Turing Intel&apos;s whooshing vise&apos;s idea&apos;s
+# Terrell baas underwriter&apos;s whooshing Turing Gorbachev freshets pluckier
+# settlement lobotomies baas Terrell settlement pluckier freshets pluckier
+# underwriter&apos;s Terrell baas lobotomies pluckier poignantly intertwines
+# tiny idea&apos;s settlement pluckier tiny Terrell baas settlement pluckier
+# idea&apos;s freshets vise&apos;s updating Grampians underwriter&apos;s settlement
+# intertwines hurray&apos;s poignantly vise&apos;s underwriter&apos;s updating baas idea&apos;s
+# intertwines Turing underwriter&apos;s underwriter&apos;s Grampians vise&apos;s baas
+# Terrell Terrell poignantly Grampians hurray&apos;s seesaw&apos;s pluckier Turing
+# lobotomies poignantly Terrell freshets underwriter&apos;s tiny
+
+# word frequency (adapted from &apos;Effective awk Programming&apos; by &apos;Arnold Robbins&apos;)
+shuf /usr/share/dict/words | head -20 | shuf -r | head -100 | fmt | awk &apos;
+{
+    $0 = tolower($0)
+    gsub(/[^[:alnum:]_[:blank:]]/, &quot;&quot;, $0)
+    for (i = 1; i &lt;= NF; i++) {
+        freq[$i]++
+        if (maxlen &lt; length($i)) {
+            maxlen = length($i)
+        }
+    }
+}
+
+END {
+    sort = &quot;sort -k2 -rn | head -n 5&quot;
+    for (word in freq) {
+        printf &quot;%-*s%d\n&quot;, maxlen, word, freq[word] | sort
+    }
+    close(sort)
+}&apos;
+# walmarts    11
+# hogs        7
+# trousseaux  6
+# trees       6
+# priming     6
+</code></pre>
+
 </body>
+
 </html>
-<!--HTML generated by highlight 3.62, http://www.andre-simon.de/-->

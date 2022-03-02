@@ -1,156 +1,166 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
+
 <head>
-<meta charset="ISO-8859-1">
-<title>calc.ml</title>
-<link rel="stylesheet" type="text/css" href="../highlight.css">
+  <meta charset="utf-8">
+  <meta name="color-scheme" content="light dark">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>calc.ml</title>
+  <link rel="stylesheet" href="../style/code.css">
+  <link rel="stylesheet" href="../highlightjs/github.min.css" media="screen and (prefers-color-scheme: light)">
+  <link rel="stylesheet" href="../highlightjs/github-dark.min.css" media="screen and (prefers-color-scheme: dark)">
+  <script src="../highlightjs/highlight-ocaml.min.js"></script>
+  <script>hljs.highlightAll();</script>
 </head>
-<body class="hl">
-<pre class="hl"><span class="hl com">(*</span>
-<span class="hl com"> * calc.ml</span>
-<span class="hl com"> *</span>
-<span class="hl com"> * Calculator for simple expressions</span>
-<span class="hl com"> *</span>
-<span class="hl com"> * The expression grammar is as follows:</span>
-<span class="hl com"> *</span>
-<span class="hl com"> *     E ::= T {+ T}</span>
-<span class="hl com"> *     T ::= F {* F}</span>
-<span class="hl com"> *     F ::= ( E ) | Int</span>
-<span class="hl com"> *</span>
-<span class="hl com"> * Expressions are parsed and evaluated on the fly.</span>
-<span class="hl com"> *</span>
-<span class="hl com"> * You can compile this file with the following command:</span>
-<span class="hl com"> *</span>
-<span class="hl com"> *     ocamlc -I +camlp4 -pp camlp4o calc.ml -o calc</span>
-<span class="hl com"> *)</span>
 
-<span class="hl com">(* Lex *)</span>
+<body>
 
-<span class="hl kwa">module</span> Token <span class="hl opt">=</span>
-  <span class="hl kwa">struct</span>
-    <span class="hl kwa">type</span> token <span class="hl opt">=</span>
-      <span class="hl opt">|</span> LPar
-      <span class="hl opt">|</span> RPar
-      <span class="hl opt">|</span> Plus
-      <span class="hl opt">|</span> Star
-      <span class="hl opt">|</span> Number <span class="hl kwa">of</span> <span class="hl kwb">float</span>
-  <span class="hl kwa">end</span>
+<pre><code class="language-ocaml">(*
+ * calc.ml
+ *
+ * Calculator for simple expressions
+ *
+ * The expression grammar is as follows:
+ *
+ *     E ::= T {+ T}
+ *     T ::= F {* F}
+ *     F ::= ( E ) | Int
+ *
+ * Expressions are parsed and evaluated on the fly.
+ *
+ * You can compile this file with the following command:
+ *
+ *     ocamlc -I +camlp4 -pp camlp4o calc.ml -o calc
+ *)
 
-<span class="hl kwa">let rec</span> <span class="hl kwd">lex</span> <span class="hl opt">=</span> parser
-  <span class="hl opt">| [&lt;</span> &#39; <span class="hl opt">(</span>&#39; &#39; <span class="hl opt">|</span> &#39;<span class="hl esc">\n</span>&#39; <span class="hl opt">|</span> &#39;<span class="hl esc">\r</span>&#39; <span class="hl opt">|</span> &#39;<span class="hl esc">\t</span>&#39;<span class="hl opt">);</span> stream <span class="hl opt">&gt;] -&gt;</span> <span class="hl kwd">lex</span> stream
-  <span class="hl opt">| [&lt;</span> &#39; <span class="hl opt">(</span>&#39;<span class="hl opt">(</span>&#39;<span class="hl opt">);</span> stream <span class="hl opt">&gt;] -&gt; [&lt;</span> &#39;<span class="hl kwc">Token</span><span class="hl opt">.</span>LPar<span class="hl opt">;</span> <span class="hl kwd">lex</span> stream <span class="hl opt">&gt;]</span>
-  <span class="hl opt">| [&lt;</span> &#39; <span class="hl opt">(</span>&#39;<span class="hl opt">)</span>&#39;<span class="hl opt">);</span> stream <span class="hl opt">&gt;] -&gt; [&lt;</span> &#39;<span class="hl kwc">Token</span><span class="hl opt">.</span>RPar<span class="hl opt">;</span> <span class="hl kwd">lex</span> stream <span class="hl opt">&gt;]</span>
-  <span class="hl opt">| [&lt;</span> &#39; <span class="hl opt">(</span>&#39;<span class="hl opt">+</span>&#39;<span class="hl opt">);</span> stream <span class="hl opt">&gt;] -&gt; [&lt;</span> &#39;<span class="hl kwc">Token</span><span class="hl opt">.</span>Plus<span class="hl opt">;</span> <span class="hl kwd">lex</span> stream <span class="hl opt">&gt;]</span>
-  <span class="hl opt">| [&lt;</span> &#39; <span class="hl opt">(</span>&#39;<span class="hl opt">*</span>&#39;<span class="hl opt">);</span> stream <span class="hl opt">&gt;] -&gt; [&lt;</span> &#39;<span class="hl kwc">Token</span><span class="hl opt">.</span>Star<span class="hl opt">;</span> <span class="hl kwd">lex</span> stream <span class="hl opt">&gt;]</span>
-  <span class="hl opt">| [&lt;</span> &#39; <span class="hl opt">(</span>&#39;<span class="hl num">0</span>&#39; <span class="hl opt">..</span> &#39;<span class="hl num">9</span>&#39; <span class="hl kwa">as</span> c<span class="hl opt">);</span> stream <span class="hl opt">&gt;] -&gt;</span>
-    <span class="hl kwa">let</span> <span class="hl kwd">buffer</span> <span class="hl opt">=</span> <span class="hl kwc">Buffer</span><span class="hl opt">.</span>create <span class="hl num">1</span> <span class="hl kwa">in</span>
-    <span class="hl kwc">Buffer</span><span class="hl opt">.</span>add_char <span class="hl kwd">buffer</span> c<span class="hl opt">;</span>
-    lex_number <span class="hl kwd">buffer</span> stream
-  <span class="hl opt">| [&lt; &gt;] -&gt; [&lt; &gt;]</span>
+(* Lex *)
 
-<span class="hl kwa">and</span> lex_number <span class="hl kwd">buffer</span> <span class="hl opt">=</span> parser
-  <span class="hl opt">| [&lt;</span> &#39; <span class="hl opt">(</span>&#39;<span class="hl num">0</span>&#39; <span class="hl opt">..</span> &#39;<span class="hl num">9</span>&#39; <span class="hl opt">|</span> &#39;<span class="hl opt">.</span>&#39; <span class="hl kwa">as</span> c<span class="hl opt">);</span> stream <span class="hl opt">&gt;] -&gt;</span>
-    <span class="hl kwc">Buffer</span><span class="hl opt">.</span>add_char <span class="hl kwd">buffer</span> c<span class="hl opt">;</span>
-    lex_number <span class="hl kwd">buffer</span> stream
-  <span class="hl opt">| [&lt;</span> stream <span class="hl opt">&gt;] -&gt;</span>
-    <span class="hl kwa">let</span> <span class="hl kwd">contents</span> <span class="hl opt">=</span> <span class="hl kwc">Buffer</span><span class="hl opt">.</span><span class="hl kwd">contents buffer</span> <span class="hl kwa">in</span>
-    <span class="hl kwa">let</span> <span class="hl kwd">number</span> <span class="hl opt">=</span> float_of_string <span class="hl kwd">contents</span> <span class="hl kwa">in</span>
-    <span class="hl opt">[&lt;</span> &#39;<span class="hl kwc">Token</span><span class="hl opt">.</span>Number <span class="hl kwd">number</span><span class="hl opt">;</span> <span class="hl kwd">lex</span> stream <span class="hl opt">&gt;]</span>
+module Token =
+  struct
+    type token =
+      | LPar
+      | RPar
+      | Plus
+      | Star
+      | Number of float
+  end
 
-<span class="hl kwa">let</span> <span class="hl kwd">print_token</span> token <span class="hl opt">=</span> <span class="hl kwa">match</span> token <span class="hl kwa">with</span>
-  <span class="hl opt">|</span> <span class="hl kwc">Token</span><span class="hl opt">.</span>LPar <span class="hl opt">-&gt;</span> print_endline <span class="hl str">&quot;LPar&quot;</span>
-  <span class="hl opt">|</span> <span class="hl kwc">Token</span><span class="hl opt">.</span>RPar <span class="hl opt">-&gt;</span> print_endline <span class="hl str">&quot;RPar&quot;</span>
-  <span class="hl opt">|</span> <span class="hl kwc">Token</span><span class="hl opt">.</span>Plus <span class="hl opt">-&gt;</span> print_endline <span class="hl str">&quot;Plus&quot;</span>
-  <span class="hl opt">|</span> <span class="hl kwc">Token</span><span class="hl opt">.</span>Star <span class="hl opt">-&gt;</span> print_endline <span class="hl str">&quot;Star&quot;</span>
-  <span class="hl opt">|</span> <span class="hl kwc">Token</span><span class="hl opt">.</span>Number <span class="hl kwa">value</span> <span class="hl opt">-&gt;</span> print_endline <span class="hl opt">&#64;&#64;</span> <span class="hl str">&quot;Number: &quot;</span> ^ string_of_float <span class="hl kwa">value</span>
+let rec lex = parser
+  | [&lt; &apos; (&apos; &apos; | &apos;\n&apos; | &apos;\r&apos; | &apos;\t&apos;); stream &gt;] -&gt; lex stream
+  | [&lt; &apos; (&apos;(&apos;); stream &gt;] -&gt; [&lt; &apos;Token.LPar; lex stream &gt;]
+  | [&lt; &apos; (&apos;)&apos;); stream &gt;] -&gt; [&lt; &apos;Token.RPar; lex stream &gt;]
+  | [&lt; &apos; (&apos;+&apos;); stream &gt;] -&gt; [&lt; &apos;Token.Plus; lex stream &gt;]
+  | [&lt; &apos; (&apos;*&apos;); stream &gt;] -&gt; [&lt; &apos;Token.Star; lex stream &gt;]
+  | [&lt; &apos; (&apos;0&apos; .. &apos;9&apos; as c); stream &gt;] -&gt;
+    let buffer = Buffer.create 1 in
+    Buffer.add_char buffer c;
+    lex_number buffer stream
+  | [&lt; &gt;] -&gt; [&lt; &gt;]
 
-<span class="hl com">(* Parse *)</span>
+and lex_number buffer = parser
+  | [&lt; &apos; (&apos;0&apos; .. &apos;9&apos; | &apos;.&apos; as c); stream &gt;] -&gt;
+    Buffer.add_char buffer c;
+    lex_number buffer stream
+  | [&lt; stream &gt;] -&gt;
+    let contents = Buffer.contents buffer in
+    let number = float_of_string contents in
+    [&lt; &apos;Token.Number number; lex stream &gt;]
 
-<span class="hl kwa">module</span> Expr <span class="hl opt">=</span>
-  <span class="hl kwa">struct</span>
-    <span class="hl kwa">type</span> expr <span class="hl opt">=</span>
-      <span class="hl opt">|</span> Add <span class="hl kwa">of</span> expr <span class="hl opt">*</span> expr
-      <span class="hl opt">|</span> Mul <span class="hl kwa">of</span> expr <span class="hl opt">*</span> expr
-      <span class="hl opt">|</span> Num <span class="hl kwa">of</span> <span class="hl kwb">float</span>
-  <span class="hl kwa">end</span>
+let print_token token = match token with
+  | Token.LPar -&gt; print_endline &quot;LPar&quot;
+  | Token.RPar -&gt; print_endline &quot;RPar&quot;
+  | Token.Plus -&gt; print_endline &quot;Plus&quot;
+  | Token.Star -&gt; print_endline &quot;Star&quot;
+  | Token.Number value -&gt; print_endline @@ &quot;Number: &quot; ^ string_of_float value
 
-<span class="hl com">(* E -&gt; T E&#39; *)</span>
-<span class="hl kwa">let rec</span> <span class="hl kwd">parse_expr</span> <span class="hl opt">=</span> parser
-  <span class="hl opt">| [&lt;</span> lhs<span class="hl opt">=</span>parse_term<span class="hl opt">;</span> expr<span class="hl opt">=</span>parse_expr_rhs lhs <span class="hl opt">&gt;] -&gt;</span> expr
+(* Parse *)
 
-<span class="hl com">(* E&#39; -&gt; + T E&#39; | eps *)</span>
-<span class="hl kwa">and</span> parse_expr_rhs lhs <span class="hl opt">=</span> parser
-  <span class="hl opt">| [&lt;</span> &#39;<span class="hl kwc">Token</span><span class="hl opt">.</span>Plus<span class="hl opt">;</span>
-       rhs<span class="hl opt">=</span>parse_term<span class="hl opt">;</span>
-       expr<span class="hl opt">=</span>parse_expr_rhs <span class="hl opt">(</span><span class="hl kwc">Expr</span><span class="hl opt">.</span>Add <span class="hl opt">(</span>lhs<span class="hl opt">,</span> rhs<span class="hl opt">)) &gt;] -&gt;</span> expr
-  <span class="hl opt">| [&lt; &gt;] -&gt;</span> lhs
+module Expr =
+  struct
+    type expr =
+      | Add of expr * expr
+      | Mul of expr * expr
+      | Num of float
+  end
 
-<span class="hl com">(* T -&gt; F T&#39; *)</span>
-<span class="hl kwa">and</span> parse_term <span class="hl opt">=</span> parser
-  <span class="hl opt">| [&lt;</span> lhs<span class="hl opt">=</span>parse_factor<span class="hl opt">;</span> expr<span class="hl opt">=</span>parse_term_rhs lhs <span class="hl opt">&gt;] -&gt;</span> expr
+(* E -&gt; T E&apos; *)
+let rec parse_expr = parser
+  | [&lt; lhs=parse_term; expr=parse_expr_rhs lhs &gt;] -&gt; expr
 
-<span class="hl com">(* T&#39; -&gt; * F T&#39; | eps *)</span>
-<span class="hl kwa">and</span> parse_term_rhs lhs <span class="hl opt">=</span> parser
-  <span class="hl opt">| [&lt;</span> &#39;<span class="hl kwc">Token</span><span class="hl opt">.</span>Star<span class="hl opt">;</span>
-       rhs<span class="hl opt">=</span>parse_factor<span class="hl opt">;</span>
-       term<span class="hl opt">=</span>parse_term_rhs <span class="hl opt">(</span><span class="hl kwc">Expr</span><span class="hl opt">.</span>Mul <span class="hl opt">(</span>lhs<span class="hl opt">,</span> rhs<span class="hl opt">)) &gt;] -&gt;</span> term
-  <span class="hl opt">| [&lt; &gt;] -&gt;</span> lhs
+(* E&apos; -&gt; + T E&apos; | eps *)
+and parse_expr_rhs lhs = parser
+  | [&lt; &apos;Token.Plus;
+       rhs=parse_term;
+       expr=parse_expr_rhs (Expr.Add (lhs, rhs)) &gt;] -&gt; expr
+  | [&lt; &gt;] -&gt; lhs
 
-<span class="hl com">(* F -&gt; ( E )  | Num *)</span>
-<span class="hl kwa">and</span> parse_factor <span class="hl opt">=</span> parser
-  <span class="hl opt">| [&lt;</span> &#39;<span class="hl kwc">Token</span><span class="hl opt">.</span>LPar<span class="hl opt">;</span> expr<span class="hl opt">=</span><span class="hl kwd">parse_expr</span><span class="hl opt">;</span> &#39;<span class="hl kwc">Token</span><span class="hl opt">.</span>RPar <span class="hl opt">&gt;] -&gt;</span> expr
-  <span class="hl opt">| [&lt;</span> &#39;<span class="hl kwc">Token</span><span class="hl opt">.</span>Number <span class="hl kwa">value</span> <span class="hl opt">&gt;] -&gt;</span> <span class="hl kwc">Expr</span><span class="hl opt">.</span>Num <span class="hl kwa">value</span>
+(* T -&gt; F T&apos; *)
+and parse_term = parser
+  | [&lt; lhs=parse_factor; expr=parse_term_rhs lhs &gt;] -&gt; expr
 
-<span class="hl kwa">let</span> <span class="hl kwd">parse</span> <span class="hl opt">=</span> <span class="hl kwd">parse_expr</span>
+(* T&apos; -&gt; * F T&apos; | eps *)
+and parse_term_rhs lhs = parser
+  | [&lt; &apos;Token.Star;
+       rhs=parse_factor;
+       term=parse_term_rhs (Expr.Mul (lhs, rhs)) &gt;] -&gt; term
+  | [&lt; &gt;] -&gt; lhs
 
-<span class="hl kwa">let rec</span> <span class="hl kwd">print_expr</span> <span class="hl opt">=</span> <span class="hl kwa">function</span>
-  <span class="hl opt">|</span> <span class="hl kwc">Expr</span><span class="hl opt">.</span>Add <span class="hl opt">(</span>lhs<span class="hl opt">,</span> rhs<span class="hl opt">) -&gt;</span>
-    print_string <span class="hl str">&quot;Add(&quot;</span><span class="hl opt">;</span>
-    <span class="hl kwd">print_expr</span> lhs<span class="hl opt">;</span>
-    print_string <span class="hl str">&quot;, &quot;</span><span class="hl opt">;</span>
-    <span class="hl kwd">print_expr</span> rhs<span class="hl opt">;</span>
-    print_string <span class="hl str">&quot;)&quot;</span>
-  <span class="hl opt">|</span> <span class="hl kwc">Expr</span><span class="hl opt">.</span>Mul <span class="hl opt">(</span>lhs<span class="hl opt">,</span> rhs<span class="hl opt">) -&gt;</span>
-    print_string <span class="hl str">&quot;Mul(&quot;</span><span class="hl opt">;</span>
-    <span class="hl kwd">print_expr</span> lhs<span class="hl opt">;</span>
-    print_string <span class="hl str">&quot;, &quot;</span><span class="hl opt">;</span>
-    <span class="hl kwd">print_expr</span> rhs<span class="hl opt">;</span>
-    print_string <span class="hl str">&quot;)&quot;</span>
-  <span class="hl opt">|</span> <span class="hl kwc">Expr</span><span class="hl opt">.</span>Num <span class="hl kwa">value</span> <span class="hl opt">-&gt;</span>
-    print_string <span class="hl str">&quot;Num(&quot;</span><span class="hl opt">;</span>
-    print_float <span class="hl kwa">value</span><span class="hl opt">;</span>
-    print_string <span class="hl str">&quot;)&quot;</span>
+(* F -&gt; ( E )  | Num *)
+and parse_factor = parser
+  | [&lt; &apos;Token.LPar; expr=parse_expr; &apos;Token.RPar &gt;] -&gt; expr
+  | [&lt; &apos;Token.Number value &gt;] -&gt; Expr.Num value
 
-<span class="hl com">(* Eval *)</span>
+let parse = parse_expr
 
-<span class="hl kwa">let rec</span> <span class="hl kwd">eval</span> <span class="hl opt">=</span> <span class="hl kwa">function</span>
-  <span class="hl opt">|</span> <span class="hl kwc">Expr</span><span class="hl opt">.</span>Add <span class="hl opt">(</span>lhs<span class="hl opt">,</span> rhs<span class="hl opt">) -&gt;</span> <span class="hl kwd">eval</span> lhs <span class="hl opt">+.</span> <span class="hl kwd">eval</span> rhs
-  <span class="hl opt">|</span> <span class="hl kwc">Expr</span><span class="hl opt">.</span>Mul <span class="hl opt">(</span>lhs<span class="hl opt">,</span> rhs<span class="hl opt">) -&gt;</span> <span class="hl kwd">eval</span> lhs <span class="hl opt">*.</span> <span class="hl kwd">eval</span> rhs
-  <span class="hl opt">|</span> <span class="hl kwc">Expr</span><span class="hl opt">.</span>Num <span class="hl kwa">value</span> <span class="hl opt">-&gt;</span> <span class="hl kwa">value</span>
+let rec print_expr = function
+  | Expr.Add (lhs, rhs) -&gt;
+    print_string &quot;Add(&quot;;
+    print_expr lhs;
+    print_string &quot;, &quot;;
+    print_expr rhs;
+    print_string &quot;)&quot;
+  | Expr.Mul (lhs, rhs) -&gt;
+    print_string &quot;Mul(&quot;;
+    print_expr lhs;
+    print_string &quot;, &quot;;
+    print_expr rhs;
+    print_string &quot;)&quot;
+  | Expr.Num value -&gt;
+    print_string &quot;Num(&quot;;
+    print_float value;
+    print_string &quot;)&quot;
 
-<span class="hl com">(* Main *)</span>
+(* Eval *)
 
-<span class="hl kwa">let</span> <span class="hl kwd">print_result</span> result <span class="hl opt">=</span>
-  print_string <span class="hl str">&quot;= &quot;</span><span class="hl opt">;</span>
-  print_float result<span class="hl opt">;</span>
-  print_endline <span class="hl str">&quot;&quot;</span><span class="hl opt">;</span>
+let rec eval = function
+  | Expr.Add (lhs, rhs) -&gt; eval lhs +. eval rhs
+  | Expr.Mul (lhs, rhs) -&gt; eval lhs *. eval rhs
+  | Expr.Num value -&gt; value
+
+(* Main *)
+
+let print_result result =
+  print_string &quot;= &quot;;
+  print_float result;
+  print_endline &quot;&quot;;
   flush stdout
 
-<span class="hl kwa">let</span> <span class="hl opt">() =</span>
-  <span class="hl kwa">try</span>
-    <span class="hl kwa">while true do</span>
-      <span class="hl kwa">try</span>
-        print_string <span class="hl str">&quot;&gt; &quot;</span><span class="hl opt">;</span> flush stdout<span class="hl opt">;</span>
-        <span class="hl kwa">let</span> <span class="hl kwd">line</span> <span class="hl opt">=</span> input_line stdin <span class="hl kwa">in</span>
-        <span class="hl com">(*Stream.of_string line |&gt; lex |&gt; Stream.iter print_token*)</span>
-        <span class="hl com">(*Stream.of_string line |&gt; lex |&gt; parse |&gt; print_expr; print_endline &quot;&quot;*)</span>
-        <span class="hl kwc">Stream</span><span class="hl opt">.</span>of_string <span class="hl kwd">line</span> <span class="hl opt">|&gt;</span> <span class="hl kwd">lex</span> <span class="hl opt">|&gt;</span> <span class="hl kwd">parse</span> <span class="hl opt">|&gt;</span> <span class="hl kwd">eval</span> <span class="hl opt">|&gt;</span> <span class="hl kwd">print_result</span>
-      <span class="hl kwa">with</span>
-      <span class="hl opt">|</span> End_of_file <span class="hl opt">-&gt;</span> raise Exit
-      <span class="hl opt">|</span> exc <span class="hl opt">-&gt;</span> print_endline <span class="hl opt">&#64;&#64;</span> <span class="hl kwc">Printexc</span><span class="hl opt">.</span>to_string exc
-    <span class="hl kwa">done</span>
-  <span class="hl kwa">with</span> Exit <span class="hl opt">-&gt; ()</span>
-</pre>
+let () =
+  try
+    while true do
+      try
+        print_string &quot;&gt; &quot;; flush stdout;
+        let line = input_line stdin in
+        (*Stream.of_string line |&gt; lex |&gt; Stream.iter print_token*)
+        (*Stream.of_string line |&gt; lex |&gt; parse |&gt; print_expr; print_endline &quot;&quot;*)
+        Stream.of_string line |&gt; lex |&gt; parse |&gt; eval |&gt; print_result
+      with
+      | End_of_file -&gt; raise Exit
+      | exc -&gt; print_endline @@ Printexc.to_string exc
+    done
+  with Exit -&gt; ()
+</code></pre>
+
 </body>
+
 </html>
-<!--HTML generated by highlight 3.62, http://www.andre-simon.de/-->

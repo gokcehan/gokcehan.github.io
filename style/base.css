@@ -1,0 +1,69 @@
+html {
+  margin: 1em auto;
+  padding: 1em;
+  max-width: 40em;
+  line-height: 1.5;
+  font-family:
+    -apple-system,
+    "Segoe UI",
+    "Roboto",
+    "Ubuntu",
+    "Cantarell",
+    "Noto Sans",
+    sans-serif,
+    "Apple Color Emoji",
+    "Segoe UI Emoji",
+    "Segoe UI Symbol",
+    "Noto Color Emoji";
+}
+
+h2 {
+  margin-top: 2em;
+}
+
+time {
+  color: gray;
+}
+
+time::before {
+  content: "\1F4C5  ";
+}
+
+main {
+  margin: 1em 0;
+  border-top: 0.1em solid gray;
+  border-bottom: 0.1em solid gray;
+}
+
+pre {
+  padding: 1em 0;
+  overflow-x: auto;
+}
+
+code {
+  border: 0.1em solid gray;
+  padding: 0.1em;
+}
+
+pre code {
+  padding: 1em;
+  display: block;
+  overflow-x: auto;
+}
+
+pre, code {
+  line-height: 1.5;
+  font-family:
+    ui-monospace,
+    "Menlo",
+    "Consolas",
+    "Roboto Mono",
+    "Ubuntu Monospace",
+    "Noto Mono",
+    "Liberation Mono",
+    monospace,
+    "Apple Color Emoji",
+    "Segoe UI Emoji",
+    "Segoe UI Symbol",
+    "Noto Color Emoji";
+}

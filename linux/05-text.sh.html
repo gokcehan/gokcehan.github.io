@@ -1,295 +1,305 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
+
 <head>
-<meta charset="ISO-8859-1">
-<title>05-text.sh</title>
-<link rel="stylesheet" type="text/css" href="../highlight.css">
+  <meta charset="utf-8">
+  <meta name="color-scheme" content="light dark">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>05-text.sh</title>
+  <link rel="stylesheet" href="../style/code.css">
+  <link rel="stylesheet" href="../highlightjs/github.min.css" media="screen and (prefers-color-scheme: light)">
+  <link rel="stylesheet" href="../highlightjs/github-dark.min.css" media="screen and (prefers-color-scheme: dark)">
+  <script src="../highlightjs/highlight-bash.min.js"></script>
+  <script>hljs.highlightAll();</script>
 </head>
-<body class="hl">
-<pre class="hl"><span class="hl slc">#!/bin/sh</span>
 
-<span class="hl slc">## ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~</span>
-<span class="hl slc">## TEXT PROCESSING</span>
-<span class="hl slc">## ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~</span>
+<body>
 
-<span class="hl slc">## tr (1) - translate or delete characters</span>
+<pre><code class="language-bash">#!/bin/sh
 
-<span class="hl slc"># delete &#39;l&#39; characters</span>
-<span class="hl kwb">echo</span> <span class="hl str">&#39;hello world&#39;</span> <span class="hl opt">|</span> <span class="hl kwc">tr</span> <span class="hl kwb">-d</span> l
-<span class="hl slc"># heo word</span>
+## ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+## TEXT PROCESSING
+## ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-<span class="hl slc"># convert &#39;l&#39; to &#39;x&#39;</span>
-<span class="hl kwb">echo</span> <span class="hl str">&#39;hello world&#39;</span> <span class="hl opt">|</span> <span class="hl kwc">tr</span> l x
-<span class="hl slc"># hexxo worxd</span>
+## tr (1) - translate or delete characters
 
-<span class="hl slc"># lowercase everything</span>
-<span class="hl kwb">echo</span> <span class="hl str">&#39;Hello World&#39;</span> <span class="hl opt">|</span> <span class="hl kwc">tr</span> A<span class="hl kwb">-Z</span> a<span class="hl kwb">-z</span>
-<span class="hl slc"># hello world</span>
+# delete &apos;l&apos; characters
+echo &apos;hello world&apos; | tr -d l
+# heo word
 
-<span class="hl slc"># https://en.wikipedia.org/wiki/Caesar_cipher</span>
-<span class="hl kwb">echo</span> <span class="hl str">&#39;hello world&#39;</span> <span class="hl opt">|</span> <span class="hl kwc">tr</span> a<span class="hl kwb">-z</span> x<span class="hl kwb">-za-x</span>
-<span class="hl slc"># ebiil tloia</span>
+# convert &apos;l&apos; to &apos;x&apos;
+echo &apos;hello world&apos; | tr l x
+# hexxo worxd
 
-<span class="hl slc"># https://en.wikipedia.org/wiki/ROT13</span>
-<span class="hl kwb">echo</span> <span class="hl str">&#39;hello world&#39;</span> <span class="hl opt">|</span> <span class="hl kwc">tr</span> a<span class="hl kwb">-z</span> n<span class="hl kwb">-za-m</span>
-<span class="hl slc"># uryyb jbeyq</span>
+# lowercase everything
+echo &apos;Hello World&apos; | tr A-Z a-z
+# hello world
 
-<span class="hl slc"># apply rot13 twice to get the original text</span>
-<span class="hl kwb">echo</span> <span class="hl str">&#39;hello world&#39;</span> <span class="hl opt">|</span> <span class="hl kwc">tr</span> a<span class="hl kwb">-z</span> n<span class="hl kwb">-za-m</span> <span class="hl opt">|</span> <span class="hl kwc">tr</span> a<span class="hl kwb">-z</span> n<span class="hl kwb">-za-m</span>
-<span class="hl slc"># hello world</span>
+# https://en.wikipedia.org/wiki/Caesar_cipher
+echo &apos;hello world&apos; | tr a-z x-za-x
+# ebiil tloia
 
-<span class="hl slc"># calculate complement DNA sequence</span>
-<span class="hl kwb">echo</span> <span class="hl str">&#39;CCTGCAACTTAGGCAGG&#39;</span> <span class="hl opt">|</span> <span class="hl kwc">tr</span> ATGC TACG
-<span class="hl slc"># GGACGTTGAATCCGTCC</span>
+# https://en.wikipedia.org/wiki/ROT13
+echo &apos;hello world&apos; | tr a-z n-za-m
+# uryyb jbeyq
 
-<span class="hl slc">## cut (1) - remove sections from each line of files</span>
+# apply rot13 twice to get the original text
+echo &apos;hello world&apos; | tr a-z n-za-m | tr a-z n-za-m
+# hello world
 
-<span class="hl slc"># display first fields separated by &#39;:&#39; in &#39;/etc/passwd&#39;</span>
-<span class="hl kwc">head</span> <span class="hl opt">/</span>etc<span class="hl opt">/</span>passwd <span class="hl opt">|</span> cut <span class="hl kwb">-d</span><span class="hl opt">:</span> <span class="hl kwb">-f1</span>
-<span class="hl slc"># root</span>
-<span class="hl slc"># daemon</span>
-<span class="hl slc"># bin</span>
-<span class="hl slc"># sys</span>
-<span class="hl slc"># sync</span>
-<span class="hl slc"># games</span>
-<span class="hl slc"># man</span>
-<span class="hl slc"># lp</span>
-<span class="hl slc"># mail</span>
-<span class="hl slc"># news</span>
+# calculate complement DNA sequence
+echo &apos;CCTGCAACTTAGGCAGG&apos; | tr ATGC TACG
+# GGACGTTGAATCCGTCC
 
-<span class="hl slc"># display first and seventh fields separated by &#39;:&#39; in &#39;/etc/passwd&#39;</span>
-<span class="hl kwc">head</span> <span class="hl opt">/</span>etc<span class="hl opt">/</span>passwd <span class="hl opt">|</span> cut <span class="hl kwb">-d</span><span class="hl opt">:</span> <span class="hl kwb">-f1</span><span class="hl opt">,</span><span class="hl num">7</span>
-<span class="hl slc"># root:/bin/bash</span>
-<span class="hl slc"># daemon:/usr/sbin/nologin</span>
-<span class="hl slc"># bin:/usr/sbin/nologin</span>
-<span class="hl slc"># sys:/usr/sbin/nologin</span>
-<span class="hl slc"># sync:/bin/sync</span>
-<span class="hl slc"># games:/usr/sbin/nologin</span>
-<span class="hl slc"># man:/usr/sbin/nologin</span>
-<span class="hl slc"># lp:/usr/sbin/nologin</span>
-<span class="hl slc"># mail:/usr/sbin/nologin</span>
-<span class="hl slc"># news:/usr/sbin/nologin</span>
+## cut (1) - remove sections from each line of files
 
-<span class="hl slc">## column (1) - columnate lists</span>
+# display first fields separated by &apos;:&apos; in &apos;/etc/passwd&apos;
+head /etc/passwd | cut -d: -f1
+# root
+# daemon
+# bin
+# sys
+# sync
+# games
+# man
+# lp
+# mail
+# news
 
-<span class="hl slc"># display a header and list of files</span>
-<span class="hl kwb">printf</span> <span class="hl str">&quot;PERM LINKS OWNER GROUP SIZE MONTH DAY &quot;</span><span class="hl opt">;</span> <span class="hl kwb">printf</span> <span class="hl str">&quot;HH:MM/YEAR NAME</span><span class="hl esc">\n</span><span class="hl str">&quot;</span><span class="hl opt">;</span> <span class="hl kwc">ls</span> <span class="hl kwb">-l</span> <span class="hl opt">|</span> <span class="hl kwc">sed</span> <span class="hl num">1</span>d
-<span class="hl slc"># PERM LINKS OWNER GROUP SIZE MONTH DAY HH:MM/YEAR NAME</span>
-<span class="hl slc"># drwxr-x--- 2 gokcehan gokcehan 4096 Eki 26 22:02 awk</span>
-<span class="hl slc"># -rw-r--r-- 1 gokcehan gokcehan 8120 Eki 27 19:33 regex.sh</span>
-<span class="hl slc"># -rw-r--r-- 1 gokcehan gokcehan 2043 Eki 26 22:01 sed.sh</span>
-<span class="hl slc"># -rw-r--r-- 1 gokcehan gokcehan 7873 Eki 27 20:01 text.sh</span>
+# display first and seventh fields separated by &apos;:&apos; in &apos;/etc/passwd&apos;
+head /etc/passwd | cut -d: -f1,7
+# root:/bin/bash
+# daemon:/usr/sbin/nologin
+# bin:/usr/sbin/nologin
+# sys:/usr/sbin/nologin
+# sync:/bin/sync
+# games:/usr/sbin/nologin
+# man:/usr/sbin/nologin
+# lp:/usr/sbin/nologin
+# mail:/usr/sbin/nologin
+# news:/usr/sbin/nologin
 
-<span class="hl slc"># display a header and list of files in tabular form</span>
-<span class="hl opt">(</span><span class="hl kwb">printf</span> <span class="hl str">&quot;PERM LINKS OWNER GROUP SIZE MONTH DAY &quot;</span><span class="hl opt">;</span> <span class="hl kwb">printf</span> <span class="hl str">&quot;HH:MM/YEAR NAME</span><span class="hl esc">\n</span><span class="hl str">&quot;</span><span class="hl opt">;</span> <span class="hl kwc">ls</span> <span class="hl kwb">-l</span> <span class="hl opt">|</span> <span class="hl kwc">sed</span> <span class="hl num">1</span>d<span class="hl opt">) |</span> <span class="hl kwc">column</span> <span class="hl kwb">-t</span>
-<span class="hl slc"># PERM        LINKS  OWNER     GROUP     SIZE  MONTH  DAY  HH:MM/YEAR  NAME</span>
-<span class="hl slc"># drwxr-x---  2      gokcehan  gokcehan  4096  Eki    26   22:02       awk</span>
-<span class="hl slc"># -rw-r--r--  1      gokcehan  gokcehan  8120  Eki    27   19:33       regex.sh</span>
-<span class="hl slc"># -rw-r--r--  1      gokcehan  gokcehan  2043  Eki    26   22:01       sed.sh</span>
-<span class="hl slc"># -rw-r--r--  1      gokcehan  gokcehan  7873  Eki    27   20:01       text.sh</span>
+## column (1) - columnate lists
 
-<span class="hl slc"># display fields separated by &#39;:&#39; in &#39;/etc/passwd&#39; in tabular form</span>
-<span class="hl kwc">head</span> <span class="hl opt">/</span>etc<span class="hl opt">/</span>passwd <span class="hl opt">|</span> <span class="hl kwc">column</span> <span class="hl kwb">-t -s</span><span class="hl opt">:</span>
-<span class="hl slc"># root    x  0  0      root    /root            /bin/bash</span>
-<span class="hl slc"># daemon  x  1  1      daemon  /usr/sbin        /usr/sbin/nologin</span>
-<span class="hl slc"># bin     x  2  2      bin     /bin             /usr/sbin/nologin</span>
-<span class="hl slc"># sys     x  3  3      sys     /dev             /usr/sbin/nologin</span>
-<span class="hl slc"># sync    x  4  65534  sync    /bin             /bin/sync</span>
-<span class="hl slc"># games   x  5  60     games   /usr/games       /usr/sbin/nologin</span>
-<span class="hl slc"># man     x  6  12     man     /var/cache/man   /usr/sbin/nologin</span>
-<span class="hl slc"># lp      x  7  7      lp      /var/spool/lpd   /usr/sbin/nologin</span>
-<span class="hl slc"># mail    x  8  8      mail    /var/mail        /usr/sbin/nologin</span>
-<span class="hl slc"># news    x  9  9      news    /var/spool/news  /usr/sbin/nologin</span>
+# display a header and list of files
+printf &quot;PERM LINKS OWNER GROUP SIZE MONTH DAY &quot;; printf &quot;HH:MM/YEAR NAME\n&quot;; ls -l | sed 1d
+# PERM LINKS OWNER GROUP SIZE MONTH DAY HH:MM/YEAR NAME
+# drwxr-x--- 2 gokcehan gokcehan 4096 Eki 26 22:02 awk
+# -rw-r--r-- 1 gokcehan gokcehan 8120 Eki 27 19:33 regex.sh
+# -rw-r--r-- 1 gokcehan gokcehan 2043 Eki 26 22:01 sed.sh
+# -rw-r--r-- 1 gokcehan gokcehan 7873 Eki 27 20:01 text.sh
 
-<span class="hl slc">## sort (1) - sort lines of text files</span>
+# display a header and list of files in tabular form
+(printf &quot;PERM LINKS OWNER GROUP SIZE MONTH DAY &quot;; printf &quot;HH:MM/YEAR NAME\n&quot;; ls -l | sed 1d) | column -t
+# PERM        LINKS  OWNER     GROUP     SIZE  MONTH  DAY  HH:MM/YEAR  NAME
+# drwxr-x---  2      gokcehan  gokcehan  4096  Eki    26   22:02       awk
+# -rw-r--r--  1      gokcehan  gokcehan  8120  Eki    27   19:33       regex.sh
+# -rw-r--r--  1      gokcehan  gokcehan  2043  Eki    26   22:01       sed.sh
+# -rw-r--r--  1      gokcehan  gokcehan  7873  Eki    27   20:01       text.sh
 
-<span class="hl slc"># sort alphabetically line by line</span>
-<span class="hl kwb">echo -e</span> <span class="hl str">&quot;aaa</span><span class="hl esc">\n</span><span class="hl str">dd</span><span class="hl esc">\n</span><span class="hl str">cccc</span><span class="hl esc">\n</span><span class="hl str">b&quot;</span> <span class="hl opt">|</span> <span class="hl kwc">sort</span>
-<span class="hl slc"># aaa</span>
-<span class="hl slc"># b</span>
-<span class="hl slc"># cccc</span>
-<span class="hl slc"># dd</span>
+# display fields separated by &apos;:&apos; in &apos;/etc/passwd&apos; in tabular form
+head /etc/passwd | column -t -s:
+# root    x  0  0      root    /root            /bin/bash
+# daemon  x  1  1      daemon  /usr/sbin        /usr/sbin/nologin
+# bin     x  2  2      bin     /bin             /usr/sbin/nologin
+# sys     x  3  3      sys     /dev             /usr/sbin/nologin
+# sync    x  4  65534  sync    /bin             /bin/sync
+# games   x  5  60     games   /usr/games       /usr/sbin/nologin
+# man     x  6  12     man     /var/cache/man   /usr/sbin/nologin
+# lp      x  7  7      lp      /var/spool/lpd   /usr/sbin/nologin
+# mail    x  8  8      mail    /var/mail        /usr/sbin/nologin
+# news    x  9  9      news    /var/spool/news  /usr/sbin/nologin
 
-<span class="hl slc"># display disk usage</span>
-du <span class="hl kwb">-d1</span> <span class="hl opt">/</span>usr
-<span class="hl slc"># 15764   /usr/sbin</span>
-<span class="hl slc"># 428     /usr/local</span>
-<span class="hl slc"># 21388   /usr/include</span>
-<span class="hl slc"># 1680220 /usr/lib</span>
-<span class="hl slc"># 867640  /usr/share</span>
-<span class="hl slc"># 261852  /usr/src</span>
-<span class="hl slc"># 158680  /usr/bin</span>
-<span class="hl slc"># 684     /usr/games</span>
-<span class="hl slc"># 1432    /usr/libexec</span>
-<span class="hl slc"># 3008092 /usr</span>
+## sort (1) - sort lines of text files
 
-<span class="hl slc"># sort disk usage numerically</span>
-du <span class="hl kwb">-d1</span> <span class="hl opt">/</span>usr <span class="hl opt">|</span> <span class="hl kwc">sort</span> <span class="hl kwb">-n</span>
-<span class="hl slc"># 428     /usr/local</span>
-<span class="hl slc"># 684     /usr/games</span>
-<span class="hl slc"># 1432    /usr/libexec</span>
-<span class="hl slc"># 15764   /usr/sbin</span>
-<span class="hl slc"># 21388   /usr/include</span>
-<span class="hl slc"># 158680  /usr/bin</span>
-<span class="hl slc"># 261852  /usr/src</span>
-<span class="hl slc"># 867640  /usr/share</span>
-<span class="hl slc"># 1680220 /usr/lib</span>
-<span class="hl slc"># 3008092 /usr</span>
+# sort alphabetically line by line
+echo -e &quot;aaa\ndd\ncccc\nb&quot; | sort
+# aaa
+# b
+# cccc
+# dd
 
-<span class="hl slc"># display disk usage in humanized form</span>
-du <span class="hl kwb">-d1</span> <span class="hl opt">/</span>usr <span class="hl kwb">-h</span>
-<span class="hl slc"># 16M     /usr/sbin</span>
-<span class="hl slc"># 428K    /usr/local</span>
-<span class="hl slc"># 21M     /usr/include</span>
-<span class="hl slc"># 1,7G    /usr/lib</span>
-<span class="hl slc"># 848M    /usr/share</span>
-<span class="hl slc"># 256M    /usr/src</span>
-<span class="hl slc"># 155M    /usr/bin</span>
-<span class="hl slc"># 684K    /usr/games</span>
-<span class="hl slc"># 1,4M    /usr/libexec</span>
-<span class="hl slc"># 2,9G    /usr</span>
+# display disk usage
+du -d1 /usr
+# 15764   /usr/sbin
+# 428     /usr/local
+# 21388   /usr/include
+# 1680220 /usr/lib
+# 867640  /usr/share
+# 261852  /usr/src
+# 158680  /usr/bin
+# 684     /usr/games
+# 1432    /usr/libexec
+# 3008092 /usr
 
-<span class="hl slc"># sort disk usage numerically in humanized form</span>
-du <span class="hl kwb">-d1</span> <span class="hl opt">/</span>usr <span class="hl kwb">-h</span> <span class="hl opt">|</span> <span class="hl kwc">sort</span> <span class="hl kwb">-h</span>
-<span class="hl slc"># 428K    /usr/local</span>
-<span class="hl slc"># 684K    /usr/games</span>
-<span class="hl slc"># 1,4M    /usr/libexec</span>
-<span class="hl slc"># 16M     /usr/sbin</span>
-<span class="hl slc"># 21M     /usr/include</span>
-<span class="hl slc"># 155M    /usr/bin</span>
-<span class="hl slc"># 256M    /usr/src</span>
-<span class="hl slc"># 848M    /usr/share</span>
-<span class="hl slc"># 1,7G    /usr/lib</span>
-<span class="hl slc"># 2,9G    /usr</span>
+# sort disk usage numerically
+du -d1 /usr | sort -n
+# 428     /usr/local
+# 684     /usr/games
+# 1432    /usr/libexec
+# 15764   /usr/sbin
+# 21388   /usr/include
+# 158680  /usr/bin
+# 261852  /usr/src
+# 867640  /usr/share
+# 1680220 /usr/lib
+# 3008092 /usr
 
-<span class="hl slc"># display users and shells sorted by shells</span>
-<span class="hl kwc">cat</span> <span class="hl opt">/</span>etc<span class="hl opt">/</span>passwd <span class="hl opt">|</span> cut <span class="hl kwb">-d</span><span class="hl opt">:</span> <span class="hl kwb">-f1</span><span class="hl opt">,</span><span class="hl num">7</span> <span class="hl opt">|</span> <span class="hl kwc">column</span> <span class="hl kwb">-t -s</span><span class="hl opt">: |</span> <span class="hl kwc">sort</span> <span class="hl kwb">-k2</span>
-<span class="hl slc"># root                 /bin/bash</span>
-<span class="hl slc"># gokcehan             /bin/bash</span>
-<span class="hl slc"># gdm                  /bin/false</span>
-<span class="hl slc"># hplip                /bin/false</span>
-<span class="hl slc"># ...</span>
-<span class="hl slc"># speech-dispatcher    /bin/false</span>
-<span class="hl slc"># gnome-initial-setup  /bin/false</span>
-<span class="hl slc"># sync                 /bin/sync</span>
-<span class="hl slc"># lp                   /usr/sbin/nologin</span>
-<span class="hl slc"># bin                  /usr/sbin/nologin</span>
-<span class="hl slc"># ...</span>
-<span class="hl slc"># systemd-network      /usr/sbin/nologin</span>
-<span class="hl slc"># systemd-resolve      /usr/sbin/nologin</span>
+# display disk usage in humanized form
+du -d1 /usr -h
+# 16M     /usr/sbin
+# 428K    /usr/local
+# 21M     /usr/include
+# 1,7G    /usr/lib
+# 848M    /usr/share
+# 256M    /usr/src
+# 155M    /usr/bin
+# 684K    /usr/games
+# 1,4M    /usr/libexec
+# 2,9G    /usr
 
-<span class="hl slc">## uniq (1) - report or omit repeated lines</span>
+# sort disk usage numerically in humanized form
+du -d1 /usr -h | sort -h
+# 428K    /usr/local
+# 684K    /usr/games
+# 1,4M    /usr/libexec
+# 16M     /usr/sbin
+# 21M     /usr/include
+# 155M    /usr/bin
+# 256M    /usr/src
+# 848M    /usr/share
+# 1,7G    /usr/lib
+# 2,9G    /usr
 
-<span class="hl slc"># display shells used in the system</span>
-<span class="hl kwc">cat</span> <span class="hl opt">/</span>etc<span class="hl opt">/</span>passwd <span class="hl opt">|</span> cut <span class="hl kwb">-d</span><span class="hl opt">:</span> <span class="hl kwb">-f7</span> <span class="hl opt">|</span> <span class="hl kwc">sort</span> <span class="hl opt">|</span> <span class="hl kwc">uniq</span>
-<span class="hl slc"># /bin/bash</span>
-<span class="hl slc"># /bin/false</span>
-<span class="hl slc"># /bin/sync</span>
-<span class="hl slc"># /usr/sbin/nologin</span>
+# display users and shells sorted by shells
+cat /etc/passwd | cut -d: -f1,7 | column -t -s: | sort -k2
+# root                 /bin/bash
+# gokcehan             /bin/bash
+# gdm                  /bin/false
+# hplip                /bin/false
+# ...
+# speech-dispatcher    /bin/false
+# gnome-initial-setup  /bin/false
+# sync                 /bin/sync
+# lp                   /usr/sbin/nologin
+# bin                  /usr/sbin/nologin
+# ...
+# systemd-network      /usr/sbin/nologin
+# systemd-resolve      /usr/sbin/nologin
 
-<span class="hl slc"># display shell counts</span>
-<span class="hl kwc">cat</span> <span class="hl opt">/</span>etc<span class="hl opt">/</span>passwd <span class="hl opt">|</span> cut <span class="hl kwb">-d</span><span class="hl opt">:</span> <span class="hl kwb">-f7</span> <span class="hl opt">|</span> <span class="hl kwc">sort</span> <span class="hl opt">|</span> <span class="hl kwc">uniq</span> <span class="hl kwb">-c</span>
-<span class="hl slc">#       2 /bin/bash</span>
-<span class="hl slc">#      22 /bin/false</span>
-<span class="hl slc">#       1 /bin/sync</span>
-<span class="hl slc">#      16 /usr/sbin/nologin</span>
+## uniq (1) - report or omit repeated lines
 
-<span class="hl slc"># sort shell counts</span>
-<span class="hl kwc">cat</span> <span class="hl opt">/</span>etc<span class="hl opt">/</span>passwd <span class="hl opt">|</span> cut <span class="hl kwb">-d</span><span class="hl opt">:</span> <span class="hl kwb">-f7</span> <span class="hl opt">|</span> <span class="hl kwc">sort</span> <span class="hl opt">|</span> <span class="hl kwc">uniq</span> <span class="hl kwb">-c</span> <span class="hl opt">|</span> <span class="hl kwc">sort</span> <span class="hl kwb">-rn</span>
-<span class="hl slc">#      22 /bin/false</span>
-<span class="hl slc">#      16 /usr/sbin/nologin</span>
-<span class="hl slc">#       2 /bin/bash</span>
-<span class="hl slc">#       1 /bin/sync</span>
+# display shells used in the system
+cat /etc/passwd | cut -d: -f7 | sort | uniq
+# /bin/bash
+# /bin/false
+# /bin/sync
+# /usr/sbin/nologin
 
-<span class="hl slc">## wc (1) - print newline, word, and byte counts for each file</span>
+# display shell counts
+cat /etc/passwd | cut -d: -f7 | sort | uniq -c
+#       2 /bin/bash
+#      22 /bin/false
+#       1 /bin/sync
+#      16 /usr/sbin/nologin
 
-<span class="hl slc"># count lines in &#39;/etc/passwd&#39;</span>
-<span class="hl kwc">cat</span> <span class="hl opt">/</span>etc<span class="hl opt">/</span>passwd <span class="hl opt">|</span> <span class="hl kwc">wc</span> <span class="hl kwb">-l</span>
-<span class="hl slc"># 41</span>
+# sort shell counts
+cat /etc/passwd | cut -d: -f7 | sort | uniq -c | sort -rn
+#      22 /bin/false
+#      16 /usr/sbin/nologin
+#       2 /bin/bash
+#       1 /bin/sync
 
-<span class="hl slc"># count words in &#39;/etc/passwd&#39;</span>
-<span class="hl kwc">cat</span> <span class="hl opt">/</span>etc<span class="hl opt">/</span>passwd <span class="hl opt">|</span> <span class="hl kwc">wc</span> <span class="hl kwb">-w</span>
-<span class="hl slc"># 70</span>
+## wc (1) - print newline, word, and byte counts for each file
 
-<span class="hl slc"># count bytes in &#39;/etc/passwd&#39;</span>
-<span class="hl kwc">cat</span> <span class="hl opt">/</span>etc<span class="hl opt">/</span>passwd <span class="hl opt">|</span> <span class="hl kwc">wc</span> <span class="hl kwb">-c</span>
-<span class="hl slc"># 2286</span>
+# count lines in &apos;/etc/passwd&apos;
+cat /etc/passwd | wc -l
+# 41
 
-<span class="hl slc"># count lines/words/bytes in &#39;/etc/passwd&#39;</span>
-<span class="hl kwc">cat</span> <span class="hl opt">/</span>etc<span class="hl opt">/</span>passwd <span class="hl opt">|</span> <span class="hl kwc">wc</span>
-<span class="hl slc">#      41      70    2286</span>
+# count words in &apos;/etc/passwd&apos;
+cat /etc/passwd | wc -w
+# 70
 
-<span class="hl slc">## shuf (1) - generate random permutations</span>
+# count bytes in &apos;/etc/passwd&apos;
+cat /etc/passwd | wc -c
+# 2286
 
-<span class="hl slc"># select random words</span>
-<span class="hl kwc">cat</span> <span class="hl opt">/</span>usr<span class="hl opt">/</span>share<span class="hl opt">/</span>dict<span class="hl opt">/</span>words <span class="hl opt">|</span> shuf <span class="hl opt">|</span> <span class="hl kwc">head</span>
-<span class="hl slc"># crabbed</span>
-<span class="hl slc"># raceway</span>
-<span class="hl slc"># scare&#39;s</span>
-<span class="hl slc"># altercations</span>
-<span class="hl slc"># multiple</span>
-<span class="hl slc"># eerier</span>
-<span class="hl slc"># doubling</span>
-<span class="hl slc"># donned</span>
-<span class="hl slc"># Browne</span>
-<span class="hl slc"># caucussed</span>
+# count lines/words/bytes in &apos;/etc/passwd&apos;
+cat /etc/passwd | wc
+#      41      70    2286
 
-<span class="hl slc">## fmt (1) - simple optimal text formatter</span>
+## shuf (1) - generate random permutations
 
-<span class="hl slc"># format given text</span>
-shuf <span class="hl opt">/</span>usr<span class="hl opt">/</span>share<span class="hl opt">/</span>dict<span class="hl opt">/</span>words <span class="hl opt">|</span> <span class="hl kwc">fmt</span> <span class="hl opt">|</span> <span class="hl kwc">head</span>
-<span class="hl slc"># Collins kindergärtner Soyuz Cinderella pricklier laxness Domesday</span>
-<span class="hl slc"># Darryl&#39;s lighted departments delphiniums envisioned grapevine&#39;s</span>
-<span class="hl slc"># Noel&#39;s Casablanca&#39;s eyrie&#39;s seeker&#39;s Brendan exhorted Septembers</span>
-<span class="hl slc"># flea dyke burgers hashing laminating mattock servicewoman approving</span>
-<span class="hl slc"># Basho&#39;s crusade omits filthy pare performance&#39;s peccadillo certainly</span>
-<span class="hl slc"># retributions hinterland tresses displace moonlights exposed mellows</span>
-<span class="hl slc"># careened syncopating spotter&#39;s divas Ruby&#39;s measurement&#39;s waterfowls</span>
-<span class="hl slc"># curvatures Reunion moistening playback hooped Man equators cable&#39;s</span>
-<span class="hl slc"># thumbing camerawoman&#39;s Tenochtitlan&#39;s somersault&#39;s pizazz&#39;s Nestle</span>
-<span class="hl slc"># reformation Senior overshot enlivened impugns Kroc kickoffs rocketry</span>
+# select random words
+cat /usr/share/dict/words | shuf | head
+# crabbed
+# raceway
+# scare&apos;s
+# altercations
+# multiple
+# eerier
+# doubling
+# donned
+# Browne
+# caucussed
 
-<span class="hl slc"># format given text with a width of 40</span>
-shuf <span class="hl opt">/</span>usr<span class="hl opt">/</span>share<span class="hl opt">/</span>dict<span class="hl opt">/</span>words <span class="hl opt">|</span> <span class="hl kwc">fmt</span> <span class="hl kwb">-w</span> <span class="hl num">40</span> <span class="hl opt">|</span> <span class="hl kwc">head</span>
-<span class="hl slc"># eyesore&#39;s cagy Shorthorn outrider&#39;s</span>
-<span class="hl slc"># capaciousness flaunt&#39;s unbelief</span>
-<span class="hl slc"># Gaul&#39;s unselfishness fetishist&#39;s</span>
-<span class="hl slc"># Serbian&#39;s UNICEF&#39;s eventually</span>
-<span class="hl slc"># impenetrability bodkin eclectic&#39;s</span>
-<span class="hl slc"># researches smokeless geriatrics dowdily</span>
-<span class="hl slc"># Roth misidentify Congregationalist</span>
-<span class="hl slc"># trails saying disciplines Congreve</span>
-<span class="hl slc"># mystery&#39;s offends Astrakhan tinseling</span>
-<span class="hl slc"># dearness disengages glinted leprous</span>
+## fmt (1) - simple optimal text formatter
 
-<span class="hl slc">## colrm (1) - remove columns from a file</span>
+# format given text
+shuf /usr/share/dict/words | fmt | head
+# Collins kindergärtner Soyuz Cinderella pricklier laxness Domesday
+# Darryl&apos;s lighted departments delphiniums envisioned grapevine&apos;s
+# Noel&apos;s Casablanca&apos;s eyrie&apos;s seeker&apos;s Brendan exhorted Septembers
+# flea dyke burgers hashing laminating mattock servicewoman approving
+# Basho&apos;s crusade omits filthy pare performance&apos;s peccadillo certainly
+# retributions hinterland tresses displace moonlights exposed mellows
+# careened syncopating spotter&apos;s divas Ruby&apos;s measurement&apos;s waterfowls
+# curvatures Reunion moistening playback hooped Man equators cable&apos;s
+# thumbing camerawoman&apos;s Tenochtitlan&apos;s somersault&apos;s pizazz&apos;s Nestle
+# reformation Senior overshot enlivened impugns Kroc kickoffs rocketry
 
-<span class="hl slc"># display first 40 characters from each line</span>
-shuf <span class="hl opt">/</span>usr<span class="hl opt">/</span>share<span class="hl opt">/</span>dict<span class="hl opt">/</span>words <span class="hl opt">|</span> <span class="hl kwc">fmt</span> <span class="hl opt">|</span> <span class="hl kwc">head</span> <span class="hl opt">|</span> <span class="hl kwc">colrm</span> <span class="hl num">40</span>
-<span class="hl slc"># simile trappers jawbone hurdle&#39;s sorori</span>
-<span class="hl slc"># Mongolia&#39;s hallway&#39;s misquotation measu</span>
-<span class="hl slc"># Harrington nomination&#39;s guessers risk s</span>
-<span class="hl slc"># belie Charlemagne&#39;s upside&#39;s mines enve</span>
-<span class="hl slc"># Dannie tightwad fruitfulness&#39;s sensuali</span>
-<span class="hl slc"># scrapbook&#39;s asters dicta coexistence Lu</span>
-<span class="hl slc"># squeaked expressionists undies dingy ja</span>
-<span class="hl slc"># Baldwin Ricky librettos sac lobbyist pa</span>
-<span class="hl slc"># meddler teachable silversmiths percolat</span>
-<span class="hl slc"># broadsword&#39;s advisers multiplier robs m</span>
+# format given text with a width of 40
+shuf /usr/share/dict/words | fmt -w 40 | head
+# eyesore&apos;s cagy Shorthorn outrider&apos;s
+# capaciousness flaunt&apos;s unbelief
+# Gaul&apos;s unselfishness fetishist&apos;s
+# Serbian&apos;s UNICEF&apos;s eventually
+# impenetrability bodkin eclectic&apos;s
+# researches smokeless geriatrics dowdily
+# Roth misidentify Congregationalist
+# trails saying disciplines Congreve
+# mystery&apos;s offends Astrakhan tinseling
+# dearness disengages glinted leprous
 
-<span class="hl slc"># remove characters betweeen 20 and 40 from each line</span>
-shuf <span class="hl opt">/</span>usr<span class="hl opt">/</span>share<span class="hl opt">/</span>dict<span class="hl opt">/</span>words <span class="hl opt">|</span> <span class="hl kwc">fmt</span> <span class="hl opt">|</span> <span class="hl kwc">head</span> <span class="hl opt">|</span> <span class="hl kwc">colrm</span> <span class="hl num">20 40</span>
-<span class="hl slc"># busting Ahab ligatuions mammoths etymologists</span>
-<span class="hl slc"># crams logging&#39;s toddu&#39;s vacillation&#39;s VLF&#39;s</span>
-<span class="hl slc"># Prius bitterly sheln&#39;s italic interstice Rickey&#39;s</span>
-<span class="hl slc"># Shavian&#39;s cylindersfhound&#39;s hoarders psychokinesis</span>
-<span class="hl slc"># Pb devil&#39;s mumbled enlightens pleasantries wicker</span>
-<span class="hl slc"># timidity gelding amath portraiture&#39;s motion&#39;s</span>
-<span class="hl slc"># blowers Bolshevist erring song&#39;s cash diameter</span>
-<span class="hl slc"># juiciness bearded G obeisances mob&#39;s inkwell&#39;s wok</span>
-<span class="hl slc"># paddocked jiffies Crneyron&#39;s Napster tidiness&#39;s</span>
-<span class="hl slc"># need&#39;s aureola leg nnelling Mohawk craftsmanship&#39;s</span>
-</pre>
+## colrm (1) - remove columns from a file
+
+# display first 40 characters from each line
+shuf /usr/share/dict/words | fmt | head | colrm 40
+# simile trappers jawbone hurdle&apos;s sorori
+# Mongolia&apos;s hallway&apos;s misquotation measu
+# Harrington nomination&apos;s guessers risk s
+# belie Charlemagne&apos;s upside&apos;s mines enve
+# Dannie tightwad fruitfulness&apos;s sensuali
+# scrapbook&apos;s asters dicta coexistence Lu
+# squeaked expressionists undies dingy ja
+# Baldwin Ricky librettos sac lobbyist pa
+# meddler teachable silversmiths percolat
+# broadsword&apos;s advisers multiplier robs m
+
+# remove characters betweeen 20 and 40 from each line
+shuf /usr/share/dict/words | fmt | head | colrm 20 40
+# busting Ahab ligatuions mammoths etymologists
+# crams logging&apos;s toddu&apos;s vacillation&apos;s VLF&apos;s
+# Prius bitterly sheln&apos;s italic interstice Rickey&apos;s
+# Shavian&apos;s cylindersfhound&apos;s hoarders psychokinesis
+# Pb devil&apos;s mumbled enlightens pleasantries wicker
+# timidity gelding amath portraiture&apos;s motion&apos;s
+# blowers Bolshevist erring song&apos;s cash diameter
+# juiciness bearded G obeisances mob&apos;s inkwell&apos;s wok
+# paddocked jiffies Crneyron&apos;s Napster tidiness&apos;s
+# need&apos;s aureola leg nnelling Mohawk craftsmanship&apos;s
+</code></pre>
+
 </body>
+
 </html>
-<!--HTML generated by highlight 3.62, http://www.andre-simon.de/-->

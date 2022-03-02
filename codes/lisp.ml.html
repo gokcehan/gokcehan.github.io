@@ -1,300 +1,310 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
+
 <head>
-<meta charset="ISO-8859-1">
-<title>lisp.ml</title>
-<link rel="stylesheet" type="text/css" href="../highlight.css">
+  <meta charset="utf-8">
+  <meta name="color-scheme" content="light dark">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>lisp.ml</title>
+  <link rel="stylesheet" href="../style/code.css">
+  <link rel="stylesheet" href="../highlightjs/github.min.css" media="screen and (prefers-color-scheme: light)">
+  <link rel="stylesheet" href="../highlightjs/github-dark.min.css" media="screen and (prefers-color-scheme: dark)">
+  <script src="../highlightjs/highlight-ocaml.min.js"></script>
+  <script>hljs.highlightAll();</script>
 </head>
-<body class="hl">
-<pre class="hl"><span class="hl com">(*</span>
-<span class="hl com"> * lisp.ml</span>
-<span class="hl com"> *</span>
-<span class="hl com"> * Basic lisp evaluator</span>
-<span class="hl com"> *</span>
-<span class="hl com"> * You can compile this file with the following command:</span>
-<span class="hl com"> *</span>
-<span class="hl com"> *     ocamlc -I +camlp4 -pp camlp4o lisp.ml -o lisp</span>
-<span class="hl com"> *)</span>
 
-<span class="hl com">(* Lex *)</span>
+<body>
 
-<span class="hl kwa">module</span> Tok <span class="hl opt">=</span>
-  <span class="hl kwa">struct</span>
-    <span class="hl kwa">type</span> token <span class="hl opt">=</span>
-      <span class="hl opt">|</span> LPar
-      <span class="hl opt">|</span> RPar
-      <span class="hl opt">|</span> Def
-      <span class="hl opt">|</span> Lam
-      <span class="hl opt">|</span> If
-      <span class="hl opt">|</span> True
-      <span class="hl opt">|</span> False
-      <span class="hl opt">|</span> Num <span class="hl kwa">of</span> <span class="hl kwb">float</span>
-      <span class="hl opt">|</span> Var <span class="hl kwa">of</span> <span class="hl kwb">string</span>
-  <span class="hl kwa">end</span>
+<pre><code class="language-ocaml">(*
+ * lisp.ml
+ *
+ * Basic lisp evaluator
+ *
+ * You can compile this file with the following command:
+ *
+ *     ocamlc -I +camlp4 -pp camlp4o lisp.ml -o lisp
+ *)
 
-<span class="hl kwa">let rec</span> <span class="hl kwd">lex</span> <span class="hl opt">=</span> parser
-  <span class="hl opt">| [&lt;</span> &#39; <span class="hl opt">(</span>&#39; &#39; <span class="hl opt">|</span> &#39;<span class="hl esc">\n</span>&#39; <span class="hl opt">|</span> &#39;<span class="hl esc">\r</span>&#39; <span class="hl opt">|</span> &#39;<span class="hl esc">\t</span>&#39;<span class="hl opt">);</span> stream <span class="hl opt">&gt;] -&gt;</span> <span class="hl kwd">lex</span> stream
-  <span class="hl opt">| [&lt;</span> &#39;&#39;<span class="hl opt">(</span>&#39;<span class="hl opt">;</span> stream <span class="hl opt">&gt;] -&gt; [&lt;</span> &#39;<span class="hl kwc">Tok</span><span class="hl opt">.</span>LPar<span class="hl opt">;</span> <span class="hl kwd">lex</span> stream <span class="hl opt">&gt;]</span>
-  <span class="hl opt">| [&lt;</span> &#39;&#39;<span class="hl opt">)</span>&#39;<span class="hl opt">;</span> stream <span class="hl opt">&gt;] -&gt; [&lt;</span> &#39;<span class="hl kwc">Tok</span><span class="hl opt">.</span>RPar<span class="hl opt">;</span> <span class="hl kwd">lex</span> stream <span class="hl opt">&gt;]</span>
-  <span class="hl opt">| [&lt;</span> &#39; <span class="hl opt">(</span>&#39;<span class="hl num">0</span>&#39; <span class="hl opt">..</span> &#39;<span class="hl num">9</span>&#39; <span class="hl kwa">as</span> c<span class="hl opt">);</span> stream <span class="hl opt">&gt;] -&gt;</span>
-    <span class="hl kwa">let</span> <span class="hl kwd">buffer</span> <span class="hl opt">=</span> <span class="hl kwc">Buffer</span><span class="hl opt">.</span>create <span class="hl num">1</span> <span class="hl kwa">in</span>
-    <span class="hl kwc">Buffer</span><span class="hl opt">.</span>add_char <span class="hl kwd">buffer</span> c<span class="hl opt">;</span>
-    lex_number <span class="hl kwd">buffer</span> stream
-  <span class="hl opt">| [&lt;</span> &#39;c<span class="hl opt">;</span> stream <span class="hl opt">&gt;] -&gt;</span>
-    <span class="hl kwa">let</span> <span class="hl kwd">buffer</span> <span class="hl opt">=</span> <span class="hl kwc">Buffer</span><span class="hl opt">.</span>create <span class="hl num">1</span> <span class="hl kwa">in</span>
-    <span class="hl kwc">Buffer</span><span class="hl opt">.</span>add_char <span class="hl kwd">buffer</span> c<span class="hl opt">;</span>
-    lex_item <span class="hl kwd">buffer</span> stream
-  <span class="hl opt">| [&lt; &gt;] -&gt; [&lt; &gt;]</span>
+(* Lex *)
 
-<span class="hl kwa">and</span> lex_number <span class="hl kwd">buffer</span> <span class="hl opt">=</span> parser
-  <span class="hl opt">| [&lt;</span> &#39; <span class="hl opt">(</span>&#39;<span class="hl num">0</span>&#39; <span class="hl opt">..</span> &#39;<span class="hl num">9</span>&#39; <span class="hl opt">|</span> &#39;<span class="hl opt">.</span>&#39; <span class="hl kwa">as</span> c<span class="hl opt">);</span> stream <span class="hl opt">&gt;] -&gt;</span>
-    <span class="hl kwc">Buffer</span><span class="hl opt">.</span>add_char <span class="hl kwd">buffer</span> c<span class="hl opt">;</span>
-    lex_number <span class="hl kwd">buffer</span> stream
-  <span class="hl opt">| [&lt;</span> stream <span class="hl opt">&gt;] -&gt;</span>
-    <span class="hl kwa">let</span> <span class="hl kwd">contents</span> <span class="hl opt">=</span> <span class="hl kwc">Buffer</span><span class="hl opt">.</span><span class="hl kwd">contents buffer</span> <span class="hl kwa">in</span>
-    <span class="hl kwa">let value</span> <span class="hl opt">=</span> float_of_string <span class="hl kwd">contents</span> <span class="hl kwa">in</span>
-    <span class="hl kwa">let</span> <span class="hl kwd">token</span> <span class="hl opt">=</span> <span class="hl kwc">Tok</span><span class="hl opt">.</span>Num <span class="hl kwa">value in</span>
-    <span class="hl opt">[&lt;</span> &#39;<span class="hl kwd">token</span><span class="hl opt">;</span> <span class="hl kwd">lex</span> stream <span class="hl opt">&gt;]</span>
+module Tok =
+  struct
+    type token =
+      | LPar
+      | RPar
+      | Def
+      | Lam
+      | If
+      | True
+      | False
+      | Num of float
+      | Var of string
+  end
 
-<span class="hl kwa">and</span> lex_item <span class="hl kwd">buffer</span> <span class="hl opt">=</span> parser
-  <span class="hl opt">| [&lt;</span> &#39; <span class="hl opt">(</span>&#39; &#39; <span class="hl opt">|</span> &#39;<span class="hl esc">\n</span>&#39; <span class="hl opt">|</span> &#39;<span class="hl esc">\r</span>&#39; <span class="hl opt">|</span> &#39;<span class="hl esc">\t</span>&#39;<span class="hl opt">);</span> stream <span class="hl opt">&gt;] -&gt;</span>
-    <span class="hl opt">[&lt;</span> &#39;identify <span class="hl kwd">buffer</span><span class="hl opt">;</span> <span class="hl kwd">lex</span> stream <span class="hl opt">&gt;]</span>
-  <span class="hl opt">| [&lt;</span> &#39;&#39;<span class="hl opt">(</span>&#39;<span class="hl opt">;</span> stream <span class="hl opt">&gt;] -&gt; [&lt;</span> &#39;identify <span class="hl kwd">buffer</span><span class="hl opt">;</span> &#39;<span class="hl kwc">Tok</span><span class="hl opt">.</span>LPar<span class="hl opt">;</span> <span class="hl kwd">lex</span> stream <span class="hl opt">&gt;]</span>
-  <span class="hl opt">| [&lt;</span> &#39;&#39;<span class="hl opt">)</span>&#39;<span class="hl opt">;</span> stream <span class="hl opt">&gt;] -&gt; [&lt;</span> &#39;identify <span class="hl kwd">buffer</span><span class="hl opt">;</span> &#39;<span class="hl kwc">Tok</span><span class="hl opt">.</span>RPar<span class="hl opt">;</span> <span class="hl kwd">lex</span> stream <span class="hl opt">&gt;]</span>
-  <span class="hl opt">| [&lt;</span> &#39;c<span class="hl opt">;</span> stream <span class="hl opt">&gt;] -&gt;</span>
-    <span class="hl kwc">Buffer</span><span class="hl opt">.</span>add_char <span class="hl kwd">buffer</span> c<span class="hl opt">;</span>
-    lex_item <span class="hl kwd">buffer</span> stream
-  <span class="hl opt">| [&lt; &gt;] -&gt; [&lt;</span> &#39;identify <span class="hl kwd">buffer</span> <span class="hl opt">&gt;]</span>
+let rec lex = parser
+  | [&lt; &apos; (&apos; &apos; | &apos;\n&apos; | &apos;\r&apos; | &apos;\t&apos;); stream &gt;] -&gt; lex stream
+  | [&lt; &apos;&apos;(&apos;; stream &gt;] -&gt; [&lt; &apos;Tok.LPar; lex stream &gt;]
+  | [&lt; &apos;&apos;)&apos;; stream &gt;] -&gt; [&lt; &apos;Tok.RPar; lex stream &gt;]
+  | [&lt; &apos; (&apos;0&apos; .. &apos;9&apos; as c); stream &gt;] -&gt;
+    let buffer = Buffer.create 1 in
+    Buffer.add_char buffer c;
+    lex_number buffer stream
+  | [&lt; &apos;c; stream &gt;] -&gt;
+    let buffer = Buffer.create 1 in
+    Buffer.add_char buffer c;
+    lex_item buffer stream
+  | [&lt; &gt;] -&gt; [&lt; &gt;]
 
-<span class="hl kwa">and</span> identify <span class="hl kwd">buffer</span> <span class="hl opt">=</span>
-  <span class="hl kwa">let</span> <span class="hl kwd">contents</span> <span class="hl opt">=</span> <span class="hl kwc">Buffer</span><span class="hl opt">.</span><span class="hl kwd">contents buffer</span> <span class="hl kwa">in</span>
-  <span class="hl kwa">match</span> <span class="hl kwd">contents</span> <span class="hl kwa">with</span>
-  <span class="hl opt">|</span> <span class="hl str">&quot;define&quot;</span> <span class="hl opt">-&gt;</span> <span class="hl kwc">Tok</span><span class="hl opt">.</span>Def
-  <span class="hl opt">|</span> <span class="hl str">&quot;lambda&quot;</span> <span class="hl opt">-&gt;</span> <span class="hl kwc">Tok</span><span class="hl opt">.</span>Lam
-  <span class="hl opt">|</span> <span class="hl str">&quot;if&quot;</span> <span class="hl opt">-&gt;</span> <span class="hl kwc">Tok</span><span class="hl opt">.</span>If
-  <span class="hl opt">|</span> <span class="hl str">&quot;#t&quot;</span> <span class="hl opt">-&gt;</span> <span class="hl kwc">Tok</span><span class="hl opt">.</span>True
-  <span class="hl opt">|</span> <span class="hl str">&quot;#f&quot;</span> <span class="hl opt">-&gt;</span> <span class="hl kwc">Tok</span><span class="hl opt">.</span>False
-  <span class="hl opt">|</span> <span class="hl kwd">contents</span> <span class="hl opt">-&gt;</span> <span class="hl kwc">Tok</span><span class="hl opt">.</span>Var <span class="hl kwd">contents</span>
+and lex_number buffer = parser
+  | [&lt; &apos; (&apos;0&apos; .. &apos;9&apos; | &apos;.&apos; as c); stream &gt;] -&gt;
+    Buffer.add_char buffer c;
+    lex_number buffer stream
+  | [&lt; stream &gt;] -&gt;
+    let contents = Buffer.contents buffer in
+    let value = float_of_string contents in
+    let token = Tok.Num value in
+    [&lt; &apos;token; lex stream &gt;]
 
-<span class="hl kwa">let</span> <span class="hl kwd">string_of_token</span> <span class="hl opt">=</span> <span class="hl kwa">function</span>
-  <span class="hl opt">|</span> <span class="hl kwc">Tok</span><span class="hl opt">.</span>LPar <span class="hl opt">-&gt;</span> <span class="hl str">&quot;(&quot;</span>
-  <span class="hl opt">|</span> <span class="hl kwc">Tok</span><span class="hl opt">.</span>RPar <span class="hl opt">-&gt;</span> <span class="hl str">&quot;)&quot;</span>
-  <span class="hl opt">|</span> <span class="hl kwc">Tok</span><span class="hl opt">.</span>Def <span class="hl opt">-&gt;</span> <span class="hl str">&quot;define&quot;</span>
-  <span class="hl opt">|</span> <span class="hl kwc">Tok</span><span class="hl opt">.</span>Lam <span class="hl opt">-&gt;</span> <span class="hl str">&quot;lambda&quot;</span>
-  <span class="hl opt">|</span> <span class="hl kwc">Tok</span><span class="hl opt">.</span>If <span class="hl opt">-&gt;</span> <span class="hl str">&quot;if&quot;</span>
-  <span class="hl opt">|</span> <span class="hl kwc">Tok</span><span class="hl opt">.</span>True <span class="hl opt">-&gt;</span> <span class="hl str">&quot;#t&quot;</span>
-  <span class="hl opt">|</span> <span class="hl kwc">Tok</span><span class="hl opt">.</span>False <span class="hl opt">-&gt;</span> <span class="hl str">&quot;#f&quot;</span>
-  <span class="hl opt">|</span> <span class="hl kwc">Tok</span><span class="hl opt">.</span>Num num <span class="hl opt">-&gt;</span> string_of_float num
-  <span class="hl opt">|</span> <span class="hl kwc">Tok</span><span class="hl opt">.</span>Var var <span class="hl opt">-&gt;</span> var
+and lex_item buffer = parser
+  | [&lt; &apos; (&apos; &apos; | &apos;\n&apos; | &apos;\r&apos; | &apos;\t&apos;); stream &gt;] -&gt;
+    [&lt; &apos;identify buffer; lex stream &gt;]
+  | [&lt; &apos;&apos;(&apos;; stream &gt;] -&gt; [&lt; &apos;identify buffer; &apos;Tok.LPar; lex stream &gt;]
+  | [&lt; &apos;&apos;)&apos;; stream &gt;] -&gt; [&lt; &apos;identify buffer; &apos;Tok.RPar; lex stream &gt;]
+  | [&lt; &apos;c; stream &gt;] -&gt;
+    Buffer.add_char buffer c;
+    lex_item buffer stream
+  | [&lt; &gt;] -&gt; [&lt; &apos;identify buffer &gt;]
 
-<span class="hl kwa">let</span> <span class="hl kwd">print_token token</span> <span class="hl opt">=</span> <span class="hl kwd">token</span> <span class="hl opt">|&gt;</span> <span class="hl kwd">string_of_token</span> <span class="hl opt">|&gt;</span> print_endline
+and identify buffer =
+  let contents = Buffer.contents buffer in
+  match contents with
+  | &quot;define&quot; -&gt; Tok.Def
+  | &quot;lambda&quot; -&gt; Tok.Lam
+  | &quot;if&quot; -&gt; Tok.If
+  | &quot;#t&quot; -&gt; Tok.True
+  | &quot;#f&quot; -&gt; Tok.False
+  | contents -&gt; Tok.Var contents
 
-<span class="hl com">(* Parse *)</span>
+let string_of_token = function
+  | Tok.LPar -&gt; &quot;(&quot;
+  | Tok.RPar -&gt; &quot;)&quot;
+  | Tok.Def -&gt; &quot;define&quot;
+  | Tok.Lam -&gt; &quot;lambda&quot;
+  | Tok.If -&gt; &quot;if&quot;
+  | Tok.True -&gt; &quot;#t&quot;
+  | Tok.False -&gt; &quot;#f&quot;
+  | Tok.Num num -&gt; string_of_float num
+  | Tok.Var var -&gt; var
 
-<span class="hl kwa">module</span> Exp <span class="hl opt">=</span> <span class="hl kwa">struct</span>
-  <span class="hl kwa">type</span> expr <span class="hl opt">=</span>
-    <span class="hl opt">|</span> Nil
-    <span class="hl opt">|</span> Bool <span class="hl kwa">of</span> <span class="hl kwb">bool</span>
-    <span class="hl opt">|</span> Num <span class="hl kwa">of</span> <span class="hl kwb">float</span>
-    <span class="hl opt">|</span> Var <span class="hl kwa">of</span> <span class="hl kwb">string</span>
-    <span class="hl opt">|</span> Cond <span class="hl kwa">of</span> expr <span class="hl opt">*</span> expr <span class="hl opt">*</span> expr
-    <span class="hl opt">|</span> Def <span class="hl kwa">of</span> expr <span class="hl opt">*</span> expr
-    <span class="hl opt">|</span> Lam <span class="hl kwa">of</span> expr list <span class="hl opt">*</span> expr
-    <span class="hl opt">|</span> Blt <span class="hl kwa">of</span> <span class="hl opt">(</span>expr list <span class="hl opt">-&gt;</span> expr<span class="hl opt">)</span>
-    <span class="hl opt">|</span> App <span class="hl kwa">of</span> expr <span class="hl opt">*</span> expr list
-<span class="hl kwa">end</span>
+let print_token token = token |&gt; string_of_token |&gt; print_endline
 
-<span class="hl kwa">let rec</span> <span class="hl kwd">parse</span> <span class="hl opt">=</span> parser
-  <span class="hl opt">| [&lt;</span> expr<span class="hl opt">=</span><span class="hl kwd">parse_expr</span><span class="hl opt">;</span> stream <span class="hl opt">&gt;] -&gt;</span>
-    print_string <span class="hl str">&quot;-&gt; &quot;</span><span class="hl opt">;</span> flush stdout<span class="hl opt">;</span>
-    <span class="hl opt">[&lt;</span> &#39;expr<span class="hl opt">;</span> <span class="hl kwd">parse</span> stream <span class="hl opt">&gt;]</span>
-  <span class="hl opt">| [&lt; &gt;] -&gt; [&lt; &gt;]</span>
+(* Parse *)
 
-<span class="hl kwa">and</span> <span class="hl kwd">parse_expr</span> <span class="hl opt">=</span> parser
-  <span class="hl opt">| [&lt;</span> &#39;<span class="hl kwc">Tok</span><span class="hl opt">.</span>LPar<span class="hl opt">;</span> stream <span class="hl opt">&gt;] -&gt;</span> parse_list stream
-  <span class="hl opt">| [&lt;</span> &#39;<span class="hl kwc">Tok</span><span class="hl opt">.</span>True<span class="hl opt">;</span> _ <span class="hl opt">&gt;] -&gt;</span> <span class="hl kwc">Exp</span><span class="hl opt">.</span>Bool <span class="hl kwa">true</span>
-  <span class="hl opt">| [&lt;</span> &#39;<span class="hl kwc">Tok</span><span class="hl opt">.</span>False<span class="hl opt">;</span> _ <span class="hl opt">&gt;] -&gt;</span> <span class="hl kwc">Exp</span><span class="hl opt">.</span>Bool <span class="hl kwa">false</span>
-  <span class="hl opt">| [&lt;</span> &#39;<span class="hl kwc">Tok</span><span class="hl opt">.</span>Num num<span class="hl opt">;</span> _ <span class="hl opt">&gt;] -&gt;</span> <span class="hl kwc">Exp</span><span class="hl opt">.</span>Num num
-  <span class="hl opt">| [&lt;</span> &#39;<span class="hl kwc">Tok</span><span class="hl opt">.</span>Var var<span class="hl opt">;</span> _ <span class="hl opt">&gt;] -&gt;</span> <span class="hl kwc">Exp</span><span class="hl opt">.</span>Var var
+module Exp = struct
+  type expr =
+    | Nil
+    | Bool of bool
+    | Num of float
+    | Var of string
+    | Cond of expr * expr * expr
+    | Def of expr * expr
+    | Lam of expr list * expr
+    | Blt of (expr list -&gt; expr)
+    | App of expr * expr list
+end
 
-<span class="hl kwa">and</span> parse_list <span class="hl opt">=</span> parser
-  <span class="hl opt">| [&lt;</span> &#39;<span class="hl kwc">Tok</span><span class="hl opt">.</span>RPar<span class="hl opt">;</span> _ <span class="hl opt">&gt;] -&gt;</span> <span class="hl kwc">Exp</span><span class="hl opt">.</span>Nil
-  <span class="hl opt">| [&lt;</span> &#39;<span class="hl kwc">Tok</span><span class="hl opt">.</span>If<span class="hl opt">;</span>
-       con<span class="hl opt">=</span><span class="hl kwd">parse_expr</span><span class="hl opt">;</span>
-       expr1<span class="hl opt">=</span><span class="hl kwd">parse_expr</span><span class="hl opt">;</span>
-       expr2<span class="hl opt">=</span><span class="hl kwd">parse_expr</span><span class="hl opt">;</span>
-       &#39;<span class="hl kwc">Tok</span><span class="hl opt">.</span>RPar<span class="hl opt">;</span> _ <span class="hl opt">&gt;] -&gt;</span> <span class="hl kwc">Exp</span><span class="hl opt">.</span>Cond <span class="hl opt">(</span>con<span class="hl opt">,</span> expr1<span class="hl opt">,</span> expr2<span class="hl opt">)</span>
-  <span class="hl opt">| [&lt;</span> &#39;<span class="hl kwc">Tok</span><span class="hl opt">.</span>Def<span class="hl opt">; (</span>var<span class="hl opt">,</span> expr<span class="hl opt">)=</span>parse_def<span class="hl opt">;</span> &#39;<span class="hl kwc">Tok</span><span class="hl opt">.</span>RPar<span class="hl opt">;</span> _ <span class="hl opt">&gt;] -&gt;</span> <span class="hl kwc">Exp</span><span class="hl opt">.</span>Def <span class="hl opt">(</span>var<span class="hl opt">,</span> expr<span class="hl opt">)</span>
-  <span class="hl opt">| [&lt;</span> &#39;<span class="hl kwc">Tok</span><span class="hl opt">.</span>Lam<span class="hl opt">;</span>
-       &#39;<span class="hl kwc">Tok</span><span class="hl opt">.</span>LPar<span class="hl opt">;</span>
-       args<span class="hl opt">=</span>parse_args <span class="hl opt">[];</span>
-       expr<span class="hl opt">=</span><span class="hl kwd">parse_expr</span><span class="hl opt">;</span>
-       &#39;<span class="hl kwc">Tok</span><span class="hl opt">.</span>RPar<span class="hl opt">;</span> _ <span class="hl opt">&gt;] -&gt;</span> <span class="hl kwc">Exp</span><span class="hl opt">.</span>Lam <span class="hl opt">(</span>args<span class="hl opt">,</span> expr<span class="hl opt">)</span>
-  <span class="hl opt">| [&lt;</span> func<span class="hl opt">=</span><span class="hl kwd">parse_expr</span><span class="hl opt">;</span> args<span class="hl opt">=</span>parse_args <span class="hl opt">[];</span> _ <span class="hl opt">&gt;] -&gt;</span> <span class="hl kwc">Exp</span><span class="hl opt">.</span>App <span class="hl opt">(</span>func<span class="hl opt">,</span> args<span class="hl opt">)</span>
+let rec parse = parser
+  | [&lt; expr=parse_expr; stream &gt;] -&gt;
+    print_string &quot;-&gt; &quot;; flush stdout;
+    [&lt; &apos;expr; parse stream &gt;]
+  | [&lt; &gt;] -&gt; [&lt; &gt;]
 
-<span class="hl kwa">and</span> parse_def <span class="hl opt">=</span> parser
-  <span class="hl opt">| [&lt;</span> &#39;<span class="hl kwc">Tok</span><span class="hl opt">.</span>LPar<span class="hl opt">;</span>
-       var<span class="hl opt">=</span><span class="hl kwd">parse_expr</span><span class="hl opt">;</span>
-       args<span class="hl opt">=</span>parse_args <span class="hl opt">[];</span>
-       expr<span class="hl opt">=</span><span class="hl kwd">parse_expr</span><span class="hl opt">;</span> _ <span class="hl opt">&gt;] -&gt; (</span>var<span class="hl opt">,</span> <span class="hl kwc">Exp</span><span class="hl opt">.</span>Lam <span class="hl opt">(</span>args<span class="hl opt">,</span> expr<span class="hl opt">))</span>
-  <span class="hl opt">| [&lt;</span> var<span class="hl opt">=</span><span class="hl kwd">parse_expr</span><span class="hl opt">;</span> expr<span class="hl opt">=</span><span class="hl kwd">parse_expr</span><span class="hl opt">;</span> _ <span class="hl opt">&gt;] -&gt; (</span>var<span class="hl opt">,</span> expr<span class="hl opt">)</span>
+and parse_expr = parser
+  | [&lt; &apos;Tok.LPar; stream &gt;] -&gt; parse_list stream
+  | [&lt; &apos;Tok.True; _ &gt;] -&gt; Exp.Bool true
+  | [&lt; &apos;Tok.False; _ &gt;] -&gt; Exp.Bool false
+  | [&lt; &apos;Tok.Num num; _ &gt;] -&gt; Exp.Num num
+  | [&lt; &apos;Tok.Var var; _ &gt;] -&gt; Exp.Var var
 
-<span class="hl kwa">and</span> parse_args acc <span class="hl opt">=</span> parser
-  <span class="hl opt">| [&lt;</span> &#39;<span class="hl kwc">Tok</span><span class="hl opt">.</span>RPar<span class="hl opt">;</span> _ <span class="hl opt">&gt;] -&gt;</span> <span class="hl kwc">List</span><span class="hl opt">.</span>rev acc
-  <span class="hl opt">| [&lt;</span> arg<span class="hl opt">=</span><span class="hl kwd">parse_expr</span><span class="hl opt">;</span> stream <span class="hl opt">&gt;] -&gt;</span> parse_args <span class="hl opt">(</span>arg <span class="hl opt">::</span> acc<span class="hl opt">)</span> stream
+and parse_list = parser
+  | [&lt; &apos;Tok.RPar; _ &gt;] -&gt; Exp.Nil
+  | [&lt; &apos;Tok.If;
+       con=parse_expr;
+       expr1=parse_expr;
+       expr2=parse_expr;
+       &apos;Tok.RPar; _ &gt;] -&gt; Exp.Cond (con, expr1, expr2)
+  | [&lt; &apos;Tok.Def; (var, expr)=parse_def; &apos;Tok.RPar; _ &gt;] -&gt; Exp.Def (var, expr)
+  | [&lt; &apos;Tok.Lam;
+       &apos;Tok.LPar;
+       args=parse_args [];
+       expr=parse_expr;
+       &apos;Tok.RPar; _ &gt;] -&gt; Exp.Lam (args, expr)
+  | [&lt; func=parse_expr; args=parse_args []; _ &gt;] -&gt; Exp.App (func, args)
 
-<span class="hl kwa">let rec</span> <span class="hl kwd">string_of_expr</span> <span class="hl opt">=</span> <span class="hl kwa">function</span>
-  <span class="hl opt">|</span> <span class="hl kwc">Exp</span><span class="hl opt">.</span>Nil <span class="hl opt">-&gt;</span> <span class="hl str">&quot;nil&quot;</span>
-  <span class="hl opt">|</span> <span class="hl kwc">Exp</span><span class="hl opt">.</span>Num num <span class="hl opt">-&gt;</span> string_of_float num
-  <span class="hl opt">|</span> <span class="hl kwc">Exp</span><span class="hl opt">.</span>Var var <span class="hl opt">-&gt;</span> var
-  <span class="hl opt">|</span> <span class="hl kwc">Exp</span><span class="hl opt">.</span>Bool <span class="hl kwa">true</span> <span class="hl opt">-&gt;</span> <span class="hl str">&quot;#t&quot;</span>
-  <span class="hl opt">|</span> <span class="hl kwc">Exp</span><span class="hl opt">.</span>Bool <span class="hl kwa">false</span> <span class="hl opt">-&gt;</span> <span class="hl str">&quot;#f&quot;</span>
-  <span class="hl opt">|</span> <span class="hl kwc">Exp</span><span class="hl opt">.</span>Cond <span class="hl opt">(</span>con<span class="hl opt">,</span> expr1<span class="hl opt">,</span> expr2<span class="hl opt">) -&gt;</span>
-    <span class="hl kwa">let</span> <span class="hl kwd">con</span> <span class="hl opt">=</span> <span class="hl kwd">string_of_expr con</span> <span class="hl kwa">in</span>
-    <span class="hl kwa">let</span> <span class="hl kwd">expr1</span> <span class="hl opt">=</span> <span class="hl kwd">string_of_expr expr1</span> <span class="hl kwa">in</span>
-    <span class="hl kwa">let</span> <span class="hl kwd">expr2</span> <span class="hl opt">=</span> <span class="hl kwd">string_of_expr expr2</span> <span class="hl kwa">in</span>
-    <span class="hl str">&quot;(if &quot;</span> ^ <span class="hl kwd">con</span> ^ <span class="hl str">&quot; &quot;</span> ^ <span class="hl kwd">expr1</span> ^ <span class="hl str">&quot; &quot;</span> ^ <span class="hl kwd">expr2</span> ^ <span class="hl str">&quot;)&quot;</span>
-  <span class="hl opt">|</span> <span class="hl kwc">Exp</span><span class="hl opt">.</span>Def <span class="hl opt">(</span>var<span class="hl opt">,</span> expr<span class="hl opt">) -&gt;</span>
-    <span class="hl kwa">let</span> <span class="hl kwd">var</span> <span class="hl opt">=</span> <span class="hl kwd">string_of_expr var</span> <span class="hl kwa">in</span>
-    <span class="hl kwa">let</span> <span class="hl kwd">expr</span> <span class="hl opt">=</span> <span class="hl kwd">string_of_expr expr</span> <span class="hl kwa">in</span>
-    <span class="hl str">&quot;(define &quot;</span> ^ <span class="hl kwd">var</span> ^ <span class="hl str">&quot; &quot;</span> ^ <span class="hl kwd">expr</span> ^ <span class="hl str">&quot;)&quot;</span>
-  <span class="hl opt">|</span> <span class="hl kwc">Exp</span><span class="hl opt">.</span>Lam <span class="hl opt">(</span>args<span class="hl opt">,</span> <span class="hl kwd">expr</span><span class="hl opt">) -&gt;</span>
-    <span class="hl kwa">let</span> <span class="hl kwd">args</span> <span class="hl opt">=</span> <span class="hl kwd">args</span> <span class="hl opt">|&gt;</span> <span class="hl kwc">List</span><span class="hl opt">.</span>map <span class="hl kwd">string_of_expr</span> <span class="hl opt">|&gt;</span> <span class="hl kwc">String</span><span class="hl opt">.</span>concat <span class="hl str">&quot; &quot;</span> <span class="hl kwa">in</span>
-    <span class="hl kwa">let</span> <span class="hl kwd">expr</span> <span class="hl opt">=</span> <span class="hl kwd">string_of_expr expr</span> <span class="hl kwa">in</span>
-    <span class="hl str">&quot;(lambda (&quot;</span> ^ <span class="hl kwd">args</span> ^ <span class="hl str">&quot;) &quot;</span> ^ <span class="hl kwd">expr</span> ^ <span class="hl str">&quot;)&quot;</span>
-  <span class="hl opt">|</span> <span class="hl kwc">Exp</span><span class="hl opt">.</span>App <span class="hl opt">(</span>func<span class="hl opt">,</span> <span class="hl kwd">args</span><span class="hl opt">) -&gt;</span>
-    <span class="hl kwa">let</span> <span class="hl kwd">func</span> <span class="hl opt">=</span> <span class="hl kwd">string_of_expr func</span> <span class="hl kwa">in</span>
-    <span class="hl kwa">let</span> <span class="hl kwd">args</span> <span class="hl opt">=</span> <span class="hl kwd">args</span> <span class="hl opt">|&gt;</span> <span class="hl kwc">List</span><span class="hl opt">.</span>map <span class="hl kwd">string_of_expr</span> <span class="hl opt">|&gt;</span> <span class="hl kwc">String</span><span class="hl opt">.</span>concat <span class="hl str">&quot; &quot;</span> <span class="hl kwa">in</span>
-    <span class="hl str">&quot;(&quot;</span> ^ <span class="hl kwd">func</span> ^ <span class="hl str">&quot; &quot;</span> ^ <span class="hl kwd">args</span> ^ <span class="hl str">&quot;)&quot;</span>
-  <span class="hl opt">|</span> <span class="hl kwc">Exp</span><span class="hl opt">.</span>Blt blt <span class="hl opt">-&gt;</span> <span class="hl kwa">assert false</span>
+and parse_def = parser
+  | [&lt; &apos;Tok.LPar;
+       var=parse_expr;
+       args=parse_args [];
+       expr=parse_expr; _ &gt;] -&gt; (var, Exp.Lam (args, expr))
+  | [&lt; var=parse_expr; expr=parse_expr; _ &gt;] -&gt; (var, expr)
 
-<span class="hl kwa">let</span> <span class="hl kwd">print_expr expr</span> <span class="hl opt">=</span> <span class="hl kwd">expr</span> <span class="hl opt">|&gt;</span> <span class="hl kwd">string_of_expr</span> <span class="hl opt">|&gt;</span> print_endline
+and parse_args acc = parser
+  | [&lt; &apos;Tok.RPar; _ &gt;] -&gt; List.rev acc
+  | [&lt; arg=parse_expr; stream &gt;] -&gt; parse_args (arg :: acc) stream
 
-<span class="hl com">(* Eval *)</span>
+let rec string_of_expr = function
+  | Exp.Nil -&gt; &quot;nil&quot;
+  | Exp.Num num -&gt; string_of_float num
+  | Exp.Var var -&gt; var
+  | Exp.Bool true -&gt; &quot;#t&quot;
+  | Exp.Bool false -&gt; &quot;#f&quot;
+  | Exp.Cond (con, expr1, expr2) -&gt;
+    let con = string_of_expr con in
+    let expr1 = string_of_expr expr1 in
+    let expr2 = string_of_expr expr2 in
+    &quot;(if &quot; ^ con ^ &quot; &quot; ^ expr1 ^ &quot; &quot; ^ expr2 ^ &quot;)&quot;
+  | Exp.Def (var, expr) -&gt;
+    let var = string_of_expr var in
+    let expr = string_of_expr expr in
+    &quot;(define &quot; ^ var ^ &quot; &quot; ^ expr ^ &quot;)&quot;
+  | Exp.Lam (args, expr) -&gt;
+    let args = args |&gt; List.map string_of_expr |&gt; String.concat &quot; &quot; in
+    let expr = string_of_expr expr in
+    &quot;(lambda (&quot; ^ args ^ &quot;) &quot; ^ expr ^ &quot;)&quot;
+  | Exp.App (func, args) -&gt;
+    let func = string_of_expr func in
+    let args = args |&gt; List.map string_of_expr |&gt; String.concat &quot; &quot; in
+    &quot;(&quot; ^ func ^ &quot; &quot; ^ args ^ &quot;)&quot;
+  | Exp.Blt blt -&gt; assert false
 
-<span class="hl kwa">let rec</span> <span class="hl kwd">eval</span> env <span class="hl opt">=</span> parser
-  <span class="hl opt">| [&lt;</span> &#39;<span class="hl kwd">expr</span><span class="hl opt">;</span> stream <span class="hl opt">&gt;] -&gt;</span>
-    <span class="hl kwa">begin try</span>
-      <span class="hl kwa">let</span> <span class="hl opt">(</span>res<span class="hl opt">,</span> env<span class="hl opt">) =</span> eval_expr env <span class="hl kwd">expr</span> <span class="hl kwa">in</span>
-      <span class="hl kwd">print_expr</span> res<span class="hl opt">;</span>
-      <span class="hl kwd">eval</span> env stream
-    <span class="hl kwa">with</span>
-    <span class="hl opt">|</span> Failure err <span class="hl opt">-&gt;</span> print_endline err<span class="hl opt">;</span> <span class="hl kwd">eval</span> env stream
-    <span class="hl kwa">end</span><span class="hl opt">;</span>
-  <span class="hl opt">| [&lt; &gt;] -&gt; [&lt; &gt;]</span>
+let print_expr expr = expr |&gt; string_of_expr |&gt; print_endline
 
-<span class="hl kwa">and</span> eval_expr env <span class="hl opt">=</span> <span class="hl kwa">function</span>
-  <span class="hl opt">|</span> <span class="hl kwc">Exp</span><span class="hl opt">.</span>Nil <span class="hl kwa">as</span> nil <span class="hl opt">-&gt; (</span>nil<span class="hl opt">,</span> env<span class="hl opt">)</span>
-  <span class="hl opt">|</span> <span class="hl kwc">Exp</span><span class="hl opt">.</span>Bool _ <span class="hl kwa">as</span> <span class="hl kwd">con</span> <span class="hl opt">-&gt; (</span><span class="hl kwd">con</span><span class="hl opt">,</span> env<span class="hl opt">)</span>
-  <span class="hl opt">|</span> <span class="hl kwc">Exp</span><span class="hl opt">.</span>Num _ <span class="hl kwa">as</span> num <span class="hl opt">-&gt; (</span>num<span class="hl opt">,</span> env<span class="hl opt">)</span>
-  <span class="hl opt">|</span> <span class="hl kwc">Exp</span><span class="hl opt">.</span>Var _ <span class="hl kwa">as</span> <span class="hl kwd">var</span> <span class="hl opt">-&gt;</span>
-    <span class="hl kwa">let</span> <span class="hl kwd">res</span> <span class="hl opt">=</span> lookup <span class="hl kwd">var</span> env <span class="hl kwa">in</span>
-    <span class="hl opt">(</span><span class="hl kwd">res</span><span class="hl opt">,</span> env<span class="hl opt">)</span>
-  <span class="hl opt">|</span> <span class="hl kwc">Exp</span><span class="hl opt">.</span>Cond <span class="hl opt">(</span>cond<span class="hl opt">,</span> <span class="hl kwd">expr1</span><span class="hl opt">,</span> <span class="hl kwd">expr2</span><span class="hl opt">) -&gt;</span>
-    <span class="hl kwa">begin match</span> fst<span class="hl opt">(</span>eval_expr env cond<span class="hl opt">)</span> <span class="hl kwa">with</span>
-    <span class="hl opt">|</span> <span class="hl kwc">Exp</span><span class="hl opt">.</span>Bool <span class="hl kwa">true</span> <span class="hl opt">-&gt;</span> eval_expr env <span class="hl kwd">expr1</span>
-    <span class="hl opt">|</span> <span class="hl kwc">Exp</span><span class="hl opt">.</span>Bool <span class="hl kwa">false</span> <span class="hl opt">-&gt;</span> eval_expr env <span class="hl kwd">expr2</span>
-    <span class="hl opt">|</span> _ <span class="hl opt">-&gt;</span> failwith <span class="hl str">&quot;ERROR: expected boolean&quot;</span>
-    <span class="hl kwa">end</span>
-  <span class="hl opt">|</span> <span class="hl kwc">Exp</span><span class="hl opt">.</span>Def <span class="hl opt">(</span><span class="hl kwd">var</span><span class="hl opt">,</span> <span class="hl kwd">expr</span><span class="hl opt">) -&gt; (</span><span class="hl kwc">Exp</span><span class="hl opt">.</span>Nil<span class="hl opt">, (</span><span class="hl kwd">var</span><span class="hl opt">,</span> <span class="hl kwd">expr</span><span class="hl opt">) ::</span> env<span class="hl opt">)</span>
-  <span class="hl opt">|</span> <span class="hl kwc">Exp</span><span class="hl opt">.</span>Lam <span class="hl opt">(</span>_<span class="hl opt">,</span> _<span class="hl opt">)</span> <span class="hl kwa">as</span> lam <span class="hl opt">-&gt; (</span>lam<span class="hl opt">,</span> env<span class="hl opt">)</span>
-  <span class="hl opt">|</span> <span class="hl kwc">Exp</span><span class="hl opt">.</span>Blt _ <span class="hl kwa">as</span> blt <span class="hl opt">-&gt; (</span>blt<span class="hl opt">,</span> env<span class="hl opt">)</span>
-  <span class="hl opt">|</span> <span class="hl kwc">Exp</span><span class="hl opt">.</span>App <span class="hl opt">(</span><span class="hl kwd">func</span><span class="hl opt">,</span> <span class="hl kwd">args</span><span class="hl opt">) -&gt;</span>
-    <span class="hl kwa">let</span> <span class="hl kwd">args</span> <span class="hl opt">=</span> <span class="hl kwc">List</span><span class="hl opt">.</span>map <span class="hl opt">(</span><span class="hl kwa">fun</span> <span class="hl kwd">expr</span> <span class="hl opt">-&gt;</span> fst<span class="hl opt">(</span>eval_expr env <span class="hl kwd">expr</span><span class="hl opt">))</span> <span class="hl kwd">args</span> <span class="hl kwa">in</span>
-    <span class="hl kwa">begin match</span> fst<span class="hl opt">(</span>eval_expr env <span class="hl kwd">func</span><span class="hl opt">)</span> <span class="hl kwa">with</span>
-    <span class="hl opt">|</span> <span class="hl kwc">Exp</span><span class="hl opt">.</span>Lam <span class="hl opt">(</span>vars<span class="hl opt">,</span> <span class="hl kwd">expr</span><span class="hl opt">) -&gt;</span>
-      <span class="hl kwa">if</span> <span class="hl kwc">List</span><span class="hl opt">.</span>length vars <span class="hl opt">&lt;&gt;</span> <span class="hl kwc">List</span><span class="hl opt">.</span>length <span class="hl kwd">args</span>
-      <span class="hl kwa">then</span> failwith <span class="hl str">&quot;ERROR: wrong number of arguments&quot;</span><span class="hl opt">;</span>
-      <span class="hl kwa">let</span> <span class="hl kwd">binds</span> <span class="hl opt">=</span> <span class="hl kwc">List</span><span class="hl opt">.</span>combine vars <span class="hl kwd">args</span> <span class="hl kwa">in</span>
-      <span class="hl kwa">let</span> <span class="hl kwd">res</span> <span class="hl opt">=</span> fst<span class="hl opt">(</span>eval_expr <span class="hl opt">(</span><span class="hl kwd">binds</span> <span class="hl opt">&#64;</span> env<span class="hl opt">)</span> <span class="hl kwd">expr</span><span class="hl opt">)</span> <span class="hl kwa">in</span>
-      <span class="hl opt">(</span><span class="hl kwd">res</span><span class="hl opt">,</span> env<span class="hl opt">)</span>
-    <span class="hl opt">|</span> <span class="hl kwc">Exp</span><span class="hl opt">.</span>Blt <span class="hl kwd">func</span> <span class="hl opt">-&gt;</span>
-      <span class="hl kwa">let</span> <span class="hl kwd">res</span> <span class="hl opt">=</span> <span class="hl kwd">func args</span> <span class="hl kwa">in</span>
-      <span class="hl opt">(</span><span class="hl kwd">res</span><span class="hl opt">,</span> env<span class="hl opt">)</span>
-    <span class="hl opt">|</span> _ <span class="hl opt">-&gt;</span> failwith <span class="hl str">&quot;ERROR: expected function&quot;</span>
-    <span class="hl kwa">end</span>
+(* Eval *)
 
-<span class="hl kwa">and</span> lookup <span class="hl kwd">var</span> <span class="hl opt">=</span> <span class="hl kwa">function</span>
-  <span class="hl opt">| (</span>v<span class="hl opt">,</span> e<span class="hl opt">) ::</span> tl <span class="hl opt">-&gt;</span> <span class="hl kwa">if</span> v <span class="hl opt">=</span> <span class="hl kwd">var</span> <span class="hl kwa">then</span> e <span class="hl kwa">else</span> lookup <span class="hl kwd">var</span> tl
-  <span class="hl opt">|</span> _ <span class="hl opt">-&gt;</span> failwith <span class="hl str">&quot;ERROR: unbound variable&quot;</span>
+let rec eval env = parser
+  | [&lt; &apos;expr; stream &gt;] -&gt;
+    begin try
+      let (res, env) = eval_expr env expr in
+      print_expr res;
+      eval env stream
+    with
+    | Failure err -&gt; print_endline err; eval env stream
+    end;
+  | [&lt; &gt;] -&gt; [&lt; &gt;]
 
-<span class="hl com">(* Built-in functions *)</span>
+and eval_expr env = function
+  | Exp.Nil as nil -&gt; (nil, env)
+  | Exp.Bool _ as con -&gt; (con, env)
+  | Exp.Num _ as num -&gt; (num, env)
+  | Exp.Var _ as var -&gt;
+    let res = lookup var env in
+    (res, env)
+  | Exp.Cond (cond, expr1, expr2) -&gt;
+    begin match fst(eval_expr env cond) with
+    | Exp.Bool true -&gt; eval_expr env expr1
+    | Exp.Bool false -&gt; eval_expr env expr2
+    | _ -&gt; failwith &quot;ERROR: expected boolean&quot;
+    end
+  | Exp.Def (var, expr) -&gt; (Exp.Nil, (var, expr) :: env)
+  | Exp.Lam (_, _) as lam -&gt; (lam, env)
+  | Exp.Blt _ as blt -&gt; (blt, env)
+  | Exp.App (func, args) -&gt;
+    let args = List.map (fun expr -&gt; fst(eval_expr env expr)) args in
+    begin match fst(eval_expr env func) with
+    | Exp.Lam (vars, expr) -&gt;
+      if List.length vars &lt;&gt; List.length args
+      then failwith &quot;ERROR: wrong number of arguments&quot;;
+      let binds = List.combine vars args in
+      let res = fst(eval_expr (binds @ env) expr) in
+      (res, env)
+    | Exp.Blt func -&gt;
+      let res = func args in
+      (res, env)
+    | _ -&gt; failwith &quot;ERROR: expected function&quot;
+    end
 
-<span class="hl kwa">let</span> <span class="hl kwd">eq</span> <span class="hl opt">=</span> <span class="hl kwa">function</span>
-  <span class="hl opt">|</span> x <span class="hl opt">::</span> y <span class="hl opt">:: [] -&gt;</span> <span class="hl kwc">Exp</span><span class="hl opt">.</span>Bool <span class="hl opt">(</span>x <span class="hl opt">=</span> y<span class="hl opt">)</span>
-  <span class="hl opt">|</span> _ <span class="hl opt">-&gt;</span> <span class="hl kwa">assert false</span>
+and lookup var = function
+  | (v, e) :: tl -&gt; if v = var then e else lookup var tl
+  | _ -&gt; failwith &quot;ERROR: unbound variable&quot;
 
-<span class="hl kwa">let</span> <span class="hl kwd">lt</span> <span class="hl opt">=</span> <span class="hl kwa">function</span>
-  <span class="hl opt">|</span> x <span class="hl opt">::</span> y <span class="hl opt">:: [] -&gt;</span> <span class="hl kwc">Exp</span><span class="hl opt">.</span>Bool <span class="hl opt">(</span>x <span class="hl opt">&lt;</span> y<span class="hl opt">)</span>
-  <span class="hl opt">|</span> _ <span class="hl opt">-&gt;</span> <span class="hl kwa">assert false</span>
+(* Built-in functions *)
 
-<span class="hl kwa">let</span> <span class="hl kwd">gt</span> <span class="hl opt">=</span> <span class="hl kwa">function</span>
-  <span class="hl opt">|</span> x <span class="hl opt">::</span> y <span class="hl opt">:: [] -&gt;</span> <span class="hl kwc">Exp</span><span class="hl opt">.</span>Bool <span class="hl opt">(</span>x <span class="hl opt">&gt;</span> y<span class="hl opt">)</span>
-  <span class="hl opt">|</span> _ <span class="hl opt">-&gt;</span> <span class="hl kwa">assert false</span>
+let eq = function
+  | x :: y :: [] -&gt; Exp.Bool (x = y)
+  | _ -&gt; assert false
 
-<span class="hl kwa">let</span> <span class="hl kwd">le</span> <span class="hl opt">=</span> <span class="hl kwa">function</span>
-  <span class="hl opt">|</span> x <span class="hl opt">::</span> y <span class="hl opt">:: [] -&gt;</span> <span class="hl kwc">Exp</span><span class="hl opt">.</span>Bool <span class="hl opt">(</span>x <span class="hl opt">&lt;=</span> y<span class="hl opt">)</span>
-  <span class="hl opt">|</span> _ <span class="hl opt">-&gt;</span> <span class="hl kwa">assert false</span>
+let lt = function
+  | x :: y :: [] -&gt; Exp.Bool (x &lt; y)
+  | _ -&gt; assert false
 
-<span class="hl kwa">let</span> <span class="hl kwd">ge</span> <span class="hl opt">=</span> <span class="hl kwa">function</span>
-  <span class="hl opt">|</span> x <span class="hl opt">::</span> y <span class="hl opt">:: [] -&gt;</span> <span class="hl kwc">Exp</span><span class="hl opt">.</span>Bool <span class="hl opt">(</span>x <span class="hl opt">&gt;=</span> y<span class="hl opt">)</span>
-  <span class="hl opt">|</span> _ <span class="hl opt">-&gt;</span> <span class="hl kwa">assert false</span>
+let gt = function
+  | x :: y :: [] -&gt; Exp.Bool (x &gt; y)
+  | _ -&gt; assert false
 
-<span class="hl kwa">let</span> <span class="hl kwd">binop</span> f x z <span class="hl opt">=</span>
-  <span class="hl kwa">match</span> <span class="hl opt">(</span>x<span class="hl opt">,</span> z<span class="hl opt">)</span> <span class="hl kwa">with</span>
-  <span class="hl opt">| ((</span><span class="hl kwc">Exp</span><span class="hl opt">.</span>Num x<span class="hl opt">), (</span><span class="hl kwc">Exp</span><span class="hl opt">.</span>Num z<span class="hl opt">)) -&gt;</span> <span class="hl kwc">Exp</span><span class="hl opt">.</span>Num <span class="hl opt">(</span>f x z<span class="hl opt">)</span>
-  <span class="hl opt">|</span> _ <span class="hl opt">-&gt;</span> <span class="hl kwa">assert false</span>
+let le = function
+  | x :: y :: [] -&gt; Exp.Bool (x &lt;= y)
+  | _ -&gt; assert false
 
-<span class="hl kwa">let</span> <span class="hl kwd">add</span> <span class="hl opt">=</span> <span class="hl kwc">List</span><span class="hl opt">.</span>fold_left <span class="hl opt">(</span><span class="hl kwd">binop</span> <span class="hl opt">(+.)) (</span><span class="hl kwc">Exp</span><span class="hl opt">.</span>Num <span class="hl num">0.0</span><span class="hl opt">)</span>
+let ge = function
+  | x :: y :: [] -&gt; Exp.Bool (x &gt;= y)
+  | _ -&gt; assert false
 
-<span class="hl kwa">let</span> <span class="hl kwd">mul</span> <span class="hl opt">=</span> <span class="hl kwc">List</span><span class="hl opt">.</span>fold_left <span class="hl opt">(</span><span class="hl kwd">binop</span> <span class="hl opt">( *. )) (</span><span class="hl kwc">Exp</span><span class="hl opt">.</span>Num <span class="hl num">1.0</span><span class="hl opt">)</span>
+let binop f x z =
+  match (x, z) with
+  | ((Exp.Num x), (Exp.Num z)) -&gt; Exp.Num (f x z)
+  | _ -&gt; assert false
 
-<span class="hl kwa">let</span> <span class="hl kwd">sub</span> <span class="hl opt">=</span> <span class="hl kwa">function</span>
-  <span class="hl opt">|</span> <span class="hl kwc">Exp</span><span class="hl opt">.</span>Num hd <span class="hl opt">:: [] -&gt;</span> <span class="hl kwc">Exp</span><span class="hl opt">.</span>Num <span class="hl opt">(</span><span class="hl num">0.0</span> <span class="hl opt">-.</span> hd<span class="hl opt">)</span>
-  <span class="hl opt">|</span> <span class="hl kwc">Exp</span><span class="hl opt">.</span>Num hd <span class="hl opt">::</span> tl <span class="hl opt">-&gt;</span>
-    <span class="hl kwa">begin match</span> <span class="hl kwd">add</span> tl <span class="hl kwa">with</span>
-    <span class="hl opt">|</span> <span class="hl kwc">Exp</span><span class="hl opt">.</span>Num rest <span class="hl opt">-&gt;</span> <span class="hl kwc">Exp</span><span class="hl opt">.</span>Num <span class="hl opt">(</span>hd <span class="hl opt">-.</span> rest<span class="hl opt">)</span>
-    <span class="hl opt">|</span> _ <span class="hl opt">-&gt;</span> <span class="hl kwa">assert false</span>
-    <span class="hl kwa">end</span>
-  <span class="hl opt">|</span> _ <span class="hl opt">-&gt;</span> <span class="hl kwa">assert false</span>
+let add = List.fold_left (binop (+.)) (Exp.Num 0.0)
 
-<span class="hl kwa">let</span> <span class="hl kwd">div</span> <span class="hl opt">=</span> <span class="hl kwa">function</span>
-  <span class="hl opt">|</span> <span class="hl kwc">Exp</span><span class="hl opt">.</span>Num hd <span class="hl opt">:: [] -&gt;</span> <span class="hl kwc">Exp</span><span class="hl opt">.</span>Num <span class="hl opt">(</span><span class="hl num">1.0</span> <span class="hl opt">/.</span> hd<span class="hl opt">)</span>
-  <span class="hl opt">|</span> <span class="hl kwc">Exp</span><span class="hl opt">.</span>Num hd <span class="hl opt">::</span> tl <span class="hl opt">-&gt;</span>
-    <span class="hl kwa">begin match</span> <span class="hl kwd">mul</span> tl <span class="hl kwa">with</span>
-    <span class="hl opt">|</span> <span class="hl kwc">Exp</span><span class="hl opt">.</span>Num rest <span class="hl opt">-&gt;</span> <span class="hl kwc">Exp</span><span class="hl opt">.</span>Num <span class="hl opt">(</span>hd <span class="hl opt">/.</span> rest<span class="hl opt">)</span>
-    <span class="hl opt">|</span> _ <span class="hl opt">-&gt;</span> <span class="hl kwa">assert false</span>
-    <span class="hl kwa">end</span>
-  <span class="hl opt">|</span> _ <span class="hl opt">-&gt;</span> <span class="hl kwa">assert false</span>
+let mul = List.fold_left (binop ( *. )) (Exp.Num 1.0)
 
-<span class="hl kwa">let</span> <span class="hl kwd">env</span> <span class="hl opt">= [</span>
-  <span class="hl opt">(</span><span class="hl kwc">Exp</span><span class="hl opt">.</span>Var <span class="hl str">&quot;+&quot;</span><span class="hl opt">,</span> <span class="hl kwc">Exp</span><span class="hl opt">.</span>Blt <span class="hl kwd">add</span><span class="hl opt">);</span>
-  <span class="hl opt">(</span><span class="hl kwc">Exp</span><span class="hl opt">.</span>Var <span class="hl str">&quot;-&quot;</span><span class="hl opt">,</span> <span class="hl kwc">Exp</span><span class="hl opt">.</span>Blt <span class="hl kwd">sub</span><span class="hl opt">);</span>
-  <span class="hl opt">(</span><span class="hl kwc">Exp</span><span class="hl opt">.</span>Var <span class="hl str">&quot;*&quot;</span><span class="hl opt">,</span> <span class="hl kwc">Exp</span><span class="hl opt">.</span>Blt <span class="hl kwd">mul</span><span class="hl opt">);</span>
-  <span class="hl opt">(</span><span class="hl kwc">Exp</span><span class="hl opt">.</span>Var <span class="hl str">&quot;/&quot;</span><span class="hl opt">,</span> <span class="hl kwc">Exp</span><span class="hl opt">.</span>Blt <span class="hl kwd">div</span><span class="hl opt">);</span>
-  <span class="hl opt">(</span><span class="hl kwc">Exp</span><span class="hl opt">.</span>Var <span class="hl str">&quot;=&quot;</span><span class="hl opt">,</span> <span class="hl kwc">Exp</span><span class="hl opt">.</span>Blt <span class="hl kwd">eq</span><span class="hl opt">);</span>
-  <span class="hl opt">(</span><span class="hl kwc">Exp</span><span class="hl opt">.</span>Var <span class="hl str">&quot;&lt;&quot;</span><span class="hl opt">,</span> <span class="hl kwc">Exp</span><span class="hl opt">.</span>Blt <span class="hl kwd">lt</span><span class="hl opt">);</span>
-  <span class="hl opt">(</span><span class="hl kwc">Exp</span><span class="hl opt">.</span>Var <span class="hl str">&quot;&gt;&quot;</span><span class="hl opt">,</span> <span class="hl kwc">Exp</span><span class="hl opt">.</span>Blt <span class="hl kwd">gt</span><span class="hl opt">);</span>
-  <span class="hl opt">(</span><span class="hl kwc">Exp</span><span class="hl opt">.</span>Var <span class="hl str">&quot;&lt;=&quot;</span><span class="hl opt">,</span> <span class="hl kwc">Exp</span><span class="hl opt">.</span>Blt <span class="hl kwd">le</span><span class="hl opt">);</span>
-  <span class="hl opt">(</span><span class="hl kwc">Exp</span><span class="hl opt">.</span>Var <span class="hl str">&quot;&gt;=&quot;</span><span class="hl opt">,</span> <span class="hl kwc">Exp</span><span class="hl opt">.</span>Blt <span class="hl kwd">ge</span><span class="hl opt">);</span>
-<span class="hl opt">]</span>
+let sub = function
+  | Exp.Num hd :: [] -&gt; Exp.Num (0.0 -. hd)
+  | Exp.Num hd :: tl -&gt;
+    begin match add tl with
+    | Exp.Num rest -&gt; Exp.Num (hd -. rest)
+    | _ -&gt; assert false
+    end
+  | _ -&gt; assert false
 
-<span class="hl com">(* Read-Eval-Print-Loop (REPL) *)</span>
+let div = function
+  | Exp.Num hd :: [] -&gt; Exp.Num (1.0 /. hd)
+  | Exp.Num hd :: tl -&gt;
+    begin match mul tl with
+    | Exp.Num rest -&gt; Exp.Num (hd /. rest)
+    | _ -&gt; assert false
+    end
+  | _ -&gt; assert false
 
-<span class="hl kwa">let rec</span> <span class="hl kwd">print</span> <span class="hl opt">=</span> parser
-  <span class="hl opt">| [&lt;</span> &#39;<span class="hl kwd">expr</span><span class="hl opt">;</span> stream <span class="hl opt">&gt;] -&gt;</span>
-    <span class="hl kwd">print_expr expr</span><span class="hl opt">;</span>
-    <span class="hl kwd">print</span> stream
-  <span class="hl opt">| [&lt; &gt;] -&gt; ()</span>
+let env = [
+  (Exp.Var &quot;+&quot;, Exp.Blt add);
+  (Exp.Var &quot;-&quot;, Exp.Blt sub);
+  (Exp.Var &quot;*&quot;, Exp.Blt mul);
+  (Exp.Var &quot;/&quot;, Exp.Blt div);
+  (Exp.Var &quot;=&quot;, Exp.Blt eq);
+  (Exp.Var &quot;&lt;&quot;, Exp.Blt lt);
+  (Exp.Var &quot;&gt;&quot;, Exp.Blt gt);
+  (Exp.Var &quot;&lt;=&quot;, Exp.Blt le);
+  (Exp.Var &quot;&gt;=&quot;, Exp.Blt ge);
+]
 
-<span class="hl kwa">let</span> <span class="hl opt">() =</span>
+(* Read-Eval-Print-Loop (REPL) *)
+
+let rec print = parser
+  | [&lt; &apos;expr; stream &gt;] -&gt;
+    print_expr expr;
+    print stream
+  | [&lt; &gt;] -&gt; ()
+
+let () =
   stdin
-  <span class="hl opt">|&gt;</span> <span class="hl kwc">Stream</span><span class="hl opt">.</span>of_channel
-  <span class="hl opt">|&gt;</span> <span class="hl kwd">lex</span>
-  <span class="hl opt">|&gt;</span> <span class="hl kwd">parse</span>
-  <span class="hl opt">|&gt;</span> <span class="hl kwd">eval env</span>
-  <span class="hl opt">|&gt;</span> <span class="hl kwd">print</span>
-</pre>
+  |&gt; Stream.of_channel
+  |&gt; lex
+  |&gt; parse
+  |&gt; eval env
+  |&gt; print
+</code></pre>
+
 </body>
+
 </html>
-<!--HTML generated by highlight 3.62, http://www.andre-simon.de/-->

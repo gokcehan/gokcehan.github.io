@@ -1,154 +1,164 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
+
 <head>
-<meta charset="ISO-8859-1">
-<title>dyn_arr.c</title>
-<link rel="stylesheet" type="text/css" href="../highlight.css">
+  <meta charset="utf-8">
+  <meta name="color-scheme" content="light dark">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>dyn_arr.c</title>
+  <link rel="stylesheet" href="../style/code.css">
+  <link rel="stylesheet" href="../highlightjs/github.min.css" media="screen and (prefers-color-scheme: light)">
+  <link rel="stylesheet" href="../highlightjs/github-dark.min.css" media="screen and (prefers-color-scheme: dark)">
+  <script src="../highlightjs/highlight-c.min.js"></script>
+  <script>hljs.highlightAll();</script>
 </head>
-<body class="hl">
-<pre class="hl"><span class="hl slc">//</span>
-<span class="hl slc">// dyn_arr.c</span>
-<span class="hl slc">//</span>
-<span class="hl slc">// Dynamic array</span>
-<span class="hl slc">//</span>
 
-<span class="hl ppc">#include &lt;stdlib.h&gt;</span>
+<body>
 
-<span class="hl ppc">#define ARR_INIT_CAP 2</span>
-<span class="hl ppc">#define ARR_GROW_RAT 2</span>
+<pre><code class="language-c">//
+// dyn_arr.c
+//
+// Dynamic array
+//
 
-<span class="hl ppc">#define TYPE int</span>
+#include &lt;stdlib.h&gt;
 
-<span class="hl kwb">struct</span> arr <span class="hl opt">{</span>
-    TYPE <span class="hl opt">*</span>buf<span class="hl opt">;</span>
-    <span class="hl kwb">int</span>   len<span class="hl opt">;</span>
-    <span class="hl kwb">int</span>   cap<span class="hl opt">;</span>
-<span class="hl opt">};</span>
+#define ARR_INIT_CAP 2
+#define ARR_GROW_RAT 2
 
-<span class="hl kwb">struct</span> arr <span class="hl opt">*</span><span class="hl kwd">arrnew</span><span class="hl opt">(</span><span class="hl kwb">void</span><span class="hl opt">);</span>
-<span class="hl kwb">struct</span> arr <span class="hl opt">*</span><span class="hl kwd">arrnewcap</span><span class="hl opt">(</span><span class="hl kwb">int</span><span class="hl opt">);</span>
-<span class="hl kwb">void</span>        <span class="hl kwd">arrdelete</span><span class="hl opt">(</span><span class="hl kwb">struct</span> arr <span class="hl opt">*);</span>
-<span class="hl kwb">int</span>         <span class="hl kwd">arrappend</span><span class="hl opt">(</span><span class="hl kwb">struct</span> arr <span class="hl opt">*,</span> TYPE<span class="hl opt">);</span>
-<span class="hl kwb">int</span>         <span class="hl kwd">arrresize</span><span class="hl opt">(</span><span class="hl kwb">struct</span> arr <span class="hl opt">*,</span> <span class="hl kwb">int</span><span class="hl opt">);</span>
-TYPE        <span class="hl kwd">arrremove</span><span class="hl opt">(</span><span class="hl kwb">struct</span> arr <span class="hl opt">*);</span>
+#define TYPE int
 
-<span class="hl kwc">inline</span> <span class="hl kwb">struct</span> arr <span class="hl opt">*</span>
-<span class="hl kwd">arrnew</span><span class="hl opt">(</span><span class="hl kwb">void</span><span class="hl opt">)</span>
-<span class="hl opt">{</span>
-    <span class="hl kwa">return</span> <span class="hl kwd">arrnewcap</span><span class="hl opt">(</span>ARR_INIT_CAP<span class="hl opt">);</span>
-<span class="hl opt">}</span>
+struct arr {
+    TYPE *buf;
+    int   len;
+    int   cap;
+};
 
-<span class="hl kwc">inline</span> <span class="hl kwb">struct</span> arr <span class="hl opt">*</span>
-<span class="hl kwd">arrnewcap</span><span class="hl opt">(</span><span class="hl kwb">int</span> cap<span class="hl opt">)</span>
-<span class="hl opt">{</span>
-    <span class="hl kwb">struct</span> arr <span class="hl opt">*</span>arr<span class="hl opt">;</span>
+struct arr *arrnew(void);
+struct arr *arrnewcap(int);
+void        arrdelete(struct arr *);
+int         arrappend(struct arr *, TYPE);
+int         arrresize(struct arr *, int);
+TYPE        arrremove(struct arr *);
 
-    <span class="hl kwa">if</span> <span class="hl opt">((</span>arr <span class="hl opt">=</span> <span class="hl kwd">malloc</span><span class="hl opt">(</span><span class="hl kwa">sizeof</span><span class="hl opt">(</span><span class="hl kwb">struct</span> arr<span class="hl opt">))) ==</span> NULL<span class="hl opt">) {</span>
-        <span class="hl kwa">return</span> NULL<span class="hl opt">;</span>
-    <span class="hl opt">}</span>
+inline struct arr *
+arrnew(void)
+{
+    return arrnewcap(ARR_INIT_CAP);
+}
 
-    <span class="hl kwa">if</span> <span class="hl opt">((</span>arr<span class="hl opt">-&gt;</span>buf <span class="hl opt">=</span> <span class="hl kwd">malloc</span><span class="hl opt">(</span>cap <span class="hl opt">*</span> <span class="hl kwa">sizeof</span><span class="hl opt">(</span>TYPE<span class="hl opt">))) ==</span> NULL<span class="hl opt">) {</span>
-        <span class="hl kwd">free</span><span class="hl opt">(</span>arr<span class="hl opt">);</span>
-        <span class="hl kwa">return</span> NULL<span class="hl opt">;</span>
-    <span class="hl opt">}</span>
+inline struct arr *
+arrnewcap(int cap)
+{
+    struct arr *arr;
 
-    arr<span class="hl opt">-&gt;</span>len <span class="hl opt">=</span> <span class="hl num">0</span><span class="hl opt">;</span>
-    arr<span class="hl opt">-&gt;</span>cap <span class="hl opt">=</span> cap<span class="hl opt">;</span>
+    if ((arr = malloc(sizeof(struct arr))) == NULL) {
+        return NULL;
+    }
 
-    <span class="hl kwa">return</span> arr<span class="hl opt">;</span>
-<span class="hl opt">}</span>
+    if ((arr-&gt;buf = malloc(cap * sizeof(TYPE))) == NULL) {
+        free(arr);
+        return NULL;
+    }
 
-<span class="hl kwc">inline</span> <span class="hl kwb">void</span>
-<span class="hl kwd">arrdelete</span><span class="hl opt">(</span><span class="hl kwb">struct</span> arr <span class="hl opt">*</span>arr<span class="hl opt">)</span>
-<span class="hl opt">{</span>
-    <span class="hl kwd">free</span><span class="hl opt">(</span>arr<span class="hl opt">-&gt;</span>buf<span class="hl opt">);</span>
-    <span class="hl kwd">free</span><span class="hl opt">(</span>arr<span class="hl opt">);</span>
-<span class="hl opt">}</span>
+    arr-&gt;len = 0;
+    arr-&gt;cap = cap;
 
-<span class="hl kwc">inline</span> <span class="hl kwb">int</span>
-<span class="hl kwd">arrappend</span><span class="hl opt">(</span><span class="hl kwb">struct</span> arr <span class="hl opt">*</span>arr<span class="hl opt">,</span> TYPE val<span class="hl opt">)</span>
-<span class="hl opt">{</span>
-    <span class="hl kwa">if</span> <span class="hl opt">(</span>arr<span class="hl opt">-&gt;</span>cap <span class="hl opt">&lt;=</span> arr<span class="hl opt">-&gt;</span>len <span class="hl opt">&amp;&amp;</span> <span class="hl kwd">arrresize</span><span class="hl opt">(</span>arr<span class="hl opt">,</span> arr<span class="hl opt">-&gt;</span>cap <span class="hl opt">*</span> ARR_GROW_RAT<span class="hl opt">) == -</span><span class="hl num">1</span><span class="hl opt">) {</span>
-        <span class="hl kwa">return</span> <span class="hl opt">-</span><span class="hl num">1</span><span class="hl opt">;</span>
-    <span class="hl opt">}</span>
+    return arr;
+}
 
-    arr<span class="hl opt">-&gt;</span>buf<span class="hl opt">[</span>arr<span class="hl opt">-&gt;</span>len<span class="hl opt">++] =</span> val<span class="hl opt">;</span>
+inline void
+arrdelete(struct arr *arr)
+{
+    free(arr-&gt;buf);
+    free(arr);
+}
 
-    <span class="hl kwa">return</span> <span class="hl num">0</span><span class="hl opt">;</span>
-<span class="hl opt">}</span>
+inline int
+arrappend(struct arr *arr, TYPE val)
+{
+    if (arr-&gt;cap &lt;= arr-&gt;len &amp;&amp; arrresize(arr, arr-&gt;cap * ARR_GROW_RAT) == -1) {
+        return -1;
+    }
 
-<span class="hl kwc">inline</span> <span class="hl kwb">int</span>
-<span class="hl kwd">arrresize</span><span class="hl opt">(</span><span class="hl kwb">struct</span> arr <span class="hl opt">*</span>arr<span class="hl opt">,</span> <span class="hl kwb">int</span> ncap<span class="hl opt">)</span>
-<span class="hl opt">{</span>
-    TYPE <span class="hl opt">*</span>nbuf<span class="hl opt">;</span>
+    arr-&gt;buf[arr-&gt;len++] = val;
 
-    <span class="hl kwa">if</span> <span class="hl opt">((</span>nbuf <span class="hl opt">=</span> <span class="hl kwd">realloc</span><span class="hl opt">(</span>arr<span class="hl opt">-&gt;</span>buf<span class="hl opt">,</span> ncap <span class="hl opt">*</span> <span class="hl kwa">sizeof</span><span class="hl opt">(</span>TYPE<span class="hl opt">))) ==</span> NULL<span class="hl opt">) {</span>
-        <span class="hl kwa">return</span> <span class="hl opt">-</span><span class="hl num">1</span><span class="hl opt">;</span>
-    <span class="hl opt">}</span>
+    return 0;
+}
 
-    arr<span class="hl opt">-&gt;</span>cap <span class="hl opt">=</span> ncap<span class="hl opt">;</span>
-    arr<span class="hl opt">-&gt;</span>buf <span class="hl opt">=</span> nbuf<span class="hl opt">;</span>
+inline int
+arrresize(struct arr *arr, int ncap)
+{
+    TYPE *nbuf;
 
-    <span class="hl kwa">return</span> <span class="hl num">0</span><span class="hl opt">;</span>
-<span class="hl opt">}</span>
+    if ((nbuf = realloc(arr-&gt;buf, ncap * sizeof(TYPE))) == NULL) {
+        return -1;
+    }
 
-<span class="hl kwc">inline</span> TYPE
-<span class="hl kwd">arrremove</span><span class="hl opt">(</span><span class="hl kwb">struct</span> arr <span class="hl opt">*</span>arr<span class="hl opt">)</span>
-<span class="hl opt">{</span>
-    <span class="hl kwa">return</span> arr<span class="hl opt">-&gt;</span>buf<span class="hl opt">[--</span>arr<span class="hl opt">-&gt;</span>len<span class="hl opt">];</span>
-<span class="hl opt">}</span>
+    arr-&gt;cap = ncap;
+    arr-&gt;buf = nbuf;
 
-<span class="hl slc">////////////////////////////////////////////////////////////////////////////////</span>
+    return 0;
+}
 
-<span class="hl ppc">#include &lt;stdio.h&gt;</span>
+inline TYPE
+arrremove(struct arr *arr)
+{
+    return arr-&gt;buf[--arr-&gt;len];
+}
 
-<span class="hl ppc">#define LIMIT 100</span>
+////////////////////////////////////////////////////////////////////////////////
 
-<span class="hl kwb">int</span> a <span class="hl opt">=</span> <span class="hl num">0</span><span class="hl opt">;</span>
-<span class="hl kwb">int</span> b <span class="hl opt">=</span> <span class="hl num">1</span><span class="hl opt">;</span>
+#include &lt;stdio.h&gt;
 
-<span class="hl kwb">int</span> <span class="hl kwd">get</span><span class="hl opt">(</span><span class="hl kwb">void</span><span class="hl opt">)</span>
-<span class="hl opt">{</span>
-    <span class="hl kwb">int</span> tmp <span class="hl opt">=</span> a<span class="hl opt">;</span>
-    a <span class="hl opt">=</span> b<span class="hl opt">;</span>
-    b <span class="hl opt">=</span> tmp <span class="hl opt">+</span> b<span class="hl opt">;</span>
-    <span class="hl kwa">return</span> tmp<span class="hl opt">;</span>
-<span class="hl opt">}</span>
+#define LIMIT 100
 
-<span class="hl kwb">void</span> <span class="hl kwd">process</span><span class="hl opt">(</span><span class="hl kwb">int</span> i<span class="hl opt">)</span>
-<span class="hl opt">{</span>
-    <span class="hl kwd">printf</span><span class="hl opt">(</span><span class="hl str">&quot;</span><span class="hl ipl">%d</span><span class="hl str"></span><span class="hl esc">\n</span><span class="hl str">&quot;</span><span class="hl opt">,</span> i<span class="hl opt">);</span>
-<span class="hl opt">}</span>
+int a = 0;
+int b = 1;
 
-<span class="hl kwb">int</span> <span class="hl kwd">main</span><span class="hl opt">(</span><span class="hl kwb">int</span> argc<span class="hl opt">,</span> <span class="hl kwb">char</span> <span class="hl opt">*</span>argv<span class="hl opt">[])</span>
-<span class="hl opt">{</span>
-    <span class="hl kwb">int</span> i<span class="hl opt">,</span> num<span class="hl opt">;</span>
+int get(void)
+{
+    int tmp = a;
+    a = b;
+    b = tmp + b;
+    return tmp;
+}
 
-    <span class="hl kwb">int</span> limit <span class="hl opt">=</span> argc <span class="hl opt">&lt;</span> <span class="hl num">2</span> <span class="hl opt">?</span> LIMIT <span class="hl opt">:</span> <span class="hl kwd">atoi</span><span class="hl opt">(</span>argv<span class="hl opt">[</span><span class="hl num">1</span><span class="hl opt">]);</span>
+void process(int i)
+{
+    printf(&quot;%d\n&quot;, i);
+}
 
-    <span class="hl kwb">struct</span> arr <span class="hl opt">*</span>arr <span class="hl opt">=</span> <span class="hl kwd">arrnew</span><span class="hl opt">();</span>
+int main(int argc, char *argv[])
+{
+    int i, num;
 
-    <span class="hl kwa">while</span> <span class="hl opt">((</span>num <span class="hl opt">=</span> <span class="hl kwd">get</span><span class="hl opt">()) &lt;</span> limit<span class="hl opt">) {</span>
-        <span class="hl kwd">arrappend</span><span class="hl opt">(</span>arr<span class="hl opt">,</span> num<span class="hl opt">);</span>
-    <span class="hl opt">}</span>
+    int limit = argc &lt; 2 ? LIMIT : atoi(argv[1]);
 
-    <span class="hl kwa">for</span> <span class="hl opt">(</span>i <span class="hl opt">=</span> <span class="hl num">0</span><span class="hl opt">;</span> i <span class="hl opt">&lt;</span> arr<span class="hl opt">-&gt;</span>len<span class="hl opt">; ++</span>i<span class="hl opt">) {</span>
-        <span class="hl kwd">process</span><span class="hl opt">(</span>arr<span class="hl opt">-&gt;</span>buf<span class="hl opt">[</span>i<span class="hl opt">]);</span>
-    <span class="hl opt">}</span>
+    struct arr *arr = arrnew();
 
-    <span class="hl kwa">for</span> <span class="hl opt">(</span>i <span class="hl opt">=</span> arr<span class="hl opt">-&gt;</span>len<span class="hl opt">-</span><span class="hl num">1</span><span class="hl opt">;</span> i <span class="hl opt">&gt;</span> <span class="hl num">0</span><span class="hl opt">; --</span>i<span class="hl opt">) {</span>
-        arr<span class="hl opt">-&gt;</span>buf<span class="hl opt">[</span>i<span class="hl opt">] -=</span> arr<span class="hl opt">-&gt;</span>buf<span class="hl opt">[</span>i<span class="hl opt">-</span><span class="hl num">1</span><span class="hl opt">];</span>
-    <span class="hl opt">}</span>
+    while ((num = get()) &lt; limit) {
+        arrappend(arr, num);
+    }
 
-    <span class="hl kwa">for</span> <span class="hl opt">(</span>i <span class="hl opt">=</span> arr<span class="hl opt">-&gt;</span>len<span class="hl opt">-</span><span class="hl num">1</span><span class="hl opt">;</span> i <span class="hl opt">&gt;=</span> <span class="hl num">0</span><span class="hl opt">; --</span>i<span class="hl opt">) {</span>
-        <span class="hl kwd">process</span><span class="hl opt">(</span><span class="hl kwd">arrremove</span><span class="hl opt">(</span>arr<span class="hl opt">));</span>
-    <span class="hl opt">}</span>
+    for (i = 0; i &lt; arr-&gt;len; ++i) {
+        process(arr-&gt;buf[i]);
+    }
 
-    <span class="hl kwd">arrdelete</span><span class="hl opt">(</span>arr<span class="hl opt">);</span>
+    for (i = arr-&gt;len-1; i &gt; 0; --i) {
+        arr-&gt;buf[i] -= arr-&gt;buf[i-1];
+    }
 
-    <span class="hl kwa">return</span> <span class="hl num">0</span><span class="hl opt">;</span>
-<span class="hl opt">}</span>
-</pre>
+    for (i = arr-&gt;len-1; i &gt;= 0; --i) {
+        process(arrremove(arr));
+    }
+
+    arrdelete(arr);
+
+    return 0;
+}
+</code></pre>
+
 </body>
+
 </html>
-<!--HTML generated by highlight 3.62, http://www.andre-simon.de/-->

@@ -1,117 +1,127 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
+
 <head>
-<meta charset="ISO-8859-1">
-<title>rsa.py</title>
-<link rel="stylesheet" type="text/css" href="../highlight.css">
+  <meta charset="utf-8">
+  <meta name="color-scheme" content="light dark">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>rsa.py</title>
+  <link rel="stylesheet" href="../style/code.css">
+  <link rel="stylesheet" href="../highlightjs/github.min.css" media="screen and (prefers-color-scheme: light)">
+  <link rel="stylesheet" href="../highlightjs/github-dark.min.css" media="screen and (prefers-color-scheme: dark)">
+  <script src="../highlightjs/highlight-python.min.js"></script>
+  <script>hljs.highlightAll();</script>
 </head>
-<body class="hl">
-<pre class="hl"><span class="hl slc">#!/usr/bin/env python</span>
-<span class="hl slc">#</span>
-<span class="hl slc"># rsa.py</span>
-<span class="hl slc">#</span>
-<span class="hl slc"># Simple RSA cryptosystem implementation</span>
-<span class="hl slc">#</span>
-<span class="hl slc"># RSA is a common public key cryptosystem. Asymmetric property relies on the</span>
-<span class="hl slc"># computational difficulty of factorization when a number is a product of two</span>
-<span class="hl slc"># large prime numbers. Encryption and decryption is performed using modular</span>
-<span class="hl slc"># exponentiation.</span>
-<span class="hl slc">#</span>
-<span class="hl slc"># Following numbers are computed during key generation:</span>
-<span class="hl slc">#</span>
-<span class="hl slc">#     n = pq where p and q are random large primes</span>
-<span class="hl slc">#     t = lcm(p-1, q-1)</span>
-<span class="hl slc">#     e is a random coprime of t</span>
-<span class="hl slc">#     d is the modular inverse of e (mod t)</span>
-<span class="hl slc">#</span>
-<span class="hl slc"># With these numbers, following keys are provided:</span>
-<span class="hl slc">#</span>
-<span class="hl slc">#     (n, e) is the encryption key (public)</span>
-<span class="hl slc">#     (n, d) is the decryption key (private)</span>
-<span class="hl slc">#</span>
-<span class="hl slc"># Using these keys, following operations are performed:</span>
-<span class="hl slc">#</span>
-<span class="hl slc">#     c = m^e (mod n) (encryption)</span>
-<span class="hl slc">#     m = c^d (mod n) (decryption)</span>
-<span class="hl slc">#</span>
-<span class="hl slc"># Implementation given here is neither fast nor secure enough to be of any</span>
-<span class="hl slc"># practical use besides educational purposes.</span>
 
-<span class="hl kwa">import</span> math
-<span class="hl kwa">import</span> random
+<body>
 
-<span class="hl kwa">def</span> <span class="hl kwd">is_prime</span><span class="hl opt">(</span>n<span class="hl opt">):</span>
-    <span class="hl kwa">if</span> n <span class="hl opt">&lt;</span> <span class="hl num">2</span><span class="hl opt">:</span>
-        <span class="hl kwa">return False</span>
-    <span class="hl kwa">for</span> i <span class="hl kwa">in</span> <span class="hl kwb">xrange</span><span class="hl opt">(</span><span class="hl num">2</span><span class="hl opt">,</span> <span class="hl kwb">int</span><span class="hl opt">(</span>math<span class="hl opt">.</span><span class="hl kwd">sqrt</span><span class="hl opt">(</span>n<span class="hl opt">)) +</span> <span class="hl num">1</span><span class="hl opt">):</span>
-        <span class="hl kwa">if</span> n <span class="hl opt">%</span> i <span class="hl opt">==</span> <span class="hl num">0</span><span class="hl opt">:</span>
-            <span class="hl kwa">return False</span>
-    <span class="hl kwa">return True</span>
+<pre><code class="language-python">#!/usr/bin/env python
+#
+# rsa.py
+#
+# Simple RSA cryptosystem implementation
+#
+# RSA is a common public key cryptosystem. Asymmetric property relies on the
+# computational difficulty of factorization when a number is a product of two
+# large prime numbers. Encryption and decryption is performed using modular
+# exponentiation.
+#
+# Following numbers are computed during key generation:
+#
+#     n = pq where p and q are random large primes
+#     t = lcm(p-1, q-1)
+#     e is a random coprime of t
+#     d is the modular inverse of e (mod t)
+#
+# With these numbers, following keys are provided:
+#
+#     (n, e) is the encryption key (public)
+#     (n, d) is the decryption key (private)
+#
+# Using these keys, following operations are performed:
+#
+#     c = m^e (mod n) (encryption)
+#     m = c^d (mod n) (decryption)
+#
+# Implementation given here is neither fast nor secure enough to be of any
+# practical use besides educational purposes.
 
-<span class="hl kwa">def</span> <span class="hl kwd">gen_prime</span><span class="hl opt">(</span>a<span class="hl opt">,</span> b<span class="hl opt">):</span>
-    r <span class="hl opt">=</span> random<span class="hl opt">.</span><span class="hl kwd">randrange</span><span class="hl opt">(</span>a<span class="hl opt">,</span> b<span class="hl opt">)</span>
-    <span class="hl kwa">while not</span> <span class="hl kwd">is_prime</span><span class="hl opt">(</span>r<span class="hl opt">):</span>
-        r <span class="hl opt">=</span> random<span class="hl opt">.</span><span class="hl kwd">randrange</span><span class="hl opt">(</span>a<span class="hl opt">,</span> b<span class="hl opt">)</span>
-    <span class="hl kwa">return</span> r
+import math
+import random
 
-<span class="hl kwa">def</span> <span class="hl kwd">gcd</span><span class="hl opt">(</span>a<span class="hl opt">,</span> b<span class="hl opt">):</span>
-    <span class="hl kwa">while</span> b<span class="hl opt">:</span>
-        a<span class="hl opt">,</span> b <span class="hl opt">=</span> b<span class="hl opt">,</span> a <span class="hl opt">%</span> b
-    <span class="hl kwa">return</span> a
+def is_prime(n):
+    if n &lt; 2:
+        return False
+    for i in xrange(2, int(math.sqrt(n)) + 1):
+        if n % i == 0:
+            return False
+    return True
 
-<span class="hl kwa">def</span> <span class="hl kwd">lcm</span><span class="hl opt">(</span>a<span class="hl opt">,</span> b<span class="hl opt">):</span>
-    <span class="hl kwa">return</span> <span class="hl opt">(</span>a <span class="hl opt">*</span> b<span class="hl opt">) /</span> <span class="hl kwd">gcd</span><span class="hl opt">(</span>a<span class="hl opt">,</span> b<span class="hl opt">)</span>
+def gen_prime(a, b):
+    r = random.randrange(a, b)
+    while not is_prime(r):
+        r = random.randrange(a, b)
+    return r
 
-<span class="hl kwa">def</span> <span class="hl kwd">gen_coprime</span><span class="hl opt">(</span>n<span class="hl opt">):</span>
-    r <span class="hl opt">=</span> random<span class="hl opt">.</span><span class="hl kwd">randrange</span><span class="hl opt">(</span><span class="hl num">2</span><span class="hl opt">,</span> n<span class="hl opt">)</span>
-    <span class="hl kwa">while</span> <span class="hl kwd">gcd</span><span class="hl opt">(</span>n<span class="hl opt">,</span> r<span class="hl opt">) !=</span> <span class="hl num">1</span><span class="hl opt">:</span>
-        r <span class="hl opt">=</span> random<span class="hl opt">.</span><span class="hl kwd">randrange</span><span class="hl opt">(</span><span class="hl num">2</span><span class="hl opt">,</span> n<span class="hl opt">)</span>
-    <span class="hl kwa">return</span> r
+def gcd(a, b):
+    while b:
+        a, b = b, a % b
+    return a
 
-<span class="hl kwa">def</span> <span class="hl kwd">mod_inverse</span><span class="hl opt">(</span>a<span class="hl opt">,</span> b<span class="hl opt">):</span>
-    r<span class="hl opt">,</span> r_old <span class="hl opt">=</span> a<span class="hl opt">,</span> b
-    x<span class="hl opt">,</span> x_old <span class="hl opt">=</span> <span class="hl num">1</span><span class="hl opt">,</span> <span class="hl num">0</span>
-    <span class="hl kwa">while</span> r<span class="hl opt">:</span>
-        <span class="hl opt">(</span>q<span class="hl opt">,</span> r<span class="hl opt">),</span> r_old <span class="hl opt">=</span> <span class="hl kwb">divmod</span><span class="hl opt">(</span>r_old<span class="hl opt">,</span> r<span class="hl opt">),</span> r
-        x<span class="hl opt">,</span> x_old <span class="hl opt">=</span> x_old <span class="hl opt">-</span> q <span class="hl opt">*</span> x<span class="hl opt">,</span> x
-    <span class="hl kwa">return</span> x_old <span class="hl opt">%</span> b
+def lcm(a, b):
+    return (a * b) / gcd(a, b)
 
-<span class="hl kwa">def</span> <span class="hl kwd">number</span><span class="hl opt">(</span>s<span class="hl opt">):</span>
-    <span class="hl kwa">return</span> <span class="hl kwb">long</span><span class="hl opt">(</span>s<span class="hl opt">.</span><span class="hl kwd">encode</span><span class="hl opt">(</span><span class="hl str">&#39;hex&#39;</span><span class="hl opt">),</span> <span class="hl num">16</span><span class="hl opt">)</span>
+def gen_coprime(n):
+    r = random.randrange(2, n)
+    while gcd(n, r) != 1:
+        r = random.randrange(2, n)
+    return r
 
-<span class="hl kwa">def</span> <span class="hl kwd">string</span><span class="hl opt">(</span>n<span class="hl opt">):</span>
-    <span class="hl kwa">return</span> <span class="hl kwb">hex</span><span class="hl opt">(</span>n<span class="hl opt">).</span><span class="hl kwd">lstrip</span><span class="hl opt">(</span><span class="hl str">&#39;0x&#39;</span><span class="hl opt">).</span><span class="hl kwd">rstrip</span><span class="hl opt">(</span><span class="hl str">&#39;L&#39;</span><span class="hl opt">).</span><span class="hl kwd">decode</span><span class="hl opt">(</span><span class="hl str">&#39;hex&#39;</span><span class="hl opt">)</span>
+def mod_inverse(a, b):
+    r, r_old = a, b
+    x, x_old = 1, 0
+    while r:
+        (q, r), r_old = divmod(r_old, r), r
+        x, x_old = x_old - q * x, x
+    return x_old % b
 
-<span class="hl kwa">def</span> <span class="hl kwd">encrypt</span><span class="hl opt">(</span>m<span class="hl opt">,</span> e<span class="hl opt">,</span> n<span class="hl opt">):</span>
-    <span class="hl kwa">return</span> <span class="hl kwb">pow</span><span class="hl opt">(</span>m<span class="hl opt">,</span> e<span class="hl opt">,</span> n<span class="hl opt">)</span>
+def number(s):
+    return long(s.encode(&apos;hex&apos;), 16)
 
-<span class="hl kwa">def</span> <span class="hl kwd">decrypt</span><span class="hl opt">(</span>c<span class="hl opt">,</span> d<span class="hl opt">,</span> n<span class="hl opt">):</span>
-    <span class="hl kwa">return</span> <span class="hl kwb">pow</span><span class="hl opt">(</span>c<span class="hl opt">,</span> d<span class="hl opt">,</span> n<span class="hl opt">)</span>
+def string(n):
+    return hex(n).lstrip(&apos;0x&apos;).rstrip(&apos;L&apos;).decode(&apos;hex&apos;)
 
-p <span class="hl opt">=</span> <span class="hl kwd">gen_prime</span><span class="hl opt">(</span><span class="hl num">1</span>e12<span class="hl opt">,</span> <span class="hl num">1</span>e13<span class="hl opt">)</span>
-q <span class="hl opt">=</span> <span class="hl kwd">gen_prime</span><span class="hl opt">(</span><span class="hl num">1</span>e14<span class="hl opt">,</span> <span class="hl num">1</span>e15<span class="hl opt">)</span>
-n <span class="hl opt">=</span> p <span class="hl opt">*</span> q
-t <span class="hl opt">=</span> <span class="hl kwd">lcm</span><span class="hl opt">(</span>p<span class="hl opt">-</span><span class="hl num">1</span><span class="hl opt">,</span> q<span class="hl opt">-</span><span class="hl num">1</span><span class="hl opt">)</span>
-e <span class="hl opt">=</span> <span class="hl kwd">gen_coprime</span><span class="hl opt">(</span>t<span class="hl opt">)</span>
-d <span class="hl opt">=</span> <span class="hl kwd">mod_inverse</span><span class="hl opt">(</span>e<span class="hl opt">,</span> t<span class="hl opt">)</span>
+def encrypt(m, e, n):
+    return pow(m, e, n)
 
-<span class="hl kwa">print</span> <span class="hl str">&#39;p&#39;</span><span class="hl opt">,</span> p
-<span class="hl kwa">print</span> <span class="hl str">&#39;q&#39;</span><span class="hl opt">,</span> q
-<span class="hl kwa">print</span> <span class="hl str">&#39;n&#39;</span><span class="hl opt">,</span> n
-<span class="hl kwa">print</span> <span class="hl str">&#39;t&#39;</span><span class="hl opt">,</span> t
-<span class="hl kwa">print</span> <span class="hl str">&#39;e&#39;</span><span class="hl opt">,</span> e
-<span class="hl kwa">print</span> <span class="hl str">&#39;d&#39;</span><span class="hl opt">,</span> d
+def decrypt(c, d, n):
+    return pow(c, d, n)
 
-<span class="hl slc"># size of message should be less than size of n</span>
-<span class="hl slc"># or you may need to divide the message into blocks</span>
-message <span class="hl opt">=</span> <span class="hl str">&quot;hello world&quot;</span>
+p = gen_prime(1e12, 1e13)
+q = gen_prime(1e14, 1e15)
+n = p * q
+t = lcm(p-1, q-1)
+e = gen_coprime(t)
+d = mod_inverse(e, t)
 
-<span class="hl kwa">print</span> <span class="hl str">&#39;m&#39;</span><span class="hl opt">,</span> message
-cipher <span class="hl opt">=</span> <span class="hl kwd">encrypt</span><span class="hl opt">(</span><span class="hl kwd">number</span><span class="hl opt">(</span>message<span class="hl opt">),</span> e<span class="hl opt">,</span> n<span class="hl opt">)</span>
-<span class="hl kwa">print</span> <span class="hl str">&#39;c&#39;</span><span class="hl opt">,</span> cipher
-message <span class="hl opt">=</span> <span class="hl kwd">string</span><span class="hl opt">(</span><span class="hl kwd">decrypt</span><span class="hl opt">(</span>cipher<span class="hl opt">,</span> d<span class="hl opt">,</span> n<span class="hl opt">))</span>
-<span class="hl kwa">print</span> <span class="hl str">&#39;m&#39;</span><span class="hl opt">,</span> message
-</pre>
+print &apos;p&apos;, p
+print &apos;q&apos;, q
+print &apos;n&apos;, n
+print &apos;t&apos;, t
+print &apos;e&apos;, e
+print &apos;d&apos;, d
+
+# size of message should be less than size of n
+# or you may need to divide the message into blocks
+message = &quot;hello world&quot;
+
+print &apos;m&apos;, message
+cipher = encrypt(number(message), e, n)
+print &apos;c&apos;, cipher
+message = string(decrypt(cipher, d, n))
+print &apos;m&apos;, message
+</code></pre>
+
 </body>
+
 </html>
-<!--HTML generated by highlight 3.62, http://www.andre-simon.de/-->

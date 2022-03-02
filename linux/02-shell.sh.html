@@ -1,464 +1,474 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
+
 <head>
-<meta charset="ISO-8859-1">
-<title>02-shell.sh</title>
-<link rel="stylesheet" type="text/css" href="../highlight.css">
+  <meta charset="utf-8">
+  <meta name="color-scheme" content="light dark">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>02-shell.sh</title>
+  <link rel="stylesheet" href="../style/code.css">
+  <link rel="stylesheet" href="../highlightjs/github.min.css" media="screen and (prefers-color-scheme: light)">
+  <link rel="stylesheet" href="../highlightjs/github-dark.min.css" media="screen and (prefers-color-scheme: dark)">
+  <script src="../highlightjs/highlight-bash.min.js"></script>
+  <script>hljs.highlightAll();</script>
 </head>
-<body class="hl">
-<pre class="hl"><span class="hl slc">#!/bin/sh</span>
-<span class="hl slc"># see also `man sh` and `man bash`</span>
-<span class="hl slc"># see https://wiki.ubuntu.com/DashAsBinSh for bash specific (non-POSIX) features</span>
-
-<span class="hl slc">## ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~</span>
-<span class="hl slc">## EXPANSIONS</span>
-<span class="hl slc">## ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~</span>
-
-<span class="hl slc"># bc (1) - An arbitrary precision calculator language</span>
-
-<span class="hl slc">## tilde expansion</span>
-
-<span class="hl kwb">echo</span> ~      <span class="hl slc"># /home/gokcehan</span>
-<span class="hl kwb">echo</span> ~foo   <span class="hl slc"># ~foo</span>
-<span class="hl kwb">echo</span> ~<span class="hl opt">/</span>foo  <span class="hl slc"># /home/gokcehan/foo</span>
-<span class="hl kwb">echo</span> foo~   <span class="hl slc"># foo~</span>
-<span class="hl kwb">echo</span> foo<span class="hl opt">/</span>~  <span class="hl slc"># foo/~</span>
-<span class="hl kwb">echo</span> <span class="hl str">&#39;~&#39;</span>    <span class="hl slc"># ~</span>
-<span class="hl kwb">echo</span> <span class="hl str">&quot;~&quot;</span>    <span class="hl slc"># ~</span>
-
-<span class="hl slc">## parameter expansion</span>
-
-foo<span class="hl opt">=</span><span class="hl str">&quot;hello&quot;</span>
-
-<span class="hl kwb">echo</span> <span class="hl kwd">$foo</span>       <span class="hl slc"># hello</span>
-<span class="hl kwb">echo</span> <span class="hl kwd">$foobar</span>    <span class="hl slc"># (prints nothing since there is no $foobar)</span>
-<span class="hl kwb">echo</span> <span class="hl kwd">${foo}</span>bar  <span class="hl slc"># hellobar</span>
-<span class="hl kwb">echo</span> <span class="hl str">&#39;</span><span class="hl ipl">$foo</span><span class="hl str">&#39;</span>     <span class="hl slc"># $foo</span>
-<span class="hl kwb">echo</span> <span class="hl str">&quot;</span><span class="hl ipl">$foo</span><span class="hl str">&quot;</span>     <span class="hl slc"># hello</span>
-
-<span class="hl slc">## command substitution</span>
-
-<span class="hl kwc">which ls</span>          <span class="hl slc"># /bin/ls</span>
-<span class="hl kwc">ls</span> <span class="hl kwb">-l</span> <span class="hl opt">/</span>bin<span class="hl opt">/</span><span class="hl kwc">ls</span>     <span class="hl slc"># -rwxr-xr-x 1 root root 133792 Oca 18  2018 /bin/ls</span>
-<span class="hl kwc">ls</span> <span class="hl kwb">-l</span> <span class="hl str">`which ls`</span>  <span class="hl slc"># -rwxr-xr-x 1 root root 133792 Oca 18  2018 /bin/ls</span>
-
-<span class="hl kwb">echo</span> <span class="hl str">`which ls`</span>            <span class="hl slc"># /bin/ls</span>
-<span class="hl kwb">echo</span> <span class="hl str">`ls -l \`</span><span class="hl kwc">which ls</span>\<span class="hl str">``</span>  <span class="hl slc"># -rwxr-xr-x 1 root root 133792 Oca 18  2018 /bin/ls</span>
-<span class="hl kwb">echo</span> <span class="hl kwd">$(which ls)</span>           <span class="hl slc"># /bin/ls</span>
-<span class="hl kwb">echo</span> <span class="hl kwd">$(ls -l $(which ls)</span><span class="hl opt">)</span>  <span class="hl slc"># -rwxr-xr-x 1 root root 133792 Oca 18  2018 /bin/ls</span>
-<span class="hl kwb">echo</span> <span class="hl str">&#39;`which ls`&#39;</span>          <span class="hl slc"># `which ls`</span>
-<span class="hl kwb">echo</span> <span class="hl str">&quot;`which ls`&quot;</span>          <span class="hl slc"># /bin/ls</span>
-
-<span class="hl slc">## arithmetic expansion</span>
-
-<span class="hl kwb">echo</span> <span class="hl num">2</span><span class="hl opt">+</span><span class="hl num">2</span>                   <span class="hl slc"># 2+2</span>
-<span class="hl kwb">echo</span> <span class="hl kwd">$((2+2)</span><span class="hl opt">)</span>              <span class="hl slc"># 4</span>
-<span class="hl kwb">echo</span> <span class="hl kwd">$((4/2)</span><span class="hl opt">)</span>              <span class="hl slc"># 2</span>
-<span class="hl kwb">echo</span> <span class="hl kwd">$((5/2)</span><span class="hl opt">)</span>              <span class="hl slc"># 2</span>
-<span class="hl kwb">echo</span> <span class="hl str">&#39;5/2&#39;</span> <span class="hl opt">|</span> <span class="hl kwc">bc</span>            <span class="hl slc"># 2</span>
-<span class="hl kwb">echo</span> <span class="hl str">&#39;scale=10; 5/2&#39;</span> <span class="hl opt">|</span> <span class="hl kwc">bc</span>  <span class="hl slc"># 2.5000000000</span>
-<span class="hl kwb">echo</span> <span class="hl str">&#39;5/2&#39;</span> <span class="hl opt">|</span> <span class="hl kwc">bc</span> <span class="hl kwb">-l</span>         <span class="hl slc"># 2.50000000000000000000</span>
-
-<span class="hl slc">## glob expansion</span>
-
-<span class="hl kwb">echo</span> <span class="hl opt">*</span>       <span class="hl slc"># foo foo.c bar bar.c ...</span>
-<span class="hl kwb">echo</span> <span class="hl opt">*</span>.c     <span class="hl slc"># foo.c bar.c ...</span>
-<span class="hl kwb">echo</span> <span class="hl opt">*</span>.<span class="hl opt">[</span>ch<span class="hl opt">]</span>  <span class="hl slc"># foo.c bar.h ...</span>
-<span class="hl kwb">echo</span> <span class="hl opt">*</span>.?     <span class="hl slc"># foo.c bar.h baz.a ...</span>
-<span class="hl kwb">echo</span> <span class="hl str">&#39;*&#39;</span>     <span class="hl slc"># *</span>
-<span class="hl kwb">echo</span> <span class="hl str">&quot;*&quot;</span>     <span class="hl slc"># *</span>
-
-<span class="hl slc">## brace expansion (bash only -- not POSIX standard)</span>
-
-<span class="hl kwb">echo</span> foo.<span class="hl opt">{</span>c<span class="hl opt">,</span>h<span class="hl opt">}</span>    <span class="hl slc"># foo.c foo.h</span>
-<span class="hl kwb">echo</span> foo<span class="hl opt">{</span>.c<span class="hl opt">,}</span>     <span class="hl slc"># foo.c foo</span>
-<span class="hl kwb">echo</span> <span class="hl str">&#39;foo.{c,h}&#39;</span>  <span class="hl slc"># foo.{c,h}</span>
-<span class="hl kwb">echo</span> <span class="hl str">&quot;foo.{c,h}&quot;</span>  <span class="hl slc"># foo.{c,h}</span>
-
-<span class="hl slc">## ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~</span>
-<span class="hl slc">## CONDITIONALS</span>
-<span class="hl slc">## ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~</span>
-
-<span class="hl slc"># true (1) - do nothing, successfully</span>
-<span class="hl slc"># false (1) - do nothing, unsuccessfully</span>
-<span class="hl slc"># test (1) - check file types and compare values</span>
-<span class="hl slc"># [ (1) - check file types and compare values</span>
-<span class="hl slc"># uname (1) - print system information</span>
-
-<span class="hl slc"># run an example command</span>
-<span class="hl kwb">echo</span> hello world
-<span class="hl slc"># hello world</span>
-
-<span class="hl slc"># show the return value of last command (0 is true/success, non-0 is false/fail)</span>
-<span class="hl kwb">echo</span> $?
-<span class="hl slc"># 0</span>
-
-<span class="hl slc"># TIP: you may put the following in your &#39;~/.bashrc&#39; to display error codes</span>
-EC<span class="hl opt">() {</span> <span class="hl kwb">echo -e</span> <span class="hl str">&#39;\e[1;33m&#39;</span>code $?<span class="hl str">&#39;\e[m</span><span class="hl esc">\n</span><span class="hl str">&#39;</span><span class="hl opt">; }</span>
-<span class="hl kwb">trap</span> EC ERR
-
-<span class="hl slc"># statement separator &#39;;&#39; is optional at the end of line</span>
-<span class="hl kwb">echo</span> hello<span class="hl opt">;</span>
-<span class="hl slc"># hello</span>
-
-<span class="hl slc"># use &#39;;&#39; to separate multiple statements in a single line</span>
-<span class="hl kwb">echo</span> hello<span class="hl opt">;</span> <span class="hl kwb">echo</span> world
-<span class="hl slc"># hello</span>
-<span class="hl slc"># world</span>
-
-<span class="hl slc"># run &#39;true&#39; and show its return value</span>
-true<span class="hl opt">;</span> <span class="hl kwb">echo</span> $?
-<span class="hl slc"># 0</span>
 
-<span class="hl slc"># run &#39;false&#39; and show its return value</span>
-false<span class="hl opt">;</span> <span class="hl kwb">echo</span> $?
-<span class="hl slc"># 1</span>
+<body>
+
+<pre><code class="language-bash">#!/bin/sh
+# see also `man sh` and `man bash`
+# see https://wiki.ubuntu.com/DashAsBinSh for bash specific (non-POSIX) features
+
+## ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+## EXPANSIONS
+## ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+# bc (1) - An arbitrary precision calculator language
 
-<span class="hl slc"># run &#39;echo&#39; command since first condition is true (short-circuit evaluation)</span>
-true <span class="hl opt">&amp;&amp;</span> <span class="hl kwb">echo</span> <span class="hl str">&#39;is true&#39;</span>
-<span class="hl slc"># is true</span>
+## tilde expansion
+
+echo ~      # /home/gokcehan
+echo ~foo   # ~foo
+echo ~/foo  # /home/gokcehan/foo
+echo foo~   # foo~
+echo foo/~  # foo/~
+echo &apos;~&apos;    # ~
+echo &quot;~&quot;    # ~
+
+## parameter expansion
 
-<span class="hl slc"># skip &#39;echo&#39; command since first condition is false (short-circuit evaluation)</span>
-false <span class="hl opt">&amp;&amp;</span> <span class="hl kwb">echo</span> <span class="hl str">&#39;is false&#39;</span>
-<span class="hl slc"># (no output)</span>
+foo=&quot;hello&quot;
+
+echo $foo       # hello
+echo $foobar    # (prints nothing since there is no $foobar)
+echo ${foo}bar  # hellobar
+echo &apos;$foo&apos;     # $foo
+echo &quot;$foo&quot;     # hello
 
-<span class="hl slc"># run first &#39;echo&#39; command since first condition is true (short-circuit evaluation)</span>
-true <span class="hl opt">&amp;&amp;</span> <span class="hl kwb">echo</span> <span class="hl str">&#39;is true&#39;</span> <span class="hl opt">||</span> <span class="hl kwb">echo</span> <span class="hl str">&#39;is false&#39;</span>
-<span class="hl slc"># is true</span>
+## command substitution
+
+which ls          # /bin/ls
+ls -l /bin/ls     # -rwxr-xr-x 1 root root 133792 Oca 18  2018 /bin/ls
+ls -l `which ls`  # -rwxr-xr-x 1 root root 133792 Oca 18  2018 /bin/ls
+
+echo `which ls`            # /bin/ls
+echo `ls -l \`which ls\``  # -rwxr-xr-x 1 root root 133792 Oca 18  2018 /bin/ls
+echo $(which ls)           # /bin/ls
+echo $(ls -l $(which ls))  # -rwxr-xr-x 1 root root 133792 Oca 18  2018 /bin/ls
+echo &apos;`which ls`&apos;          # `which ls`
+echo &quot;`which ls`&quot;          # /bin/ls
+
+## arithmetic expansion
 
-<span class="hl slc"># run second &#39;echo&#39; command since first condition is false (short-circuit evaluation)</span>
-false <span class="hl opt">&amp;&amp;</span> <span class="hl kwb">echo</span> <span class="hl str">&#39;is true&#39;</span> <span class="hl opt">||</span> <span class="hl kwb">echo</span> <span class="hl str">&#39;is false&#39;</span>
-<span class="hl slc"># is false</span>
+echo 2+2                   # 2+2
+echo $((2+2))              # 4
+echo $((4/2))              # 2
+echo $((5/2))              # 2
+echo &apos;5/2&apos; | bc            # 2
+echo &apos;scale=10; 5/2&apos; | bc  # 2.5000000000
+echo &apos;5/2&apos; | bc -l         # 2.50000000000000000000
 
-<span class="hl slc"># check whether &#39;/bin&#39; exists</span>
-<span class="hl kwb">test -e</span> <span class="hl opt">/</span>bin<span class="hl opt">;</span> <span class="hl kwb">echo</span> $?
-<span class="hl slc"># 0</span>
+## glob expansion
+
+echo *       # foo foo.c bar bar.c ...
+echo *.c     # foo.c bar.c ...
+echo *.[ch]  # foo.c bar.h ...
+echo *.?     # foo.c bar.h baz.a ...
+echo &apos;*&apos;     # *
+echo &quot;*&quot;     # *
 
-<span class="hl slc"># check whether &#39;/bin/ls&#39; exists</span>
-<span class="hl kwb">test -e</span> <span class="hl opt">/</span>bin<span class="hl opt">/</span><span class="hl kwc">ls</span><span class="hl opt">;</span> <span class="hl kwb">echo</span> $?
-<span class="hl slc"># 0</span>
+## brace expansion (bash only -- not POSIX standard)
+
+echo foo.{c,h}    # foo.c foo.h
+echo foo{.c,}     # foo.c foo
+echo &apos;foo.{c,h}&apos;  # foo.{c,h}
+echo &quot;foo.{c,h}&quot;  # foo.{c,h}
 
-<span class="hl slc"># check whether &#39;/bin&#39; exists as a file</span>
-<span class="hl kwb">test -f</span> <span class="hl opt">/</span>bin<span class="hl opt">;</span> <span class="hl kwb">echo</span> $?
-<span class="hl slc"># 1</span>
+## ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+## CONDITIONALS
+## ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-<span class="hl slc"># check whether &#39;/bin/ls&#39; exists as a file</span>
-<span class="hl kwb">test -f</span> <span class="hl opt">/</span>bin<span class="hl opt">/</span><span class="hl kwc">ls</span><span class="hl opt">;</span> <span class="hl kwb">echo</span> $?
-<span class="hl slc"># 0</span>
+# true (1) - do nothing, successfully
+# false (1) - do nothing, unsuccessfully
+# test (1) - check file types and compare values
+# [ (1) - check file types and compare values
+# uname (1) - print system information
+
+# run an example command
+echo hello world
+# hello world
+
+# show the return value of last command (0 is true/success, non-0 is false/fail)
+echo $?
+# 0
+
+# TIP: you may put the following in your &apos;~/.bashrc&apos; to display error codes
+EC() { echo -e &apos;\e[1;33m&apos;code $?&apos;\e[m\n&apos;; }
+trap EC ERR
+
+# statement separator &apos;;&apos; is optional at the end of line
+echo hello;
+# hello
+
+# use &apos;;&apos; to separate multiple statements in a single line
+echo hello; echo world
+# hello
+# world
+
+# run &apos;true&apos; and show its return value
+true; echo $?
+# 0
+
+# run &apos;false&apos; and show its return value
+false; echo $?
+# 1
+
+# run &apos;echo&apos; command since first condition is true (short-circuit evaluation)
+true &amp;&amp; echo &apos;is true&apos;
+# is true
+
+# skip &apos;echo&apos; command since first condition is false (short-circuit evaluation)
+false &amp;&amp; echo &apos;is false&apos;
+# (no output)
+
+# run first &apos;echo&apos; command since first condition is true (short-circuit evaluation)
+true &amp;&amp; echo &apos;is true&apos; || echo &apos;is false&apos;
+# is true
 
-<span class="hl slc"># check whether &#39;/path/to/non/existent/file&#39; exists as a file</span>
-<span class="hl kwb">test -f</span> <span class="hl opt">/</span>path<span class="hl opt">/</span>to<span class="hl opt">/</span>non<span class="hl opt">/</span>existent<span class="hl opt">/</span><span class="hl kwc">file</span><span class="hl opt">;</span> <span class="hl kwb">echo</span> $?
-<span class="hl slc"># 1</span>
+# run second &apos;echo&apos; command since first condition is false (short-circuit evaluation)
+false &amp;&amp; echo &apos;is true&apos; || echo &apos;is false&apos;
+# is false
 
-<span class="hl slc"># check whether &#39;/bin&#39; exists as a directory</span>
-<span class="hl kwb">test -d</span> <span class="hl opt">/</span>bin<span class="hl opt">;</span> <span class="hl kwb">echo</span> $?
-<span class="hl slc"># 0</span>
+# check whether &apos;/bin&apos; exists
+test -e /bin; echo $?
+# 0
 
-<span class="hl slc"># check whether &#39;/bin/ls&#39; exists as a directory</span>
-<span class="hl kwb">test -d</span> <span class="hl opt">/</span>bin<span class="hl opt">/</span><span class="hl kwc">ls</span><span class="hl opt">;</span> <span class="hl kwb">echo</span> $?
-<span class="hl slc"># 1</span>
-
-<span class="hl slc"># check whether &#39;/path/to/non/existent/dir&#39; exists as a directory</span>
-<span class="hl kwb">test -d</span> <span class="hl opt">/</span>path<span class="hl opt">/</span>to<span class="hl opt">/</span>non<span class="hl opt">/</span>existent<span class="hl opt">/</span>dir<span class="hl opt">;</span> <span class="hl kwb">echo</span> $?
-<span class="hl slc"># 1</span>
+# check whether &apos;/bin/ls&apos; exists
+test -e /bin/ls; echo $?
+# 0
 
-<span class="hl slc"># check whether &#39;/bin/ls&#39; is readable</span>
-<span class="hl kwb">test -r</span> <span class="hl opt">/</span>bin<span class="hl opt">/</span><span class="hl kwc">ls</span><span class="hl opt">;</span> <span class="hl kwb">echo</span> $?
-<span class="hl slc"># 0</span>
-
-<span class="hl slc"># check whether &#39;/bin/ls&#39; is writable</span>
-<span class="hl kwb">test -w</span> <span class="hl opt">/</span>bin<span class="hl opt">/</span><span class="hl kwc">ls</span><span class="hl opt">;</span> <span class="hl kwb">echo</span> $?
-<span class="hl slc"># 1</span>
-
-<span class="hl slc"># check whether &#39;/bin/ls&#39; is readable AND writable</span>
-<span class="hl kwb">test -r</span> <span class="hl opt">/</span>bin<span class="hl opt">/</span><span class="hl kwc">ls</span> <span class="hl kwb">-a -w</span> <span class="hl opt">/</span>bin<span class="hl opt">/</span><span class="hl kwc">ls</span><span class="hl opt">;</span> <span class="hl kwb">echo</span> $?
-<span class="hl slc"># 1</span>
-
-<span class="hl slc"># check whether &#39;/bin/ls&#39; is readable OR writable</span>
-<span class="hl kwb">test -r</span> <span class="hl opt">/</span>bin<span class="hl opt">/</span><span class="hl kwc">ls</span> <span class="hl kwb">-o -w</span> <span class="hl opt">/</span>bin<span class="hl opt">/</span><span class="hl kwc">ls</span><span class="hl opt">;</span> <span class="hl kwb">echo</span> $?
-<span class="hl slc"># 0</span>
-
-<span class="hl slc"># check whether &#39;/bin/ls&#39; is NOT readable</span>
-<span class="hl kwb">test</span> <span class="hl opt">!</span> <span class="hl kwb">-r</span> <span class="hl opt">/</span>bin<span class="hl opt">/</span><span class="hl kwc">ls</span><span class="hl opt">;</span> <span class="hl kwb">echo</span> $?
-<span class="hl slc"># 1</span>
-
-<span class="hl slc"># check whether &#39;HOSTNAME&#39; variable is of non-zero length</span>
-<span class="hl kwb">test -n</span> <span class="hl kwd">$HOSTNAME</span><span class="hl opt">;</span> <span class="hl kwb">echo</span> $?
-<span class="hl slc"># 0</span>
-
-<span class="hl slc"># check whether &#39;HOSTNAME&#39; variable is of zero length</span>
-<span class="hl kwb">test -z</span> <span class="hl kwd">$HOSTNAME</span><span class="hl opt">;</span> <span class="hl kwb">echo</span> $?
-<span class="hl slc"># 1</span>
-
-<span class="hl slc"># check whether the kernel is &#39;Linux&#39;</span>
-<span class="hl kwb">test</span> <span class="hl kwd">$(uname -s)</span> <span class="hl opt">=</span> <span class="hl str">&quot;Linux&quot;</span><span class="hl opt">;</span> <span class="hl kwb">echo</span> $?
-<span class="hl slc"># 0</span>
-
-<span class="hl slc"># check whether the machine is &#39;x86_64&#39;</span>
-<span class="hl kwb">test</span> <span class="hl kwd">$(uname -m)</span> <span class="hl opt">!=</span> <span class="hl str">&quot;x86_64&quot;</span><span class="hl opt">;</span> <span class="hl kwb">echo</span> $?
-<span class="hl slc"># 1</span>
-
-<span class="hl slc"># check whether &#39;/bin&#39; exists (alternative syntax)</span>
-<span class="hl opt">[</span> <span class="hl kwb">-e</span> <span class="hl opt">/</span>bin <span class="hl opt">];</span> <span class="hl kwb">echo</span> $?
-<span class="hl slc"># 0</span>
-
-<span class="hl slc"># you need a space after &#39;[&#39;</span>
-<span class="hl opt">[</span><span class="hl kwb">-e</span> <span class="hl opt">/</span>bin <span class="hl opt">];</span> <span class="hl kwb">echo</span> $?
-<span class="hl slc"># /bin/bash: [-e: command not found</span>
-
-<span class="hl slc"># you need a space before &#39;]&#39;</span>
-<span class="hl opt">[</span> <span class="hl kwb">-e</span> <span class="hl opt">/</span>bin<span class="hl opt">];</span> <span class="hl kwb">echo</span> $?
-<span class="hl slc"># /bin/bash: line 0: [: missing `]&#39;</span>
-
-<span class="hl slc"># you need a space before &#39;=&#39;</span>
-<span class="hl opt">[</span> <span class="hl kwd">$(uname -m)</span><span class="hl opt">=</span> <span class="hl str">&quot;x86_64&quot;</span> <span class="hl opt">];</span> <span class="hl kwb">echo</span> $?
-<span class="hl slc"># /bin/bash: line 0: [: x86_64=: unary operator expected</span>
-
-<span class="hl slc"># you need a space after &#39;=&#39;</span>
-<span class="hl opt">[</span> <span class="hl kwd">$(uname -m)</span> <span class="hl opt">=</span><span class="hl str">&quot;x86_64&quot;</span> <span class="hl opt">];</span> <span class="hl kwb">echo</span> $?
-<span class="hl slc"># /bin/bash: line 0: [: x86_64: unary operator expected</span>
-
-<span class="hl slc">## ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~</span>
-<span class="hl slc">## CONTROL FLOW</span>
-<span class="hl slc">## ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~</span>
-
-<span class="hl slc"># basename (1) - strip directory and suffix from filenames</span>
-<span class="hl slc"># seq (1) - print a sequence of numbers</span>
-
-<span class="hl slc">## if/elif/else/fi</span>
-
-arch<span class="hl opt">=</span><span class="hl kwd">$(uname -m)</span>
-
-<span class="hl kwa">if</span> <span class="hl opt">[</span> <span class="hl kwd">$arch</span> <span class="hl opt">=</span> <span class="hl str">&quot;x86_64&quot;</span> <span class="hl opt">]</span>
-<span class="hl kwa">then</span>
-    <span class="hl kwb">echo</span> <span class="hl str">&#39;system is 64 bit&#39;</span>
-<span class="hl kwa">fi</span>
-<span class="hl slc"># system is 64 bit</span>
-
-<span class="hl kwa">if</span> <span class="hl opt">[</span> <span class="hl kwd">$arch</span> <span class="hl opt">=</span> <span class="hl str">&quot;x86_64&quot;</span> <span class="hl opt">];</span> <span class="hl kwa">then</span>
-    <span class="hl kwb">echo</span> <span class="hl str">&#39;system is 64 bit&#39;</span>
-<span class="hl kwa">fi</span>
-<span class="hl slc"># system is 64 bit</span>
-
-<span class="hl kwa">if</span> <span class="hl opt">[</span> <span class="hl kwd">$arch</span> <span class="hl opt">=</span> <span class="hl str">&quot;x86_64&quot;</span> <span class="hl opt">];</span> <span class="hl kwa">then</span> <span class="hl kwb">echo</span> <span class="hl str">&#39;system is 64 bit&#39;</span><span class="hl opt">;</span> <span class="hl kwa">fi</span>
-<span class="hl slc"># system is 64 bit</span>
-
-<span class="hl kwa">if</span> <span class="hl opt">[</span> <span class="hl kwd">$arch</span> <span class="hl opt">=</span> <span class="hl str">&quot;x86_64&quot;</span> <span class="hl opt">];</span> <span class="hl kwa">then</span>
-    <span class="hl kwb">echo</span> <span class="hl str">&#39;system is 64 bit&#39;</span>
-<span class="hl kwa">elif</span> <span class="hl opt">[</span> <span class="hl kwd">$arch</span> <span class="hl opt">=</span> <span class="hl str">&quot;i686&quot;</span> <span class="hl opt">];</span> <span class="hl kwa">then</span>
-    <span class="hl kwb">echo</span> <span class="hl str">&#39;system is 32 bit&#39;</span>
-<span class="hl kwa">fi</span>
-<span class="hl slc"># system is 64 bit</span>
-
-<span class="hl kwa">if</span> <span class="hl opt">[</span> <span class="hl kwd">$arch</span> <span class="hl opt">=</span> <span class="hl str">&quot;x86_64&quot;</span> <span class="hl opt">];</span> <span class="hl kwa">then</span>
-    <span class="hl kwb">echo</span> <span class="hl str">&#39;system is 64 bit&#39;</span>
-<span class="hl kwa">elif</span> <span class="hl opt">[</span> <span class="hl kwd">$arch</span> <span class="hl opt">=</span> <span class="hl str">&quot;i686&quot;</span> <span class="hl opt">];</span> <span class="hl kwa">then</span>
-    <span class="hl kwb">echo</span> <span class="hl str">&#39;system is 32 bit&#39;</span>
-<span class="hl kwa">else</span>
-    <span class="hl kwb">echo</span> <span class="hl str">&#39;system is unknown&#39;</span>
-<span class="hl kwa">fi</span>
-<span class="hl slc"># system is 64 bit</span>
-
-<span class="hl slc">## while/until/done</span>
-
-i<span class="hl opt">=</span><span class="hl num">0</span>
-<span class="hl kwa">while</span> <span class="hl opt">[</span> <span class="hl kwd">$i</span> <span class="hl kwb">-lt</span> <span class="hl num">5</span> <span class="hl opt">];</span> <span class="hl kwa">do</span>
-    <span class="hl kwc">sleep</span> <span class="hl num">1</span>
-    i<span class="hl opt">=</span><span class="hl kwd">$((i+1)</span><span class="hl opt">)</span>
-    <span class="hl kwb">echo</span> <span class="hl str">&quot;</span><span class="hl ipl">$i</span> <span class="hl str">second(s) have passed&quot;</span>
-<span class="hl kwa">done</span>
-<span class="hl slc"># 1 second(s) have passed</span>
-<span class="hl slc"># 2 second(s) have passed</span>
-<span class="hl slc"># 3 second(s) have passed</span>
-<span class="hl slc"># 4 second(s) have passed</span>
-<span class="hl slc"># 5 second(s) have passed</span>
-
-i<span class="hl opt">=</span><span class="hl num">0</span>
-<span class="hl kwa">until</span> <span class="hl opt">[</span> <span class="hl kwd">$i</span> <span class="hl kwb">-ge</span> <span class="hl num">5</span> <span class="hl opt">];</span> <span class="hl kwa">do</span>
-    <span class="hl kwc">sleep</span> <span class="hl num">1</span>
-    i<span class="hl opt">=</span><span class="hl kwd">$((i+1)</span><span class="hl opt">)</span>
-    <span class="hl kwb">echo</span> <span class="hl str">&quot;</span><span class="hl ipl">$i</span> <span class="hl str">second(s) have passed&quot;</span>
-<span class="hl kwa">done</span>
-<span class="hl slc"># 1 second(s) have passed</span>
-<span class="hl slc"># 2 second(s) have passed</span>
-<span class="hl slc"># 3 second(s) have passed</span>
-<span class="hl slc"># 4 second(s) have passed</span>
-<span class="hl slc"># 5 second(s) have passed</span>
-
-<span class="hl slc">## for/done</span>
-
-<span class="hl kwa">for</span> fruit <span class="hl kwa">in</span> apple orange banana<span class="hl opt">;</span> <span class="hl kwa">do</span>
-    <span class="hl kwb">echo</span> <span class="hl kwd">$fruit</span>
-<span class="hl kwa">done</span>
-<span class="hl slc"># apple</span>
-<span class="hl slc"># orange</span>
-<span class="hl slc"># banana</span>
-
-<span class="hl kwa">for</span> fruit <span class="hl kwa">in</span> <span class="hl str">&#39;apple orange banana&#39;</span><span class="hl opt">;</span> <span class="hl kwa">do</span>
-    <span class="hl kwb">echo</span> <span class="hl kwd">$fruit</span>
-<span class="hl kwa">done</span>
-<span class="hl slc"># apple orange banana</span>
-
-<span class="hl kwa">for</span> fruit <span class="hl kwa">in</span> <span class="hl str">&quot;apple orange banana&quot;</span><span class="hl opt">;</span> <span class="hl kwa">do</span>
-    <span class="hl kwb">echo</span> <span class="hl kwd">$fruit</span>
-<span class="hl kwa">done</span>
-<span class="hl slc"># apple orange banana</span>
-
-<span class="hl kwa">for</span> fruit <span class="hl kwa">in</span> <span class="hl str">&#39;red apple&#39;</span> <span class="hl str">&#39;orange&#39;</span> <span class="hl str">&#39;banana&#39;</span><span class="hl opt">;</span> <span class="hl kwa">do</span>
-    <span class="hl kwb">echo</span> <span class="hl kwd">$fruit</span>
-<span class="hl kwa">done</span>
-<span class="hl slc"># red apple</span>
-<span class="hl slc"># orange</span>
-<span class="hl slc"># banana</span>
-
-<span class="hl kwa">for</span> f <span class="hl kwa">in</span> <span class="hl opt">*</span>.c<span class="hl opt">;</span> <span class="hl kwa">do</span>
-    <span class="hl kwb">echo</span> <span class="hl kwd">$f</span>
-<span class="hl kwa">done</span>
-<span class="hl slc"># foo.c</span>
-<span class="hl slc"># bar.c</span>
-<span class="hl slc"># baz.c</span>
-
-<span class="hl slc"># parsing &#39;ls&#39; output can NOT handle whitespaces in filenames</span>
-<span class="hl kwa">for</span> f <span class="hl kwa">in</span> <span class="hl kwd">$(ls ~)</span><span class="hl opt">;</span> <span class="hl kwa">do</span>
-    <span class="hl kwb">echo</span> <span class="hl str">&quot;</span><span class="hl ipl">$f</span><span class="hl str">&quot;</span>
-<span class="hl kwa">done</span>
-<span class="hl slc"># cmpe230</span>
-<span class="hl slc"># Desktop</span>
-<span class="hl slc"># Documents</span>
-<span class="hl slc"># Downloads</span>
-<span class="hl slc"># examples.desktop</span>
-<span class="hl slc"># Music</span>
-<span class="hl slc"># Pictures</span>
-<span class="hl slc"># Public</span>
-<span class="hl slc"># Templates</span>
-<span class="hl slc"># Videos</span>
-<span class="hl slc"># VirtualBox</span>
-<span class="hl slc"># VMs</span>
-
-<span class="hl slc"># use glob expansion instead of &#39;ls&#39; for safety</span>
-<span class="hl kwa">for</span> f <span class="hl kwa">in</span> <span class="hl kwd">$HOME</span><span class="hl opt">/*;</span> <span class="hl kwa">do</span>
-    <span class="hl kwb">echo</span> <span class="hl str">&quot;</span><span class="hl ipl">$f</span><span class="hl str">&quot;</span>
-<span class="hl kwa">done</span>
-<span class="hl slc"># /home/gokcehan/cmpe230</span>
-<span class="hl slc"># /home/gokcehan/Desktop</span>
-<span class="hl slc"># /home/gokcehan/Documents</span>
-<span class="hl slc"># /home/gokcehan/Downloads</span>
-<span class="hl slc"># /home/gokcehan/examples.desktop</span>
-<span class="hl slc"># /home/gokcehan/Music</span>
-<span class="hl slc"># /home/gokcehan/Pictures</span>
-<span class="hl slc"># /home/gokcehan/Public</span>
-<span class="hl slc"># /home/gokcehan/Templates</span>
-<span class="hl slc"># /home/gokcehan/Videos</span>
-<span class="hl slc"># /home/gokcehan/VirtualBox VMs</span>
-
-<span class="hl slc"># show the basename of &#39;/path/to/file/name.txt&#39;</span>
-<span class="hl kwc">basename</span> <span class="hl opt">/</span>path<span class="hl opt">/</span>to<span class="hl opt">/</span>file<span class="hl opt">/</span>name.txt
-<span class="hl slc"># name.txt</span>
-
-<span class="hl slc"># show the basename of &#39;/path/to/file/name.txt&#39; and strip &#39;.txt&#39; extension</span>
-<span class="hl kwc">basename</span> <span class="hl opt">/</span>path<span class="hl opt">/</span>to<span class="hl opt">/</span>file<span class="hl opt">/</span>name.txt .txt
-<span class="hl slc"># name</span>
-
-<span class="hl slc"># generate a sequence to 5</span>
-<span class="hl kwc">seq</span> <span class="hl num">5</span>
-<span class="hl slc"># 1</span>
-<span class="hl slc"># 2</span>
-<span class="hl slc"># 3</span>
-<span class="hl slc"># 4</span>
-<span class="hl slc"># 5</span>
-
-<span class="hl slc"># generate a sequence from 2 to 5</span>
-<span class="hl kwc">seq</span> <span class="hl num">2 5</span>
-<span class="hl slc"># 2</span>
-<span class="hl slc"># 3</span>
-<span class="hl slc"># 4</span>
-<span class="hl slc"># 5</span>
-
-<span class="hl slc"># generate a sequence from 2 to 9 with a step of 3</span>
-<span class="hl kwc">seq</span> <span class="hl num">2 3 9</span>
-<span class="hl slc"># 2</span>
-<span class="hl slc"># 5</span>
-<span class="hl slc"># 8</span>
-
-<span class="hl slc"># you can use &#39;continue&#39; and &#39;break&#39; in loops</span>
-<span class="hl kwa">for</span> i <span class="hl kwa">in</span> <span class="hl kwd">$(seq 10)</span><span class="hl opt">;</span> <span class="hl kwa">do</span>
-    <span class="hl kwa">if</span> <span class="hl opt">[</span> <span class="hl kwd">$i</span> <span class="hl kwb">-eq</span> <span class="hl num">3</span> <span class="hl opt">];</span> <span class="hl kwa">then</span>
-        <span class="hl kwb">continue</span>
-    <span class="hl kwa">elif</span> <span class="hl opt">[</span> <span class="hl kwd">$i</span> <span class="hl kwb">-eq</span> <span class="hl num">5</span> <span class="hl opt">];</span> <span class="hl kwa">then</span>
-        <span class="hl kwb">break</span>
-    <span class="hl kwa">fi</span>
-    <span class="hl kwb">echo</span> <span class="hl kwd">$i</span>
-<span class="hl kwa">done</span>
-<span class="hl slc"># 1</span>
-<span class="hl slc"># 2</span>
-<span class="hl slc"># 4</span>
-
-<span class="hl slc">## case/esac</span>
-
-<span class="hl slc"># Each body is finished with &#39;;;&#39;</span>
-<span class="hl slc"># Left &#39;(&#39; is optional</span>
-<span class="hl slc"># Multiple options can be given with &#39;|&#39;</span>
-<span class="hl slc"># Globs can be used with patterns</span>
-<span class="hl slc"># Everything else can be given with &#39;*)&#39;</span>
-
-os<span class="hl opt">=</span><span class="hl kwd">$(uname -s)</span>
-<span class="hl kwa">case</span> <span class="hl kwd">$os</span> <span class="hl kwa">in</span>
-    <span class="hl opt">(</span><span class="hl str">&quot;Linux&quot;</span><span class="hl opt">)</span>
-        <span class="hl kwb">echo</span> <span class="hl str">&quot;setting up for Linux&quot;</span>
-        <span class="hl opt">;;</span>
-    <span class="hl str">&quot;Darwin&quot;</span><span class="hl opt">)</span>
-        <span class="hl kwb">echo</span> <span class="hl str">&quot;setting up for MacOSX&quot;</span>
-        <span class="hl opt">;;</span>
-    <span class="hl str">&quot;NetBSD&quot;</span><span class="hl opt">|</span><span class="hl str">&quot;FreeBSD&quot;</span><span class="hl opt">)</span>
-        <span class="hl kwb">echo</span> <span class="hl str">&quot;setting up for BSD&quot;</span>
-        <span class="hl opt">;;</span>
-    <span class="hl opt">*)</span>
-        <span class="hl kwb">echo</span> <span class="hl str">&quot;unsupported system&quot;</span>
-        <span class="hl opt">;;</span>
-<span class="hl kwa">esac</span>
-<span class="hl slc"># setting up for Linux</span>
-
-<span class="hl slc">## ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~</span>
-<span class="hl slc">## FUNCTIONS</span>
-<span class="hl slc">## ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~</span>
-
-<span class="hl slc"># define a function named &#39;greet&#39;</span>
-greet<span class="hl opt">() {</span>
-    <span class="hl kwb">echo</span> hello <span class="hl kwd">$1</span>
-<span class="hl opt">}</span>
-<span class="hl slc"># (function is defined)</span>
-
-<span class="hl slc"># define a function named &#39;greet&#39; (bash only -- not POSIX standard)</span>
-<span class="hl kwa">function</span> greet <span class="hl opt">{</span>
-    <span class="hl kwb">echo</span> hello <span class="hl kwd">$1</span>
-<span class="hl opt">}</span>
-<span class="hl slc"># (function is defined)</span>
-
-<span class="hl slc"># statement separator &#39;;&#39; is required for a single line definition</span>
-greet<span class="hl opt">() {</span> <span class="hl kwb">echo</span> hello <span class="hl kwd">$1</span><span class="hl opt">; }</span>
-<span class="hl slc"># (function is defined)</span>
-
-<span class="hl slc"># run &#39;greet&#39; function with the argument &#39;world&#39;</span>
+# check whether &apos;/bin&apos; exists as a file
+test -f /bin; echo $?
+# 1
+
+# check whether &apos;/bin/ls&apos; exists as a file
+test -f /bin/ls; echo $?
+# 0
+
+# check whether &apos;/path/to/non/existent/file&apos; exists as a file
+test -f /path/to/non/existent/file; echo $?
+# 1
+
+# check whether &apos;/bin&apos; exists as a directory
+test -d /bin; echo $?
+# 0
+
+# check whether &apos;/bin/ls&apos; exists as a directory
+test -d /bin/ls; echo $?
+# 1
+
+# check whether &apos;/path/to/non/existent/dir&apos; exists as a directory
+test -d /path/to/non/existent/dir; echo $?
+# 1
+
+# check whether &apos;/bin/ls&apos; is readable
+test -r /bin/ls; echo $?
+# 0
+
+# check whether &apos;/bin/ls&apos; is writable
+test -w /bin/ls; echo $?
+# 1
+
+# check whether &apos;/bin/ls&apos; is readable AND writable
+test -r /bin/ls -a -w /bin/ls; echo $?
+# 1
+
+# check whether &apos;/bin/ls&apos; is readable OR writable
+test -r /bin/ls -o -w /bin/ls; echo $?
+# 0
+
+# check whether &apos;/bin/ls&apos; is NOT readable
+test ! -r /bin/ls; echo $?
+# 1
+
+# check whether &apos;HOSTNAME&apos; variable is of non-zero length
+test -n $HOSTNAME; echo $?
+# 0
+
+# check whether &apos;HOSTNAME&apos; variable is of zero length
+test -z $HOSTNAME; echo $?
+# 1
+
+# check whether the kernel is &apos;Linux&apos;
+test $(uname -s) = &quot;Linux&quot;; echo $?
+# 0
+
+# check whether the machine is &apos;x86_64&apos;
+test $(uname -m) != &quot;x86_64&quot;; echo $?
+# 1
+
+# check whether &apos;/bin&apos; exists (alternative syntax)
+[ -e /bin ]; echo $?
+# 0
+
+# you need a space after &apos;[&apos;
+[-e /bin ]; echo $?
+# /bin/bash: [-e: command not found
+
+# you need a space before &apos;]&apos;
+[ -e /bin]; echo $?
+# /bin/bash: line 0: [: missing `]&apos;
+
+# you need a space before &apos;=&apos;
+[ $(uname -m)= &quot;x86_64&quot; ]; echo $?
+# /bin/bash: line 0: [: x86_64=: unary operator expected
+
+# you need a space after &apos;=&apos;
+[ $(uname -m) =&quot;x86_64&quot; ]; echo $?
+# /bin/bash: line 0: [: x86_64: unary operator expected
+
+## ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+## CONTROL FLOW
+## ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+# basename (1) - strip directory and suffix from filenames
+# seq (1) - print a sequence of numbers
+
+## if/elif/else/fi
+
+arch=$(uname -m)
+
+if [ $arch = &quot;x86_64&quot; ]
+then
+    echo &apos;system is 64 bit&apos;
+fi
+# system is 64 bit
+
+if [ $arch = &quot;x86_64&quot; ]; then
+    echo &apos;system is 64 bit&apos;
+fi
+# system is 64 bit
+
+if [ $arch = &quot;x86_64&quot; ]; then echo &apos;system is 64 bit&apos;; fi
+# system is 64 bit
+
+if [ $arch = &quot;x86_64&quot; ]; then
+    echo &apos;system is 64 bit&apos;
+elif [ $arch = &quot;i686&quot; ]; then
+    echo &apos;system is 32 bit&apos;
+fi
+# system is 64 bit
+
+if [ $arch = &quot;x86_64&quot; ]; then
+    echo &apos;system is 64 bit&apos;
+elif [ $arch = &quot;i686&quot; ]; then
+    echo &apos;system is 32 bit&apos;
+else
+    echo &apos;system is unknown&apos;
+fi
+# system is 64 bit
+
+## while/until/done
+
+i=0
+while [ $i -lt 5 ]; do
+    sleep 1
+    i=$((i+1))
+    echo &quot;$i second(s) have passed&quot;
+done
+# 1 second(s) have passed
+# 2 second(s) have passed
+# 3 second(s) have passed
+# 4 second(s) have passed
+# 5 second(s) have passed
+
+i=0
+until [ $i -ge 5 ]; do
+    sleep 1
+    i=$((i+1))
+    echo &quot;$i second(s) have passed&quot;
+done
+# 1 second(s) have passed
+# 2 second(s) have passed
+# 3 second(s) have passed
+# 4 second(s) have passed
+# 5 second(s) have passed
+
+## for/done
+
+for fruit in apple orange banana; do
+    echo $fruit
+done
+# apple
+# orange
+# banana
+
+for fruit in &apos;apple orange banana&apos;; do
+    echo $fruit
+done
+# apple orange banana
+
+for fruit in &quot;apple orange banana&quot;; do
+    echo $fruit
+done
+# apple orange banana
+
+for fruit in &apos;red apple&apos; &apos;orange&apos; &apos;banana&apos;; do
+    echo $fruit
+done
+# red apple
+# orange
+# banana
+
+for f in *.c; do
+    echo $f
+done
+# foo.c
+# bar.c
+# baz.c
+
+# parsing &apos;ls&apos; output can NOT handle whitespaces in filenames
+for f in $(ls ~); do
+    echo &quot;$f&quot;
+done
+# cmpe230
+# Desktop
+# Documents
+# Downloads
+# examples.desktop
+# Music
+# Pictures
+# Public
+# Templates
+# Videos
+# VirtualBox
+# VMs
+
+# use glob expansion instead of &apos;ls&apos; for safety
+for f in $HOME/*; do
+    echo &quot;$f&quot;
+done
+# /home/gokcehan/cmpe230
+# /home/gokcehan/Desktop
+# /home/gokcehan/Documents
+# /home/gokcehan/Downloads
+# /home/gokcehan/examples.desktop
+# /home/gokcehan/Music
+# /home/gokcehan/Pictures
+# /home/gokcehan/Public
+# /home/gokcehan/Templates
+# /home/gokcehan/Videos
+# /home/gokcehan/VirtualBox VMs
+
+# show the basename of &apos;/path/to/file/name.txt&apos;
+basename /path/to/file/name.txt
+# name.txt
+
+# show the basename of &apos;/path/to/file/name.txt&apos; and strip &apos;.txt&apos; extension
+basename /path/to/file/name.txt .txt
+# name
+
+# generate a sequence to 5
+seq 5
+# 1
+# 2
+# 3
+# 4
+# 5
+
+# generate a sequence from 2 to 5
+seq 2 5
+# 2
+# 3
+# 4
+# 5
+
+# generate a sequence from 2 to 9 with a step of 3
+seq 2 3 9
+# 2
+# 5
+# 8
+
+# you can use &apos;continue&apos; and &apos;break&apos; in loops
+for i in $(seq 10); do
+    if [ $i -eq 3 ]; then
+        continue
+    elif [ $i -eq 5 ]; then
+        break
+    fi
+    echo $i
+done
+# 1
+# 2
+# 4
+
+## case/esac
+
+# Each body is finished with &apos;;;&apos;
+# Left &apos;(&apos; is optional
+# Multiple options can be given with &apos;|&apos;
+# Globs can be used with patterns
+# Everything else can be given with &apos;*)&apos;
+
+os=$(uname -s)
+case $os in
+    (&quot;Linux&quot;)
+        echo &quot;setting up for Linux&quot;
+        ;;
+    &quot;Darwin&quot;)
+        echo &quot;setting up for MacOSX&quot;
+        ;;
+    &quot;NetBSD&quot;|&quot;FreeBSD&quot;)
+        echo &quot;setting up for BSD&quot;
+        ;;
+    *)
+        echo &quot;unsupported system&quot;
+        ;;
+esac
+# setting up for Linux
+
+## ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+## FUNCTIONS
+## ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+# define a function named &apos;greet&apos;
+greet() {
+    echo hello $1
+}
+# (function is defined)
+
+# define a function named &apos;greet&apos; (bash only -- not POSIX standard)
+function greet {
+    echo hello $1
+}
+# (function is defined)
+
+# statement separator &apos;;&apos; is required for a single line definition
+greet() { echo hello $1; }
+# (function is defined)
+
+# run &apos;greet&apos; function with the argument &apos;world&apos;
 greet world
-<span class="hl slc"># hello world</span>
+# hello world
 
-<span class="hl slc"># define a function named &#39;extract&#39; to extract an archive using its extension</span>
-extract<span class="hl opt">() {</span>
-    <span class="hl kwa">case</span> <span class="hl str">&quot;</span><span class="hl ipl">$1</span><span class="hl str">&quot;</span> <span class="hl kwa">in</span>
-        <span class="hl opt">*</span>.<span class="hl kwc">tar</span>.bz<span class="hl opt">|*</span>.<span class="hl kwc">tar</span>.bz2<span class="hl opt">|*</span>.tbz<span class="hl opt">|*</span>.tbz2<span class="hl opt">)</span> <span class="hl kwc">tar</span> xjf <span class="hl str">&quot;</span><span class="hl ipl">$1</span><span class="hl str">&quot;</span><span class="hl opt">;;</span>
-        <span class="hl opt">*</span>.<span class="hl kwc">tar</span>.gz<span class="hl opt">|*</span>.tgz<span class="hl opt">)</span> <span class="hl kwc">tar</span> xzf <span class="hl str">&quot;</span><span class="hl ipl">$1</span><span class="hl str">&quot;</span><span class="hl opt">;;</span>
-        <span class="hl opt">*</span>.<span class="hl kwc">tar</span>.xz<span class="hl opt">|*</span>.txz<span class="hl opt">)</span> <span class="hl kwc">tar</span> xJf <span class="hl str">&quot;</span><span class="hl ipl">$1</span><span class="hl str">&quot;</span><span class="hl opt">;;</span>
-        <span class="hl opt">*</span>.<span class="hl kwc">zip</span><span class="hl opt">)</span> <span class="hl kwc">unzip</span> <span class="hl str">&quot;</span><span class="hl ipl">$1</span><span class="hl str">&quot;</span><span class="hl opt">;;</span>
-        <span class="hl opt">*</span>.rar<span class="hl opt">)</span> unrar x <span class="hl str">&quot;</span><span class="hl ipl">$1</span><span class="hl str">&quot;</span><span class="hl opt">;;</span>
-        <span class="hl opt">*</span><span class="hl num">.7</span>z<span class="hl opt">)</span> <span class="hl num">7</span>z x <span class="hl str">&quot;</span><span class="hl ipl">$1</span><span class="hl str">&quot;</span><span class="hl opt">;;</span>
-    <span class="hl kwa">esac</span>
-<span class="hl opt">}</span>
-<span class="hl slc"># (function is defined)</span>
+# define a function named &apos;extract&apos; to extract an archive using its extension
+extract() {
+    case &quot;$1&quot; in
+        *.tar.bz|*.tar.bz2|*.tbz|*.tbz2) tar xjf &quot;$1&quot;;;
+        *.tar.gz|*.tgz) tar xzf &quot;$1&quot;;;
+        *.tar.xz|*.txz) tar xJf &quot;$1&quot;;;
+        *.zip) unzip &quot;$1&quot;;;
+        *.rar) unrar x &quot;$1&quot;;;
+        *.7z) 7z x &quot;$1&quot;;;
+    esac
+}
+# (function is defined)
 
-<span class="hl slc"># run &#39;extract&#39; function with the argument &#39;foo.tar.gz&#39;</span>
-extract foo.<span class="hl kwc">tar</span>.gz
-<span class="hl slc"># (archive file is extracted)</span>
-</pre>
+# run &apos;extract&apos; function with the argument &apos;foo.tar.gz&apos;
+extract foo.tar.gz
+# (archive file is extracted)
+</code></pre>
+
 </body>
+
 </html>
-<!--HTML generated by highlight 3.62, http://www.andre-simon.de/-->

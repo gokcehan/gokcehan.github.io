@@ -3,16 +3,24 @@
 
 <head>
   <meta charset="utf-8">
+  <meta name="color-scheme" content="light dark">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Installation with Go Language can be Simpler</title>
-  <link rel="stylesheet" type="text/css" href="../style.css">
+  <link rel="stylesheet" href="../style/base.css">
+  <link rel="stylesheet" href="../highlightjs/github.min.css" media="screen and (prefers-color-scheme: light)">
+  <link rel="stylesheet" href="../highlightjs/github-dark.min.css" media="screen and (prefers-color-scheme: dark)">
+  <script src="../highlightjs/highlight-cpp.min.js"></script>
+  <script>hljs.highlightAll();</script>
 </head>
 
 <body>
 
-<h1>Installation with Go Language can be Simpler</h1>
+<header>
+  <h1>Installation with Go Language can be Simpler</h1>
+  <time>2018-05-01</time>
+</header>
 
-<time>2018-05-01</time>
+<main>
 
 <p>
 I have been working on a hobby project written in Go for almost two years.
@@ -30,9 +38,8 @@ There is also a pure Go resolver implemented in the package which is used when c
 It is easy to override this behavior by disabling cgo using the <code>CGO_ENABLED</code> environmental variable:
 </p>
 
-<pre>
-env CGO_ENABLED=0 go build
-</pre>
+<pre><code>env CGO_ENABLED=0 go build
+</code></pre>
 
 <p>
 Unfortunately, there is no way to specify this within the source code where I think this information really belongs.
@@ -40,9 +47,8 @@ Many people use makefiles or shell scripts to iron out these details but then yo
 The best recommendation I get was to simply put the installation instruction with <code>CGO_ENABLED</code> as such:
 </p>
 
-<pre>
-env CGO_ENABLED=0 go get -u github.com/gokcehan/lf
-</pre>
+<pre><code>env CGO_ENABLED=0 go get -u github.com/gokcehan/lf
+</code></pre>
 
 <p>
 This works more or less though it is a bit longer than it should be and it does not work in windows.
@@ -58,9 +64,8 @@ In order to avoid this, you can either pass <code>-s</code> and <code>-w</code> 
 Now the combined installation instruction looks as such:
 </p>
 
-<pre>
-env CGO_ENABLED=0 go get -u -ldflags="-s -w" github.com/gokcehan/lf
-</pre>
+<pre><code>env CGO_ENABLED=0 go get -u -ldflags=&quot;-s -w&quot; github.com/gokcehan/lf
+</code></pre>
 
 <p>
 Compiler optimizations such as inlining and escape analysis are performed by default which can already make debugging tricky.
@@ -78,11 +83,10 @@ Long story short, the usual practice to have version numbers in the binary is to
 So a complete source install instruction should now look something like this:
 </p>
 
-<pre>
-go get -u github.com/gokcehan/lf
+<pre><code>go get -u github.com/gokcehan/lf
 version=$(git -C $GOPATH/src/github.com/gokcehan/lf describe --tags)
-env CGO_ENABLED=0 go get -u -ldflags="-s -w -X main.gVersion=$version" github.com/gokcehan/lf
-</pre>
+env CGO_ENABLED=0 go get -u -ldflags=&quot;-s -w -X main.gVersion=$version&quot; github.com/gokcehan/lf
+</code></pre>
 
 <p>
 If compiler pragma comments are to be added to set ldflags for the previous issue, this issue can be solved by adding a capability to run shell commands within these compiler pragmas.
@@ -105,18 +109,16 @@ This process is sometimes automatized using a shell script that basically matche
 If same values were to be used for both <code>uname</code> and Go environmental variables, the corresponding file name would simply be something like:
 </p>
 
-<pre>
-lf-$(uname -s)-$(uname -m).tar.gz
-</pre>
+<pre><code>lf-$(uname -s)-$(uname -m).tar.gz
+</code></pre>
 
 <p>
 This can eliminate the need for an installation script to have one-liner installation instructions instead.
 For example, a pre-built binary from a github release can be installed with a command like the following:
 </p>
 
-<pre>
-curl -L https://github.com/gokcehan/lf/releases/download/r1/lf-$(uname -s)-$(uname -m).tar.gz | tar xzC ~/.local/bin
-</pre>
+<pre><code>curl -L https://github.com/gokcehan/lf/releases/download/r1/lf-$(uname -s)-$(uname -m).tar.gz | tar xzC ~/.local/bin
+</code></pre>
 
 <p>
 Of course when you think about it, there is no actual issue here.
@@ -138,17 +140,15 @@ The reason is that, even though github provides an url to view the latest tag, i
 So the following url shows you the latest release in your project:
 </p>
 
-<pre>
-https://github.com/gokcehan/lf/releases/latest
-</pre>
+<pre><code>https://github.com/gokcehan/lf/releases/latest
+</code></pre>
 
 <p>
 But the following download url does not exists:
 </p>
 
-<pre>
-https://github.com/gokcehan/lf/releases/download/latest/lf-linux-amd64.tar.gz
-</pre>
+<pre><code>https://github.com/gokcehan/lf/releases/download/latest/lf-linux-amd64.tar.gz
+</code></pre>
 
 <p>
 If you want to download the latest release, you need to use the Github API to find out the latest release version first, and then you can download the file you want in a second request.
@@ -170,26 +170,24 @@ In an ideal world, I would want to have two simple instructions for installation
 For a source install you may have the following:
 </p>
 
-<pre>
-go get -u github.com/gokcehan/lf
-</pre>
+<pre><code>go get -u github.com/gokcehan/lf
+</code></pre>
 
 <p>
 For a pre-built binary install, you may have the following:
 </p>
 
-<pre>
-curl -L https://github.com/gokcehan/lf/releases/download/latest/lf-$(uname -s)-$(uname -m).tar.gz | tar xzC ~/.local/bin
-</pre>
+<pre><code>curl -L https://github.com/gokcehan/lf/releases/download/latest/lf-$(uname -s)-$(uname -m).tar.gz | tar xzC ~/.local/bin
+</code></pre>
 
 <p>
 This may put an end to the endless curl-pipe-shell idiom discussion.
 </p>
 
-<hr>
+</main>
 
 <footer>
-<a href="/">home</a> &middot; <a href="https://github.com/gokcehan">github</a> &middot; gokcehankara (at) gmail (dot) com 
+  <a href="/">home</a> &middot; <a href="https://github.com/gokcehan">github</a> &middot; gokcehankara (at) gmail (dot) com
 </footer>
 
 </body>

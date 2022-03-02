@@ -1,174 +1,184 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
+
 <head>
-<meta charset="ISO-8859-1">
-<title>dyn_arr_cat.c</title>
-<link rel="stylesheet" type="text/css" href="../highlight.css">
+  <meta charset="utf-8">
+  <meta name="color-scheme" content="light dark">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>dyn_arr_cat.c</title>
+  <link rel="stylesheet" href="../style/code.css">
+  <link rel="stylesheet" href="../highlightjs/github.min.css" media="screen and (prefers-color-scheme: light)">
+  <link rel="stylesheet" href="../highlightjs/github-dark.min.css" media="screen and (prefers-color-scheme: dark)">
+  <script src="../highlightjs/highlight-c.min.js"></script>
+  <script>hljs.highlightAll();</script>
 </head>
-<body class="hl">
-<pre class="hl"><span class="hl slc">//</span>
-<span class="hl slc">// dyn_arr_cat.c</span>
-<span class="hl slc">//</span>
-<span class="hl slc">// Dynamic array (concatenation)</span>
-<span class="hl slc">//</span>
 
-<span class="hl ppc">#include &lt;stdlib.h&gt;</span>
+<body>
 
-<span class="hl ppc">#define ARR_INIT_CAP 2</span>
-<span class="hl ppc">#define ARR_GROW_RAT 2</span>
+<pre><code class="language-c">//
+// dyn_arr_cat.c
+//
+// Dynamic array (concatenation)
+//
 
-<span class="hl ppc">#define DEFINE_ARR(TYPE, TAIL)                                                 \</span>
-<span class="hl ppc">                                                                               \</span>
-<span class="hl ppc">struct arr_##TAIL {                                                            \</span>
-<span class="hl ppc">    TYPE *buf;                                                                 \</span>
-<span class="hl ppc">    int   len;                                                                 \</span>
-<span class="hl ppc">    int   cap;                                                                 \</span>
-<span class="hl ppc">};                                                                             \</span>
-<span class="hl ppc">                                                                               \</span>
-<span class="hl ppc">struct arr_##TAIL *arrnew_##TAIL(void);                                        \</span>
-<span class="hl ppc">struct arr_##TAIL *arrnewcap_##TAIL(int);                                      \</span>
-<span class="hl ppc">void               arrdelete_##TAIL(struct arr_##TAIL *);                      \</span>
-<span class="hl ppc">int                arrappend_##TAIL(struct arr_##TAIL *, TYPE);                \</span>
-<span class="hl ppc">int                arrresize_##TAIL(struct arr_##TAIL *, int);                 \</span>
-<span class="hl ppc">TYPE               arrremove_##TAIL(struct arr_##TAIL *);                      \</span>
-<span class="hl ppc">                                                                               \</span>
-<span class="hl ppc">inline struct arr_##TAIL *                                                     \</span>
-<span class="hl ppc">arrnew_##TAIL(void)                                                            \</span>
-<span class="hl ppc">{                                                                              \</span>
-<span class="hl ppc">    return arrnewcap_##TAIL(ARR_INIT_CAP);                                     \</span>
-<span class="hl ppc">}                                                                              \</span>
-<span class="hl ppc">                                                                               \</span>
-<span class="hl ppc">inline struct arr_##TAIL *                                                     \</span>
-<span class="hl ppc">arrnewcap_##TAIL(int cap)                                                      \</span>
-<span class="hl ppc">{                                                                              \</span>
-<span class="hl ppc">    struct arr_##TAIL *arr;                                                    \</span>
-<span class="hl ppc">                                                                               \</span>
-<span class="hl ppc">    if ((arr = malloc(sizeof(struct arr_##TAIL))) == NULL) {                   \</span>
-<span class="hl ppc">        return NULL;                                                           \</span>
-<span class="hl ppc">    }                                                                          \</span>
-<span class="hl ppc">                                                                               \</span>
-<span class="hl ppc">    if ((arr-&gt;buf = malloc(cap * sizeof(TYPE))) == NULL) {                     \</span>
-<span class="hl ppc">        free(arr);                                                             \</span>
-<span class="hl ppc">        return NULL;                                                           \</span>
-<span class="hl ppc">    }                                                                          \</span>
-<span class="hl ppc">                                                                               \</span>
-<span class="hl ppc">    arr-&gt;len = 0;                                                              \</span>
-<span class="hl ppc">    arr-&gt;cap = cap;                                                            \</span>
-<span class="hl ppc">                                                                               \</span>
-<span class="hl ppc">    return arr;                                                                \</span>
-<span class="hl ppc">}                                                                              \</span>
-<span class="hl ppc">                                                                               \</span>
-<span class="hl ppc">inline void                                                                    \</span>
-<span class="hl ppc">arrdelete_##TAIL(struct arr_##TAIL *arr)                                       \</span>
-<span class="hl ppc">{                                                                              \</span>
-<span class="hl ppc">    free(arr-&gt;buf);                                                            \</span>
-<span class="hl ppc">    free(arr);                                                                 \</span>
-<span class="hl ppc">}                                                                              \</span>
-<span class="hl ppc">                                                                               \</span>
-<span class="hl ppc">inline int                                                                     \</span>
-<span class="hl ppc">arrappend_##TAIL(struct arr_##TAIL *arr, TYPE val)                             \</span>
-<span class="hl ppc">{                                                                              \</span>
-<span class="hl ppc">    if (arr-&gt;cap &lt;= arr-&gt;len &amp;&amp;                                                \</span>
-<span class="hl ppc">            arrresize_##TAIL(arr, arr-&gt;cap * ARR_GROW_RAT) == -1) {            \</span>
-<span class="hl ppc">        return -1;                                                             \</span>
-<span class="hl ppc">    }                                                                          \</span>
-<span class="hl ppc">                                                                               \</span>
-<span class="hl ppc">    arr-&gt;buf[arr-&gt;len++] = val;                                                \</span>
-<span class="hl ppc">                                                                               \</span>
-<span class="hl ppc">    return 0;                                                                  \</span>
-<span class="hl ppc">}                                                                              \</span>
-<span class="hl ppc">                                                                               \</span>
-<span class="hl ppc">inline int                                                                     \</span>
-<span class="hl ppc">arrresize_##TAIL(struct arr_##TAIL *arr, int ncap)                             \</span>
-<span class="hl ppc">{                                                                              \</span>
-<span class="hl ppc">    TYPE *nbuf;                                                                \</span>
-<span class="hl ppc">                                                                               \</span>
-<span class="hl ppc">    if ((nbuf = realloc(arr-&gt;buf, ncap * sizeof(TYPE))) == NULL) {             \</span>
-<span class="hl ppc">        return -1;                                                             \</span>
-<span class="hl ppc">    }                                                                          \</span>
-<span class="hl ppc">                                                                               \</span>
-<span class="hl ppc">    arr-&gt;cap = ncap;                                                           \</span>
-<span class="hl ppc">    arr-&gt;buf = nbuf;                                                           \</span>
-<span class="hl ppc">                                                                               \</span>
-<span class="hl ppc">    return 0;                                                                  \</span>
-<span class="hl ppc">}                                                                              \</span>
-<span class="hl ppc">                                                                               \</span>
-<span class="hl ppc">inline TYPE                                                                    \</span>
-<span class="hl ppc">arrremove_##TAIL(struct arr_##TAIL *arr)                                       \</span>
-<span class="hl ppc">{                                                                              \</span>
-<span class="hl ppc">    return arr-&gt;buf[--arr-&gt;len];                                               \</span>
-<span class="hl ppc">}</span>
+#include &lt;stdlib.h&gt;
 
-<span class="hl slc">////////////////////////////////////////////////////////////////////////////////</span>
+#define ARR_INIT_CAP 2
+#define ARR_GROW_RAT 2
 
-<span class="hl ppc">#include &lt;stdio.h&gt;</span>
+#define DEFINE_ARR(TYPE, TAIL)                                                 \
+                                                                               \
+struct arr_##TAIL {                                                            \
+    TYPE *buf;                                                                 \
+    int   len;                                                                 \
+    int   cap;                                                                 \
+};                                                                             \
+                                                                               \
+struct arr_##TAIL *arrnew_##TAIL(void);                                        \
+struct arr_##TAIL *arrnewcap_##TAIL(int);                                      \
+void               arrdelete_##TAIL(struct arr_##TAIL *);                      \
+int                arrappend_##TAIL(struct arr_##TAIL *, TYPE);                \
+int                arrresize_##TAIL(struct arr_##TAIL *, int);                 \
+TYPE               arrremove_##TAIL(struct arr_##TAIL *);                      \
+                                                                               \
+inline struct arr_##TAIL *                                                     \
+arrnew_##TAIL(void)                                                            \
+{                                                                              \
+    return arrnewcap_##TAIL(ARR_INIT_CAP);                                     \
+}                                                                              \
+                                                                               \
+inline struct arr_##TAIL *                                                     \
+arrnewcap_##TAIL(int cap)                                                      \
+{                                                                              \
+    struct arr_##TAIL *arr;                                                    \
+                                                                               \
+    if ((arr = malloc(sizeof(struct arr_##TAIL))) == NULL) {                   \
+        return NULL;                                                           \
+    }                                                                          \
+                                                                               \
+    if ((arr-&gt;buf = malloc(cap * sizeof(TYPE))) == NULL) {                     \
+        free(arr);                                                             \
+        return NULL;                                                           \
+    }                                                                          \
+                                                                               \
+    arr-&gt;len = 0;                                                              \
+    arr-&gt;cap = cap;                                                            \
+                                                                               \
+    return arr;                                                                \
+}                                                                              \
+                                                                               \
+inline void                                                                    \
+arrdelete_##TAIL(struct arr_##TAIL *arr)                                       \
+{                                                                              \
+    free(arr-&gt;buf);                                                            \
+    free(arr);                                                                 \
+}                                                                              \
+                                                                               \
+inline int                                                                     \
+arrappend_##TAIL(struct arr_##TAIL *arr, TYPE val)                             \
+{                                                                              \
+    if (arr-&gt;cap &lt;= arr-&gt;len &amp;&amp;                                                \
+            arrresize_##TAIL(arr, arr-&gt;cap * ARR_GROW_RAT) == -1) {            \
+        return -1;                                                             \
+    }                                                                          \
+                                                                               \
+    arr-&gt;buf[arr-&gt;len++] = val;                                                \
+                                                                               \
+    return 0;                                                                  \
+}                                                                              \
+                                                                               \
+inline int                                                                     \
+arrresize_##TAIL(struct arr_##TAIL *arr, int ncap)                             \
+{                                                                              \
+    TYPE *nbuf;                                                                \
+                                                                               \
+    if ((nbuf = realloc(arr-&gt;buf, ncap * sizeof(TYPE))) == NULL) {             \
+        return -1;                                                             \
+    }                                                                          \
+                                                                               \
+    arr-&gt;cap = ncap;                                                           \
+    arr-&gt;buf = nbuf;                                                           \
+                                                                               \
+    return 0;                                                                  \
+}                                                                              \
+                                                                               \
+inline TYPE                                                                    \
+arrremove_##TAIL(struct arr_##TAIL *arr)                                       \
+{                                                                              \
+    return arr-&gt;buf[--arr-&gt;len];                                               \
+}
 
-<span class="hl ppc">#define LIMIT 100</span>
+////////////////////////////////////////////////////////////////////////////////
 
-<span class="hl kwb">int</span> a <span class="hl opt">=</span> <span class="hl num">0</span><span class="hl opt">;</span>
-<span class="hl kwb">int</span> b <span class="hl opt">=</span> <span class="hl num">1</span><span class="hl opt">;</span>
+#include &lt;stdio.h&gt;
 
-<span class="hl kwb">int</span> <span class="hl kwd">get</span><span class="hl opt">(</span><span class="hl kwb">void</span><span class="hl opt">)</span>
-<span class="hl opt">{</span>
-    <span class="hl kwb">int</span> tmp <span class="hl opt">=</span> a<span class="hl opt">;</span>
-    a <span class="hl opt">=</span> b<span class="hl opt">;</span>
-    b <span class="hl opt">=</span> tmp <span class="hl opt">+</span> b<span class="hl opt">;</span>
-    <span class="hl kwa">return</span> tmp<span class="hl opt">;</span>
-<span class="hl opt">}</span>
+#define LIMIT 100
 
-<span class="hl kwb">void</span> <span class="hl kwd">process</span><span class="hl opt">(</span><span class="hl kwb">int</span> i<span class="hl opt">)</span>
-<span class="hl opt">{</span>
-    <span class="hl kwd">printf</span><span class="hl opt">(</span><span class="hl str">&quot;</span><span class="hl ipl">%d</span><span class="hl str"></span><span class="hl esc">\n</span><span class="hl str">&quot;</span><span class="hl opt">,</span> i<span class="hl opt">);</span>
-<span class="hl opt">}</span>
+int a = 0;
+int b = 1;
 
-<span class="hl kwd">DEFINE_ARR</span><span class="hl opt">(</span><span class="hl kwb">int</span><span class="hl opt">,</span> <span class="hl kwb">int</span><span class="hl opt">)</span>
-<span class="hl kwd">DEFINE_ARR</span><span class="hl opt">(</span><span class="hl kwb">char</span> <span class="hl opt">*,</span> charp<span class="hl opt">)</span>
+int get(void)
+{
+    int tmp = a;
+    a = b;
+    b = tmp + b;
+    return tmp;
+}
 
-<span class="hl kwb">int</span> <span class="hl kwd">main</span><span class="hl opt">(</span><span class="hl kwb">int</span> argc<span class="hl opt">,</span> <span class="hl kwb">char</span> <span class="hl opt">*</span>argv<span class="hl opt">[])</span>
-<span class="hl opt">{</span>
-    <span class="hl kwb">int</span> i<span class="hl opt">,</span> num<span class="hl opt">;</span>
+void process(int i)
+{
+    printf(&quot;%d\n&quot;, i);
+}
 
-    <span class="hl kwb">int</span> limit <span class="hl opt">=</span> argc <span class="hl opt">&lt;</span> <span class="hl num">2</span> <span class="hl opt">?</span> LIMIT <span class="hl opt">:</span> <span class="hl kwd">atoi</span><span class="hl opt">(</span>argv<span class="hl opt">[</span><span class="hl num">1</span><span class="hl opt">]);</span>
+DEFINE_ARR(int, int)
+DEFINE_ARR(char *, charp)
 
-    <span class="hl slc">// int</span>
+int main(int argc, char *argv[])
+{
+    int i, num;
 
-    <span class="hl kwb">struct</span> arr_int <span class="hl opt">*</span>arr <span class="hl opt">=</span> <span class="hl kwd">arrnew_int</span><span class="hl opt">();</span>
+    int limit = argc &lt; 2 ? LIMIT : atoi(argv[1]);
 
-    <span class="hl kwa">while</span> <span class="hl opt">((</span>num <span class="hl opt">=</span> <span class="hl kwd">get</span><span class="hl opt">()) &lt;</span> limit<span class="hl opt">) {</span>
-        <span class="hl kwd">arrappend_int</span><span class="hl opt">(</span>arr<span class="hl opt">,</span> num<span class="hl opt">);</span>
-    <span class="hl opt">}</span>
+    // int
 
-    <span class="hl kwa">for</span> <span class="hl opt">(</span>i <span class="hl opt">=</span> <span class="hl num">0</span><span class="hl opt">;</span> i <span class="hl opt">&lt;</span> arr<span class="hl opt">-&gt;</span>len<span class="hl opt">; ++</span>i<span class="hl opt">) {</span>
-        <span class="hl kwd">process</span><span class="hl opt">(</span>arr<span class="hl opt">-&gt;</span>buf<span class="hl opt">[</span>i<span class="hl opt">]);</span>
-    <span class="hl opt">}</span>
+    struct arr_int *arr = arrnew_int();
 
-    <span class="hl kwa">for</span> <span class="hl opt">(</span>i <span class="hl opt">=</span> arr<span class="hl opt">-&gt;</span>len<span class="hl opt">-</span><span class="hl num">1</span><span class="hl opt">;</span> i <span class="hl opt">&gt;</span> <span class="hl num">0</span><span class="hl opt">; --</span>i<span class="hl opt">) {</span>
-        arr<span class="hl opt">-&gt;</span>buf<span class="hl opt">[</span>i<span class="hl opt">] -=</span> arr<span class="hl opt">-&gt;</span>buf<span class="hl opt">[</span>i<span class="hl opt">-</span><span class="hl num">1</span><span class="hl opt">];</span>
-    <span class="hl opt">}</span>
+    while ((num = get()) &lt; limit) {
+        arrappend_int(arr, num);
+    }
 
-    <span class="hl kwa">for</span> <span class="hl opt">(</span>i <span class="hl opt">=</span> arr<span class="hl opt">-&gt;</span>len<span class="hl opt">-</span><span class="hl num">1</span><span class="hl opt">;</span> i <span class="hl opt">&gt;=</span> <span class="hl num">0</span><span class="hl opt">; --</span>i<span class="hl opt">) {</span>
-        <span class="hl kwd">process</span><span class="hl opt">(</span><span class="hl kwd">arrremove_int</span><span class="hl opt">(</span>arr<span class="hl opt">));</span>
-    <span class="hl opt">}</span>
+    for (i = 0; i &lt; arr-&gt;len; ++i) {
+        process(arr-&gt;buf[i]);
+    }
 
-    <span class="hl kwd">arrdelete_int</span><span class="hl opt">(</span>arr<span class="hl opt">);</span>
+    for (i = arr-&gt;len-1; i &gt; 0; --i) {
+        arr-&gt;buf[i] -= arr-&gt;buf[i-1];
+    }
 
-    <span class="hl slc">// char *</span>
+    for (i = arr-&gt;len-1; i &gt;= 0; --i) {
+        process(arrremove_int(arr));
+    }
 
-    <span class="hl kwb">struct</span> arr_charp <span class="hl opt">*</span>words <span class="hl opt">=</span> <span class="hl kwd">arrnew_charp</span><span class="hl opt">();</span>
+    arrdelete_int(arr);
 
-    <span class="hl kwd">arrappend_charp</span><span class="hl opt">(</span>words<span class="hl opt">,</span> <span class="hl str">&quot;one&quot;</span><span class="hl opt">);</span>
-    <span class="hl kwd">arrappend_charp</span><span class="hl opt">(</span>words<span class="hl opt">,</span> <span class="hl str">&quot;two&quot;</span><span class="hl opt">);</span>
-    <span class="hl kwd">arrappend_charp</span><span class="hl opt">(</span>words<span class="hl opt">,</span> <span class="hl str">&quot;three&quot;</span><span class="hl opt">);</span>
+    // char *
 
-    <span class="hl kwa">for</span> <span class="hl opt">(</span>i <span class="hl opt">=</span> <span class="hl num">0</span><span class="hl opt">;</span> i <span class="hl opt">&lt;</span> words<span class="hl opt">-&gt;</span>len<span class="hl opt">; ++</span>i<span class="hl opt">) {</span>
-        <span class="hl kwd">puts</span><span class="hl opt">(</span>words<span class="hl opt">-&gt;</span>buf<span class="hl opt">[</span>i<span class="hl opt">]);</span>
-    <span class="hl opt">}</span>
+    struct arr_charp *words = arrnew_charp();
 
-    <span class="hl kwd">arrdelete_charp</span><span class="hl opt">(</span>words<span class="hl opt">);</span>
+    arrappend_charp(words, &quot;one&quot;);
+    arrappend_charp(words, &quot;two&quot;);
+    arrappend_charp(words, &quot;three&quot;);
 
-    <span class="hl kwa">return</span> <span class="hl num">0</span><span class="hl opt">;</span>
-<span class="hl opt">}</span>
-</pre>
+    for (i = 0; i &lt; words-&gt;len; ++i) {
+        puts(words-&gt;buf[i]);
+    }
+
+    arrdelete_charp(words);
+
+    return 0;
+}
+</code></pre>
+
 </body>
+
 </html>
-<!--HTML generated by highlight 3.62, http://www.andre-simon.de/-->

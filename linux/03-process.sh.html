@@ -1,225 +1,235 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
+
 <head>
-<meta charset="ISO-8859-1">
-<title>03-process.sh</title>
-<link rel="stylesheet" type="text/css" href="../highlight.css">
+  <meta charset="utf-8">
+  <meta name="color-scheme" content="light dark">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>03-process.sh</title>
+  <link rel="stylesheet" href="../style/code.css">
+  <link rel="stylesheet" href="../highlightjs/github.min.css" media="screen and (prefers-color-scheme: light)">
+  <link rel="stylesheet" href="../highlightjs/github-dark.min.css" media="screen and (prefers-color-scheme: dark)">
+  <script src="../highlightjs/highlight-bash.min.js"></script>
+  <script>hljs.highlightAll();</script>
 </head>
-<body class="hl">
-<pre class="hl"><span class="hl slc">#!/bin/sh</span>
 
-<span class="hl slc">## ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~</span>
-<span class="hl slc">## PROCESSES</span>
-<span class="hl slc">## ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~</span>
+<body>
 
-<span class="hl slc"># Unix Processes</span>
-<span class="hl slc"># ~~~</span>
-<span class="hl slc"># Single executable running in its own address space</span>
-<span class="hl slc"># Unix jobs or commands may be composed of multiple processes</span>
-<span class="hl slc"># Interactive processes can run in either the background or the foreground</span>
-<span class="hl slc">#   `&amp;` is used to run a command in the background</span>
-<span class="hl slc">#   ^Z stops foreground process</span>
-<span class="hl slc">#   ^C kill foreground process</span>
-<span class="hl slc"># Batch processes are submitted to a queue for execution</span>
-<span class="hl slc"># Daemons are server processes running continuously while system is up</span>
+<pre><code class="language-bash">#!/bin/sh
 
-<span class="hl slc"># Process Attributes</span>
-<span class="hl slc"># ~~~</span>
-<span class="hl slc"># Process ID (PID)</span>
-<span class="hl slc"># Parent process ID (PPID)</span>
-<span class="hl slc"># Nice number</span>
-<span class="hl slc"># TTY</span>
-<span class="hl slc"># Real and effective user ID (RUID, EUID)</span>
-<span class="hl slc"># Real and effective group ID (RGID, EGID)</span>
+## ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+## PROCESSES
+## ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-<span class="hl slc"># jobs - lists the active jobs (shell builtin)</span>
-<span class="hl slc"># fg - move job to the background (shell builtin)</span>
-<span class="hl slc"># bg - move job to the foreground (shell builtin)</span>
-<span class="hl slc"># disown - remove jobs from current shell (shell builtin)</span>
-<span class="hl slc"># ps (1) - report a snapshot of the current processes</span>
-<span class="hl slc"># pstree (1) - display a tree of processes</span>
-<span class="hl slc"># pgrep (1) - look up or signal processes based on name and other attributes</span>
-<span class="hl slc"># top (1) - display Linux processes</span>
-<span class="hl slc"># signal (7) - overview of signals</span>
-<span class="hl slc"># kill (1) - send a signal to a process</span>
-<span class="hl slc"># killall (1) - kill processes by name</span>
-<span class="hl slc"># pkill (1) - look up or signal processes based on name and other attributes</span>
+# Unix Processes
+# ~~~
+# Single executable running in its own address space
+# Unix jobs or commands may be composed of multiple processes
+# Interactive processes can run in either the background or the foreground
+#   `&amp;` is used to run a command in the background
+#   ^Z stops foreground process
+#   ^C kill foreground process
+# Batch processes are submitted to a queue for execution
+# Daemons are server processes running continuously while system is up
 
-<span class="hl slc"># create &#39;loop.c&#39; file with content up to &#39;EOF&#39;</span>
-<span class="hl kwc">cat</span> <span class="hl str">&lt;&lt; &#39;EOF&#39; &gt; loop.c</span>
-<span class="hl str">#include &lt;stdio.h&gt;</span>
-<span class="hl str">#include &lt;unistd.h&gt;</span>
-<span class="hl str"></span>
-<span class="hl str">int main(void)</span>
-<span class="hl str">{</span>
-<span class="hl str">	int curr = 0;</span>
-<span class="hl str">	while (1) {</span>
-<span class="hl str">		printf(&quot;running for %d seconds\n&quot;, curr++);</span>
-<span class="hl str">		sleep(1);</span>
-<span class="hl str">	}</span>
-<span class="hl str">	return 0;</span>
-<span class="hl str">}</span>
-<span class="hl str">EOF</span>
-<span class="hl slc"># (creates the file)</span>
+# Process Attributes
+# ~~~
+# Process ID (PID)
+# Parent process ID (PPID)
+# Nice number
+# TTY
+# Real and effective user ID (RUID, EUID)
+# Real and effective group ID (RGID, EGID)
 
-<span class="hl slc"># compile &#39;loop.c&#39; source into &#39;loop&#39; binary</span>
-gcc loop.c <span class="hl kwb">-o</span> loop
-<span class="hl slc"># (compiles the file)</span>
+# jobs - lists the active jobs (shell builtin)
+# fg - move job to the background (shell builtin)
+# bg - move job to the foreground (shell builtin)
+# disown - remove jobs from current shell (shell builtin)
+# ps (1) - report a snapshot of the current processes
+# pstree (1) - display a tree of processes
+# pgrep (1) - look up or signal processes based on name and other attributes
+# top (1) - display Linux processes
+# signal (7) - overview of signals
+# kill (1) - send a signal to a process
+# killall (1) - kill processes by name
+# pkill (1) - look up or signal processes based on name and other attributes
 
-<span class="hl slc"># run &#39;loop&#39; binary -- interrupt with Ctrl-c to quit</span>
-.<span class="hl opt">/</span>loop
-<span class="hl slc"># running for 0 seconds</span>
-<span class="hl slc"># running for 1 seconds</span>
-<span class="hl slc"># running for 2 seconds</span>
-<span class="hl slc"># running for 3 seconds</span>
-<span class="hl slc"># ^C</span>
+# create &apos;loop.c&apos; file with content up to &apos;EOF&apos;
+cat &lt;&lt; &apos;EOF&apos; &gt; loop.c
+#include &lt;stdio.h&gt;
+#include &lt;unistd.h&gt;
 
-<span class="hl slc"># run &#39;loop&#39; binary -- interrupt with Ctrl-z to stop</span>
-.<span class="hl opt">/</span>loop
-<span class="hl slc"># running for 0 seconds</span>
-<span class="hl slc"># running for 1 seconds</span>
-<span class="hl slc"># running for 2 seconds</span>
-<span class="hl slc"># running for 3 seconds</span>
-<span class="hl slc"># ^Z</span>
-<span class="hl slc"># [1]+  Stopped                 ./loop</span>
+int main(void)
+{
+	int curr = 0;
+	while (1) {
+		printf(&quot;running for %d seconds\n&quot;, curr++);
+		sleep(1);
+	}
+	return 0;
+}
+EOF
+# (creates the file)
 
-<span class="hl slc"># display status of jobs</span>
-<span class="hl kwb">jobs</span>
-<span class="hl slc"># [1]+  Stopped                 ./loop</span>
+# compile &apos;loop.c&apos; source into &apos;loop&apos; binary
+gcc loop.c -o loop
+# (compiles the file)
 
-<span class="hl slc"># move the job to the foreground and then stop again afterwards</span>
-<span class="hl kwb">fg</span>
-<span class="hl slc"># ./loop</span>
-<span class="hl slc"># running for 4 seconds</span>
-<span class="hl slc"># running for 5 seconds</span>
-<span class="hl slc"># running for 6 seconds</span>
-<span class="hl slc"># ^Z</span>
-<span class="hl slc"># [1]+  Stopped                 ./loop</span>
+# run &apos;loop&apos; binary -- interrupt with Ctrl-c to quit
+./loop
+# running for 0 seconds
+# running for 1 seconds
+# running for 2 seconds
+# running for 3 seconds
+# ^C
 
-<span class="hl slc"># move the job to the background</span>
-<span class="hl kwb">bg</span>
-<span class="hl slc"># [1]+ ./loop &amp;</span>
-<span class="hl slc"># gokcehan&#64;gokcehan-VirtualBox:~/cmpe230/process$ running for 7 seconds</span>
-<span class="hl slc"># running for 8 seconds</span>
-<span class="hl slc"># running for 9 seconds</span>
-<span class="hl slc"># running for 10 seconds</span>
+# run &apos;loop&apos; binary -- interrupt with Ctrl-z to stop
+./loop
+# running for 0 seconds
+# running for 1 seconds
+# running for 2 seconds
+# running for 3 seconds
+# ^Z
+# [1]+  Stopped                 ./loop
 
-<span class="hl slc"># abondons the last job</span>
-<span class="hl kwb">disown</span>
-<span class="hl slc"># (job is abondoned)</span>
+# display status of jobs
+jobs
+# [1]+  Stopped                 ./loop
 
-<span class="hl slc"># abondons the last job with nohup</span>
-<span class="hl kwb">disown -h</span>
-<span class="hl slc"># (job is abondoned with nohup)</span>
+# move the job to the foreground and then stop again afterwards
+fg
+# ./loop
+# running for 4 seconds
+# running for 5 seconds
+# running for 6 seconds
+# ^Z
+# [1]+  Stopped                 ./loop
 
-<span class="hl slc"># abondons running jobs</span>
-<span class="hl kwb">disown -r</span>
-<span class="hl slc"># (running jobs are abondoned)</span>
+# move the job to the background
+bg
+# [1]+ ./loop &amp;
+# gokcehan@gokcehan-VirtualBox:~/cmpe230/process$ running for 7 seconds
+# running for 8 seconds
+# running for 9 seconds
+# running for 10 seconds
 
-<span class="hl slc"># abondons all jobs</span>
-<span class="hl kwb">disown -a</span>
-<span class="hl slc"># (all jobs are abondoned)</span>
+# abondons the last job
+disown
+# (job is abondoned)
 
-<span class="hl slc"># shows all processes in the current terminal</span>
+# abondons the last job with nohup
+disown -h
+# (job is abondoned with nohup)
+
+# abondons running jobs
+disown -r
+# (running jobs are abondoned)
+
+# abondons all jobs
+disown -a
+# (all jobs are abondoned)
+
+# shows all processes in the current terminal
 ps
-<span class="hl slc"># PID TTY          TIME CMD</span>
-<span class="hl slc"># 20348 pts/2    00:00:00 bash</span>
-<span class="hl slc"># 20359 pts/2    00:00:00 ps</span>
+# PID TTY          TIME CMD
+# 20348 pts/2    00:00:00 bash
+# 20359 pts/2    00:00:00 ps
 
-<span class="hl slc"># shows all processes attached to a terminal</span>
-ps <span class="hl kwb">-a</span>
-<span class="hl slc">#   PID TTY          TIME CMD</span>
-<span class="hl slc">#  1077 tty1     00:00:00 gnome-session-b</span>
-<span class="hl slc">#  1083 tty1     00:00:12 gnome-shell</span>
-<span class="hl slc"># ...</span>
-<span class="hl slc"># 19965 pts/1    00:00:01 vi</span>
-<span class="hl slc"># 20364 pts/2    00:00:00 ps</span>
+# shows all processes attached to a terminal
+ps -a
+#   PID TTY          TIME CMD
+#  1077 tty1     00:00:00 gnome-session-b
+#  1083 tty1     00:00:12 gnome-shell
+# ...
+# 19965 pts/1    00:00:01 vi
+# 20364 pts/2    00:00:00 ps
 
-<span class="hl slc"># shows all processes</span>
-ps <span class="hl kwb">-e</span>
-<span class="hl slc">#   PID TTY          TIME CMD</span>
-<span class="hl slc">#     1 ?        00:00:02 systemd</span>
-<span class="hl slc">#     2 ?        00:00:00 kthreadd</span>
-<span class="hl slc"># ...</span>
-<span class="hl slc"># 20348 pts/2    00:00:00 bash</span>
-<span class="hl slc"># 20400 pts/2    00:00:00 ps</span>
+# shows all processes
+ps -e
+#   PID TTY          TIME CMD
+#     1 ?        00:00:02 systemd
+#     2 ?        00:00:00 kthreadd
+# ...
+# 20348 pts/2    00:00:00 bash
+# 20400 pts/2    00:00:00 ps
 
-<span class="hl slc"># display a tree of processes</span>
+# display a tree of processes
 pstree
-<span class="hl slc"># systemd─┬─ModemManager───2*[{ModemManager}]</span>
-<span class="hl slc">#         ├─NetworkManager─┬─dhclient</span>
-<span class="hl slc">#         │                └─2*[{NetworkManager}]</span>
-<span class="hl slc"># ...</span>
-<span class="hl slc">#         ├─whoopsie───2*[{whoopsie}]</span>
-<span class="hl slc">#         └─wpa_supplicant</span>
+# systemd─┬─ModemManager───2*[{ModemManager}]
+#         ├─NetworkManager─┬─dhclient
+#         │                └─2*[{NetworkManager}]
+# ...
+#         ├─whoopsie───2*[{whoopsie}]
+#         └─wpa_supplicant
 
-<span class="hl slc"># create &#39;lock.c&#39; file with content up to &#39;EOF&#39;</span>
-<span class="hl kwc">cat</span> <span class="hl str">&lt;&lt; &#39;EOF&#39; &gt; lock.c</span>
-<span class="hl str">int main(void)</span>
-<span class="hl str">{</span>
-<span class="hl str">	int curr = 0;</span>
-<span class="hl str">	while (1) {</span>
-<span class="hl str">		++curr;</span>
-<span class="hl str">	}</span>
-<span class="hl str">	return 0;</span>
-<span class="hl str">}</span>
-<span class="hl str">EOF</span>
-<span class="hl slc"># (creates the file)</span>
+# create &apos;lock.c&apos; file with content up to &apos;EOF&apos;
+cat &lt;&lt; &apos;EOF&apos; &gt; lock.c
+int main(void)
+{
+	int curr = 0;
+	while (1) {
+		++curr;
+	}
+	return 0;
+}
+EOF
+# (creates the file)
 
-<span class="hl slc"># compile &#39;lock.c&#39; source into &#39;lock&#39; binary</span>
-gcc lock.c <span class="hl kwb">-o</span> lock
-<span class="hl slc"># (compiles the file)</span>
+# compile &apos;lock.c&apos; source into &apos;lock&apos; binary
+gcc lock.c -o lock
+# (compiles the file)
 
-<span class="hl slc"># run &#39;lock&#39; binary -- interrupt with Ctrl-c to quit</span>
-.<span class="hl opt">/</span>lock
-<span class="hl slc"># (lock is running)</span>
+# run &apos;lock&apos; binary -- interrupt with Ctrl-c to quit
+./lock
+# (lock is running)
 
-<span class="hl slc"># show resource usage of all processes</span>
+# show resource usage of all processes
 top
-<span class="hl slc"># (displays processes in top -- press &#39;q&#39; to quit)</span>
+# (displays processes in top -- press &apos;q&apos; to quit)
 
-<span class="hl slc"># shows resource usage of all processes owned by gokcehan</span>
-top <span class="hl kwb">-u</span> gokcehan
-<span class="hl slc"># (displays processes in top -- press &#39;q&#39; to quit)</span>
+# shows resource usage of all processes owned by gokcehan
+top -u gokcehan
+# (displays processes in top -- press &apos;q&apos; to quit)
 
-<span class="hl slc"># lists all processes with the name loop</span>
+# lists all processes with the name loop
 pgrep lock
-<span class="hl slc"># 33</span>
-<span class="hl slc"># 20463</span>
+# 33
+# 20463
 
-<span class="hl slc"># kills process with id 1234</span>
-<span class="hl kwb">kill</span> <span class="hl num">1234</span>
-<span class="hl slc"># (SIGTERM is sent to the process)</span>
+# kills process with id 1234
+kill 1234
+# (SIGTERM is sent to the process)
 
-<span class="hl slc"># force kills process with id 1234</span>
-<span class="hl kwb">kill -9</span> <span class="hl num">1234</span>
-<span class="hl slc"># (SIGKILL is sent to the process)</span>
+# force kills process with id 1234
+kill -9 1234
+# (SIGKILL is sent to the process)
 
-<span class="hl slc"># kills all processes with the name lock</span>
+# kills all processes with the name lock
 pkill lock
-<span class="hl slc"># (SIGTERM is sent to the processes)</span>
+# (SIGTERM is sent to the processes)
 
-<span class="hl slc"># force kills all processes with the name lock</span>
-pkill <span class="hl kwb">-9</span> lock
-<span class="hl slc"># (SIGKILL is sent to the processes)</span>
+# force kills all processes with the name lock
+pkill -9 lock
+# (SIGKILL is sent to the processes)
 
-<span class="hl slc"># kills all processes with the exact name lock</span>
+# kills all processes with the exact name lock
 killall lock
-<span class="hl slc"># (SIGTERM is sent to the processes)</span>
+# (SIGTERM is sent to the processes)
 
-<span class="hl slc"># force kills all processes with the exact name lock</span>
-killall <span class="hl kwb">-9</span> lock
-<span class="hl slc"># (SIGKILL is sent to the processes)</span>
+# force kills all processes with the exact name lock
+killall -9 lock
+# (SIGKILL is sent to the processes)
 
-<span class="hl slc"># Exercise</span>
-<span class="hl slc"># ~~~</span>
-<span class="hl slc"># Start a process in the foreground and then move to background</span>
-<span class="hl slc"># Find a way to make the process continue after closing the terminal</span>
-<span class="hl slc"># List all processes of a user and sort by</span>
-<span class="hl slc">#   Cpu usage</span>
-<span class="hl slc">#   Memory usage</span>
-<span class="hl slc"># Create a cpu intensive process and then kill it</span>
-</pre>
+# Exercise
+# ~~~
+# Start a process in the foreground and then move to background
+# Find a way to make the process continue after closing the terminal
+# List all processes of a user and sort by
+#   Cpu usage
+#   Memory usage
+# Create a cpu intensive process and then kill it
+</code></pre>
+
 </body>
+
 </html>
-<!--HTML generated by highlight 3.62, http://www.andre-simon.de/-->

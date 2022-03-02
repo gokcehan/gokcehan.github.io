@@ -1,0 +1,27 @@
+* {
+  margin: 0;
+  padding: 0;
+}
+
+pre code {
+  padding: 1em;
+  display: block;
+  overflow-x: auto;
+}
+
+pre, code {
+  line-height: 1.5;
+  font-family:
+    ui-monospace,
+    "Menlo",
+    "Consolas",
+    "Roboto Mono",
+    "Ubuntu Monospace",
+    "Noto Mono",
+    "Liberation Mono",
+    monospace,
+    "Apple Color Emoji",
+    "Segoe UI Emoji",
+    "Segoe UI Symbol",
+    "Noto Color Emoji";
+}

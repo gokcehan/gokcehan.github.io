@@ -1,84 +1,94 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
+
 <head>
-<meta charset="ISO-8859-1">
-<title>irc.py</title>
-<link rel="stylesheet" type="text/css" href="../highlight.css">
+  <meta charset="utf-8">
+  <meta name="color-scheme" content="light dark">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>irc.py</title>
+  <link rel="stylesheet" href="../style/code.css">
+  <link rel="stylesheet" href="../highlightjs/github.min.css" media="screen and (prefers-color-scheme: light)">
+  <link rel="stylesheet" href="../highlightjs/github-dark.min.css" media="screen and (prefers-color-scheme: dark)">
+  <script src="../highlightjs/highlight-python.min.js"></script>
+  <script>hljs.highlightAll();</script>
 </head>
-<body class="hl">
-<pre class="hl"><span class="hl slc">#!/usr/bin/env python</span>
-<span class="hl slc">#</span>
-<span class="hl slc"># irc.py</span>
-<span class="hl slc">#</span>
-<span class="hl slc"># Barebones IRC client using TCP sockets</span>
-<span class="hl slc">#</span>
-<span class="hl slc"># This is a simple IRC client using TCP sockets. It runs with two threads for</span>
-<span class="hl slc"># reading and writing messages. The following messages that are configurable in</span>
-<span class="hl slc"># this script are sent when you first connect to the server:</span>
-<span class="hl slc">#</span>
-<span class="hl slc">#     NICK guest123</span>
-<span class="hl slc">#     USER guest123 localhost irc.freenode.net :John Doe</span>
-<span class="hl slc">#</span>
-<span class="hl slc"># PING messages from the server are automatically responded with a PONG</span>
-<span class="hl slc"># message. No special escaped commands are provided so you are required to</span>
-<span class="hl slc"># directly use the IRC protocol as such:</span>
-<span class="hl slc">#</span>
-<span class="hl slc">#     JOIN #python</span>
-<span class="hl slc">#     PRIVMSG #python :hi folks!</span>
-<span class="hl slc">#     PRIVMSG John :hi John, how are you?</span>
-<span class="hl slc">#</span>
-<span class="hl slc"># Input lines are terminated with CR-LF characters. Messages from all joined</span>
-<span class="hl slc"># channels are displayed on the same screen. Lastly a QUIT message is sent and</span>
-<span class="hl slc"># the socket is closed when the program is interrupted.</span>
-<span class="hl slc">#</span>
-<span class="hl slc"># IRC protocol standard: https://tools.ietf.org/html/rfc1459</span>
-<span class="hl slc">#</span>
 
-<span class="hl kwa">import</span> sys
-<span class="hl kwa">import</span> socket
-<span class="hl kwa">import</span> signal
-<span class="hl kwa">import</span> threading
+<body>
 
-nick <span class="hl opt">=</span> <span class="hl str">&#39;guest123&#39;</span>
-real <span class="hl opt">=</span> <span class="hl str">&#39;John Doe&#39;</span>
-host <span class="hl opt">=</span> <span class="hl str">&#39;irc.freenode.net&#39;</span>
-port <span class="hl opt">=</span> <span class="hl num">6667</span>
+<pre><code class="language-python">#!/usr/bin/env python
+#
+# irc.py
+#
+# Barebones IRC client using TCP sockets
+#
+# This is a simple IRC client using TCP sockets. It runs with two threads for
+# reading and writing messages. The following messages that are configurable in
+# this script are sent when you first connect to the server:
+#
+#     NICK guest123
+#     USER guest123 localhost irc.freenode.net :John Doe
+#
+# PING messages from the server are automatically responded with a PONG
+# message. No special escaped commands are provided so you are required to
+# directly use the IRC protocol as such:
+#
+#     JOIN #python
+#     PRIVMSG #python :hi folks!
+#     PRIVMSG John :hi John, how are you?
+#
+# Input lines are terminated with CR-LF characters. Messages from all joined
+# channels are displayed on the same screen. Lastly a QUIT message is sent and
+# the socket is closed when the program is interrupted.
+#
+# IRC protocol standard: https://tools.ietf.org/html/rfc1459
+#
 
-sock <span class="hl opt">=</span> socket<span class="hl opt">.</span><span class="hl kwd">socket</span><span class="hl opt">()</span>
-sock<span class="hl opt">.</span><span class="hl kwd">connect</span><span class="hl opt">((</span>host<span class="hl opt">,</span> port<span class="hl opt">))</span>
+import sys
+import socket
+import signal
+import threading
 
-sock<span class="hl opt">.</span><span class="hl kwd">send</span><span class="hl opt">(</span><span class="hl str">&#39;NICK</span> <span class="hl ipl">%s</span><span class="hl str"></span><span class="hl esc">\r\n</span><span class="hl str">&#39;</span> <span class="hl opt">%</span> nick<span class="hl opt">)</span>
-sock<span class="hl opt">.</span><span class="hl kwd">send</span><span class="hl opt">(</span><span class="hl str">&#39;USER</span> <span class="hl ipl">%s</span> <span class="hl str">localhost</span> <span class="hl ipl">%s</span> <span class="hl str">:</span><span class="hl ipl">%s</span><span class="hl str"></span><span class="hl esc">\r\n</span><span class="hl str">&#39;</span> <span class="hl opt">% (</span>nick<span class="hl opt">,</span> host<span class="hl opt">,</span> real<span class="hl opt">))</span>
+nick = &apos;guest123&apos;
+real = &apos;John Doe&apos;
+host = &apos;irc.freenode.net&apos;
+port = 6667
 
-<span class="hl kwa">def</span> <span class="hl kwd">reader</span><span class="hl opt">(</span>sock<span class="hl opt">):</span>
-    <span class="hl kwa">while True</span><span class="hl opt">:</span>
-        mesg <span class="hl opt">=</span> sock<span class="hl opt">.</span><span class="hl kwd">recv</span><span class="hl opt">(</span><span class="hl num">4096</span><span class="hl opt">)</span>
-        toks <span class="hl opt">=</span> mesg<span class="hl opt">.</span><span class="hl kwd">split</span><span class="hl opt">()</span>
-        <span class="hl kwa">if</span> toks<span class="hl opt">[</span><span class="hl num">0</span><span class="hl opt">] ==</span> <span class="hl str">&#39;PING&#39;</span><span class="hl opt">:</span>
-            sock<span class="hl opt">.</span><span class="hl kwd">send</span><span class="hl opt">(</span><span class="hl str">&#39;PONG</span> <span class="hl ipl">%s</span><span class="hl str"></span><span class="hl esc">\r\n</span><span class="hl str">&#39;</span> <span class="hl opt">%</span> toks<span class="hl opt">[</span><span class="hl num">1</span><span class="hl opt">])</span>
-        <span class="hl kwa">else</span><span class="hl opt">:</span>
-            <span class="hl kwa">print</span> mesg<span class="hl opt">,</span>
+sock = socket.socket()
+sock.connect((host, port))
 
-<span class="hl kwa">def</span> <span class="hl kwd">writer</span><span class="hl opt">(</span>sock<span class="hl opt">):</span>
-    <span class="hl kwa">while True</span><span class="hl opt">:</span>
-        line <span class="hl opt">=</span> sys<span class="hl opt">.</span>stdin<span class="hl opt">.</span><span class="hl kwd">readline</span><span class="hl opt">()</span>
-        sock<span class="hl opt">.</span><span class="hl kwd">send</span><span class="hl opt">(</span><span class="hl str">&#39;</span><span class="hl ipl">%s</span><span class="hl str"></span><span class="hl esc">\r\n</span><span class="hl str">&#39;</span> <span class="hl opt">%</span> line<span class="hl opt">.</span><span class="hl kwd">rstrip</span><span class="hl opt">())</span>
+sock.send(&apos;NICK %s\r\n&apos; % nick)
+sock.send(&apos;USER %s localhost %s :%s\r\n&apos; % (nick, host, real))
 
-t1 <span class="hl opt">=</span> threading<span class="hl opt">.</span><span class="hl kwd">Thread</span><span class="hl opt">(</span>target<span class="hl opt">=</span>reader<span class="hl opt">,</span> args<span class="hl opt">=(</span>sock<span class="hl opt">,))</span>
-t2 <span class="hl opt">=</span> threading<span class="hl opt">.</span><span class="hl kwd">Thread</span><span class="hl opt">(</span>target<span class="hl opt">=</span>writer<span class="hl opt">,</span> args<span class="hl opt">=(</span>sock<span class="hl opt">,))</span>
+def reader(sock):
+    while True:
+        mesg = sock.recv(4096)
+        toks = mesg.split()
+        if toks[0] == &apos;PING&apos;:
+            sock.send(&apos;PONG %s\r\n&apos; % toks[1])
+        else:
+            print mesg,
 
-t1<span class="hl opt">.</span>daemon <span class="hl opt">=</span> <span class="hl kwa">True</span>
-t2<span class="hl opt">.</span>daemon <span class="hl opt">=</span> <span class="hl kwa">True</span>
+def writer(sock):
+    while True:
+        line = sys.stdin.readline()
+        sock.send(&apos;%s\r\n&apos; % line.rstrip())
 
-t1<span class="hl opt">.</span><span class="hl kwd">start</span><span class="hl opt">()</span>
-t2<span class="hl opt">.</span><span class="hl kwd">start</span><span class="hl opt">()</span>
+t1 = threading.Thread(target=reader, args=(sock,))
+t2 = threading.Thread(target=writer, args=(sock,))
 
-<span class="hl kwa">try</span><span class="hl opt">:</span>
-    signal<span class="hl opt">.</span><span class="hl kwd">pause</span><span class="hl opt">()</span>
-<span class="hl kwa">except</span> <span class="hl kwc">KeyboardInterrupt</span><span class="hl opt">:</span>
-    sock<span class="hl opt">.</span><span class="hl kwd">send</span><span class="hl opt">(</span><span class="hl str">&#39;QUIT</span><span class="hl esc">\r\n</span><span class="hl str">&#39;</span><span class="hl opt">)</span>
-    sock<span class="hl opt">.</span><span class="hl kwd">close</span><span class="hl opt">()</span>
-</pre>
+t1.daemon = True
+t2.daemon = True
+
+t1.start()
+t2.start()
+
+try:
+    signal.pause()
+except KeyboardInterrupt:
+    sock.send(&apos;QUIT\r\n&apos;)
+    sock.close()
+</code></pre>
+
 </body>
+
 </html>
-<!--HTML generated by highlight 3.62, http://www.andre-simon.de/-->

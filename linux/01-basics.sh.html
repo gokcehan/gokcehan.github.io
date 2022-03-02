@@ -1,1207 +1,1217 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
+
 <head>
-<meta charset="ISO-8859-1">
-<title>01-basics.sh</title>
-<link rel="stylesheet" type="text/css" href="../highlight.css">
+  <meta charset="utf-8">
+  <meta name="color-scheme" content="light dark">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>01-basics.sh</title>
+  <link rel="stylesheet" href="../style/code.css">
+  <link rel="stylesheet" href="../highlightjs/github.min.css" media="screen and (prefers-color-scheme: light)">
+  <link rel="stylesheet" href="../highlightjs/github-dark.min.css" media="screen and (prefers-color-scheme: dark)">
+  <script src="../highlightjs/highlight-bash.min.js"></script>
+  <script>hljs.highlightAll();</script>
 </head>
-<body class="hl">
-<pre class="hl"><span class="hl slc">#!/bin/sh</span>
 
-<span class="hl slc">## ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~</span>
-<span class="hl slc">## POSIX CONVENTIONS</span>
-<span class="hl slc">## ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~</span>
+<body>
 
-<span class="hl slc"># ls (1) - list directory contents</span>
+<pre><code class="language-bash">#!/bin/sh
 
-<span class="hl slc"># Common options for `ls`</span>
-<span class="hl slc"># ~~~</span>
-<span class="hl slc"># `-a` to not ignore entries starting with .</span>
-<span class="hl slc"># `-l` to use a long listing format</span>
-<span class="hl slc"># `-h` to print human readable sizes</span>
-<span class="hl slc"># `-t` to sort by modification time, newest first</span>
-<span class="hl slc"># `-S` to sort by file size, largest first</span>
-<span class="hl slc"># `-r` to reverse order while sorting</span>
-<span class="hl slc"># `-R` to list subdirectories recursively</span>
+## ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+## POSIX CONVENTIONS
+## ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-<span class="hl slc"># POSIX Utility Argument Syntax</span>
-<span class="hl slc"># ~~~</span>
-<span class="hl slc"># utility_name [-a] [-b] [-c option_argument]</span>
-<span class="hl slc">#     [-d|-e] [-f [option_argument]] [operand...]</span>
+# ls (1) - list directory contents
 
-<span class="hl slc"># POSIX Utility Syntax Guidelines</span>
-<span class="hl slc"># ~~~</span>
-<span class="hl slc"># Guideline 4:</span>
-<span class="hl slc">#     All options should be preceded by the &#39;-&#39; delimiter character.</span>
-<span class="hl slc">#</span>
-<span class="hl slc"># Guideline 5:</span>
-<span class="hl slc">#     One or more options without option-arguments, followed by at most one</span>
-<span class="hl slc">#     option that takes an option-argument, should be accepted when grouped</span>
-<span class="hl slc">#     behind one &#39;-&#39; delimiter.</span>
-<span class="hl slc">#</span>
-<span class="hl slc"># Guideline 10:</span>
-<span class="hl slc">#     The first -- argument that is not an option-argument should be accepted</span>
-<span class="hl slc">#     as a delimiter indicating the end of options. Any following arguments</span>
-<span class="hl slc">#     should be treated as operands, even if they begin with the &#39;-&#39; character.</span>
+# Common options for `ls`
+# ~~~
+# `-a` to not ignore entries starting with .
+# `-l` to use a long listing format
+# `-h` to print human readable sizes
+# `-t` to sort by modification time, newest first
+# `-S` to sort by file size, largest first
+# `-r` to reverse order while sorting
+# `-R` to list subdirectories recursively
 
-<span class="hl slc"># Exercise</span>
-<span class="hl slc"># ~~~</span>
-<span class="hl slc"># Read the rest of the utility conventions at:</span>
-<span class="hl slc"># https://pubs.opengroup.org/onlinepubs/9699919799/basedefs/V1_chap12.html</span>
+# POSIX Utility Argument Syntax
+# ~~~
+# utility_name [-a] [-b] [-c option_argument]
+#     [-d|-e] [-f [option_argument]] [operand...]
 
-<span class="hl slc">## ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~</span>
-<span class="hl slc">## MANUALS AND DOCUMENTATION</span>
-<span class="hl slc">## ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~</span>
+# POSIX Utility Syntax Guidelines
+# ~~~
+# Guideline 4:
+#     All options should be preceded by the &apos;-&apos; delimiter character.
+#
+# Guideline 5:
+#     One or more options without option-arguments, followed by at most one
+#     option that takes an option-argument, should be accepted when grouped
+#     behind one &apos;-&apos; delimiter.
+#
+# Guideline 10:
+#     The first -- argument that is not an option-argument should be accepted
+#     as a delimiter indicating the end of options. Any following arguments
+#     should be treated as operands, even if they begin with the &apos;-&apos; character.
 
-<span class="hl slc"># whatis (1) - display one-line manual page descriptions</span>
-<span class="hl slc"># apropos (1) - search the manual page names and descriptions</span>
-<span class="hl slc"># man (1) - an interface to the on-line reference manuals</span>
-<span class="hl slc"># manpath (1) - determine search path for manual pages</span>
-<span class="hl slc"># info (1) - read Info documents</span>
-<span class="hl slc"># help (information about builtin commands) (shell builtin)</span>
-<span class="hl slc"># type (information about command type) (shell builtin)</span>
+# Exercise
+# ~~~
+# Read the rest of the utility conventions at:
+# https://pubs.opengroup.org/onlinepubs/9699919799/basedefs/V1_chap12.html
 
-<span class="hl slc"># display one-line manual page description of &#39;ls&#39; command</span>
-<span class="hl kwc">whatis ls</span>
-<span class="hl slc"># ls (1)               - list directory contents</span>
+## ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+## MANUALS AND DOCUMENTATION
+## ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-<span class="hl slc"># display descriptions of all available commands matching wildcard pattern &#39;ls*&#39;</span>
-<span class="hl kwc">whatis</span> <span class="hl kwb">-w</span> <span class="hl kwc">ls</span><span class="hl opt">*</span>
-<span class="hl slc"># ls (1)               - list directory contents</span>
-<span class="hl slc"># lsattr (1)           - list file attributes on a Linux second extended file system</span>
-<span class="hl slc"># ..</span>
-<span class="hl slc"># lstat64 (2)          - get file status</span>
-<span class="hl slc"># lsusb (8)            - list USB devices</span>
+# whatis (1) - display one-line manual page descriptions
+# apropos (1) - search the manual page names and descriptions
+# man (1) - an interface to the on-line reference manuals
+# manpath (1) - determine search path for manual pages
+# info (1) - read Info documents
+# help (information about builtin commands) (shell builtin)
+# type (information about command type) (shell builtin)
 
-<span class="hl slc"># display all available commands with descriptions containing word &#39;directory&#39;</span>
+# display one-line manual page description of &apos;ls&apos; command
+whatis ls
+# ls (1)               - list directory contents
+
+# display descriptions of all available commands matching wildcard pattern &apos;ls*&apos;
+whatis -w ls*
+# ls (1)               - list directory contents
+# lsattr (1)           - list file attributes on a Linux second extended file system
+# ..
+# lstat64 (2)          - get file status
+# lsusb (8)            - list USB devices
+
+# display all available commands with descriptions containing word &apos;directory&apos;
 apropos directory
-<span class="hl slc"># alphasort (3)        - scan a directory for matching entries</span>
-<span class="hl slc"># basename (1)         - strip directory and suffix from filenames</span>
-<span class="hl slc"># ..</span>
-<span class="hl slc"># vdir (1)             - list directory contents</span>
-<span class="hl slc"># versionsort (3)      - scan a directory for matching entries</span>
+# alphasort (3)        - scan a directory for matching entries
+# basename (1)         - strip directory and suffix from filenames
+# ..
+# vdir (1)             - list directory contents
+# versionsort (3)      - scan a directory for matching entries
 
-<span class="hl slc"># display all available commands with descriptions containing words &#39;list&#39; and &#39;directory&#39;</span>
-apropos <span class="hl kwb">-a</span> list directory
-<span class="hl slc"># chacl (1)            - change the access control list of a file or directory</span>
-<span class="hl slc"># dir (1)              - list directory contents</span>
-<span class="hl slc"># File::Listing (3pm)  - parse directory listing</span>
-<span class="hl slc"># ls (1)               - list directory contents</span>
-<span class="hl slc"># ntfsls (8)           - list directory contents on an NTFS filesystem</span>
-<span class="hl slc"># vdir (1)             - list directory contents</span>
+# display all available commands with descriptions containing words &apos;list&apos; and &apos;directory&apos;
+apropos -a list directory
+# chacl (1)            - change the access control list of a file or directory
+# dir (1)              - list directory contents
+# File::Listing (3pm)  - parse directory listing
+# ls (1)               - list directory contents
+# ntfsls (8)           - list directory contents on an NTFS filesystem
+# vdir (1)             - list directory contents
 
-<span class="hl slc"># display manual page of &#39;ls&#39; command</span>
-man <span class="hl kwc">ls</span>
-<span class="hl slc"># (displays manual page in a pager -- press &#39;q&#39; to quit)</span>
+# display manual page of &apos;ls&apos; command
+man ls
+# (displays manual page in a pager -- press &apos;q&apos; to quit)
 
-<span class="hl slc"># display one-line manual page descriptions of &#39;printf&#39; command and library call</span>
-<span class="hl kwc">whatis</span> <span class="hl kwb">printf</span>
-<span class="hl slc"># printf (1)           - format and print data</span>
-<span class="hl slc"># printf (3)           - formatted output conversion</span>
+# display one-line manual page descriptions of &apos;printf&apos; command and library call
+whatis printf
+# printf (1)           - format and print data
+# printf (3)           - formatted output conversion
 
-<span class="hl slc"># Man Sections (see `man man`)</span>
-<span class="hl slc"># 1. Executable programs or shell commands</span>
-<span class="hl slc"># 2. System calls (functions provided by the kernel)</span>
-<span class="hl slc"># 3. Library calls (functions within program libraries)</span>
-<span class="hl slc"># 4. Special files (usually found in /dev)</span>
-<span class="hl slc"># 5. File formats and conventions eg /etc/passwd</span>
-<span class="hl slc"># 6. Games</span>
-<span class="hl slc"># 7. Miscellaneous (including macro packages and conventions)</span>
-<span class="hl slc"># 8. System administration commands (usually only for root)</span>
-<span class="hl slc"># 9. Kernel routines [Non standard]</span>
+# Man Sections (see `man man`)
+# 1. Executable programs or shell commands
+# 2. System calls (functions provided by the kernel)
+# 3. Library calls (functions within program libraries)
+# 4. Special files (usually found in /dev)
+# 5. File formats and conventions eg /etc/passwd
+# 6. Games
+# 7. Miscellaneous (including macro packages and conventions)
+# 8. System administration commands (usually only for root)
+# 9. Kernel routines [Non standard]
 
-<span class="hl slc"># display manual page of &#39;printf&#39; command</span>
-man <span class="hl num">1</span> <span class="hl kwb">printf</span>
-<span class="hl slc"># (displays manual page in a pager -- press &#39;q&#39; to quit)</span>
+# display manual page of &apos;printf&apos; command
+man 1 printf
+# (displays manual page in a pager -- press &apos;q&apos; to quit)
 
-<span class="hl slc"># display manual page of &#39;printf&#39; library call</span>
-man <span class="hl num">3</span> <span class="hl kwb">printf</span>
-<span class="hl slc"># (displays manual page in a pager -- press &#39;q&#39; to quit)</span>
+# display manual page of &apos;printf&apos; library call
+man 3 printf
+# (displays manual page in a pager -- press &apos;q&apos; to quit)
 
-<span class="hl slc"># display search path for manual pages</span>
+# display search path for manual pages
 manpath
-<span class="hl slc"># /usr/local/man:/usr/local/share/man:/usr/share/man</span>
-
-<span class="hl slc"># display info page of &#39;ls&#39; command</span>
-info <span class="hl kwc">ls</span>
-<span class="hl slc"># (displays info page in info viewer)</span>
-
-<span class="hl slc"># display manual page of &#39;cd&#39; command</span>
-man <span class="hl kwb">cd</span>
-<span class="hl slc"># No manual entry for cd</span>
-
-<span class="hl slc"># display shell help of &#39;cd&#39; command</span>
-<span class="hl kwb">help cd</span>
-<span class="hl slc"># cd: cd [-L|[-P [-e]] [-&#64;]] [dir]</span>
-<span class="hl slc">#     Change the shell working directory.</span>
-<span class="hl slc"># ..</span>
-<span class="hl slc">#     Exit Status:</span>
-<span class="hl slc">#     Returns 0 if the directory is changed, and if $PWD is set successfully when</span>
-<span class="hl slc">#     -P is used; non-zero otherwise.</span>
-
-<span class="hl slc"># display command type of &#39;ls&#39; command</span>
-<span class="hl kwb">type</span> <span class="hl kwc">ls</span>
-<span class="hl slc"># ls is /bin/ls</span>
-
-<span class="hl slc"># display command type of &#39;cd&#39; command</span>
-<span class="hl kwb">type cd</span>
-<span class="hl slc"># cd is a shell builtin</span>
-
-<span class="hl slc">## ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~</span>
-<span class="hl slc">## PATH NAVIGATION</span>
-<span class="hl slc">## ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~</span>
-
-<span class="hl slc"># Unix paths</span>
-<span class="hl slc"># ~~~</span>
-<span class="hl slc"># Root directory is denoted with `/`</span>
-<span class="hl slc"># Home directory is denoted with `~` (expanded by shell)</span>
-<span class="hl slc"># Path separator is `/`</span>
-<span class="hl slc"># Current directory is denoted with `.`</span>
-<span class="hl slc"># Parent directory is denoted with `..`</span>
-<span class="hl slc"># Absolute paths are those that start with `/`</span>
-<span class="hl slc"># Relative paths are those that does not start with `/`</span>
-
-<span class="hl slc"># pwd (1) - print name of current/working directory</span>
-<span class="hl slc"># cd (change directory) (shell builtin)</span>
-
-<span class="hl slc"># display present working directory</span>
-<span class="hl kwb">pwd</span>
-<span class="hl slc"># /home/gokcehan/cmpe230/basics</span>
-
-<span class="hl slc"># change working directory to parent</span>
-<span class="hl kwb">cd</span> ..
-<span class="hl slc"># (changes to parent directory)</span>
-
-<span class="hl slc"># change working directory to &#39;basics&#39; from current directory (relative path)</span>
-<span class="hl kwb">cd</span> basics
-<span class="hl slc"># (changes to &#39;basics&#39; directory in current directory)</span>
-
-<span class="hl slc"># change working directory to &#39;/etc&#39; (full path / absolute path)</span>
-<span class="hl kwb">cd</span> <span class="hl opt">/</span>etc
-<span class="hl slc"># (changes to &#39;/etc&#39; directory)</span>
-
-<span class="hl slc"># change working directory to home directory of current user</span>
-<span class="hl kwb">cd</span> ~
-<span class="hl slc"># (changes to home directory)</span>
-
-<span class="hl slc"># change working directory to home directory of current user</span>
-<span class="hl kwb">cd</span>
-<span class="hl slc"># (changes to home directory)</span>
-
-<span class="hl slc"># change working directory to previous</span>
-<span class="hl kwb">cd</span> <span class="hl opt">-</span>
-<span class="hl slc"># (changes to previous directory)</span>
-
-<span class="hl slc"># Exercise</span>
-<span class="hl slc"># ~~~</span>
-<span class="hl slc"># Examine the file system (see `man hier`).</span>
-
-<span class="hl slc">## ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~</span>
-<span class="hl slc">## FILE/DIRECTORY OPERATIONS</span>
-<span class="hl slc">## ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~</span>
-
-<span class="hl slc"># mkdir (1) - make directories</span>
-<span class="hl slc"># rmdir (1) - remove empty directories</span>
-<span class="hl slc"># touch (1) - change file timestamps</span>
-<span class="hl slc"># rm (1) - remove files or directories</span>
-<span class="hl slc"># cp (1) - copy files and directories</span>
-<span class="hl slc"># mv (1) - move (rename) files</span>
-<span class="hl slc"># ln (1) - make links between files</span>
-
-<span class="hl slc"># create and then remove &#39;demo&#39; directory (empty)</span>
-<span class="hl kwc">mkdir</span> demo
-<span class="hl kwc">rmdir</span> demo
-<span class="hl slc"># (creates and then removes &#39;demo&#39; directory)</span>
-
-<span class="hl slc"># create and then remove &#39;demo&#39; directory (non-empty)</span>
-<span class="hl kwc">mkdir</span> demo
-<span class="hl kwc">touch</span> demo<span class="hl opt">/</span>foo.txt
-<span class="hl kwc">rmdir</span> demo
-<span class="hl slc"># rmdir: failed to remove &#39;demo&#39;: Directory not empty</span>
-
-<span class="hl slc"># recursively remove &#39;demo&#39; directory along with its children</span>
-<span class="hl kwc">rm</span> <span class="hl kwb">-r</span> demo
-<span class="hl slc"># (removes the directory)</span>
-
-<span class="hl slc"># create a nested directory &#39;demo/foo/bar/baz&#39; along with its parents</span>
-<span class="hl kwc">mkdir</span> demo<span class="hl opt">/</span>foo<span class="hl opt">/</span>bar<span class="hl opt">/</span>baz
-<span class="hl slc"># mkdir: cannot create directory ‘demo/foo/bar/baz’: No such file or directory</span>
-
-<span class="hl slc"># create a nested directory &#39;demo/foo/bar/baz&#39; and then remove them</span>
-<span class="hl kwc">mkdir</span> <span class="hl kwb">-p</span> demo<span class="hl opt">/</span>foo<span class="hl opt">/</span>bar<span class="hl opt">/</span>baz
-<span class="hl kwc">rmdir</span> <span class="hl opt">/</span>demo<span class="hl opt">/</span>foo<span class="hl opt">/</span>bar<span class="hl opt">/</span>baz
-<span class="hl kwc">rmdir</span> <span class="hl opt">/</span>demo<span class="hl opt">/</span>foo<span class="hl opt">/</span>bar
-<span class="hl kwc">rmdir</span> <span class="hl opt">/</span>demo<span class="hl opt">/</span>foo
-<span class="hl slc"># (creates &#39;demo/foo/bar/baz&#39; along with its parents and then removes them)</span>
-
-<span class="hl slc"># copy &#39;demo/foo.txt&#39; file to &#39;demo/bar.txt&#39;</span>
-<span class="hl kwc">mkdir</span> demo
-<span class="hl kwc">touch</span> demo<span class="hl opt">/</span>foo.txt
-<span class="hl kwc">cp</span> demo<span class="hl opt">/</span>foo.txt demo<span class="hl opt">/</span>bar.txt
-<span class="hl slc"># (copies the file)</span>
-
-<span class="hl slc"># copy &#39;demo&#39; directory to &#39;demo2&#39;</span>
-<span class="hl kwc">cp</span> demo demo2
-<span class="hl slc"># cp: omitting directory &#39;demo&#39;</span>
-
-<span class="hl slc"># copy &#39;demo&#39; directory to &#39;demo2&#39;</span>
-<span class="hl kwc">cp</span> <span class="hl kwb">-r</span> demo demo2
-<span class="hl slc"># (copies the directory)</span>
-
-<span class="hl slc"># move &#39;demo2&#39; directory to &#39;demo3&#39;</span>
-<span class="hl kwc">mv</span> demo2 demo3
-<span class="hl slc"># (moves the directory)</span>
-
-<span class="hl slc"># remove &#39;demo3&#39; directory</span>
-<span class="hl kwc">rm</span> <span class="hl kwb">-r</span> demo3
-<span class="hl slc"># (removes the directory)</span>
-
-<span class="hl slc"># Hard Links vs Soft (Symbolic) Links</span>
-<span class="hl slc"># ~~~</span>
-<span class="hl slc"># A hard link is a new entry pointing to the same file content in the filesystem</span>
-<span class="hl slc"># A soft link is a new link file pointing to a file path</span>
-<span class="hl slc"># Hard links continue to work when the original file is moved or removed</span>
-<span class="hl slc"># Soft links only work when there is an existing file in the linked path</span>
-<span class="hl slc"># Hard links can only be used for files</span>
-<span class="hl slc"># Soft links can be used for files or directories</span>
-<span class="hl slc"># Hard links can only be used for a file in the current filesystem</span>
-<span class="hl slc"># Soft links can span over different filesystems</span>
-
-<span class="hl slc"># create a hard link named &#39;hard&#39; to &#39;demo/foo.txt&#39;</span>
-<span class="hl kwc">ln</span> demo<span class="hl opt">/</span>foo.txt hard
-<span class="hl slc"># (creates the hard link)</span>
-
-<span class="hl slc"># remove &#39;hard&#39; file</span>
-<span class="hl kwc">rm</span> hard
-<span class="hl slc"># (removes the hard link but not the file)</span>
-
-<span class="hl slc"># create a soft link named &#39;soft&#39; to &#39;demo/foo.txt&#39;</span>
-<span class="hl kwc">ln</span> <span class="hl kwb">-s</span> demo<span class="hl opt">/</span>foo.txt soft
-<span class="hl slc"># (creates the soft link)</span>
-
-<span class="hl slc"># remove &#39;soft&#39; link</span>
-<span class="hl kwc">rm</span> soft
-<span class="hl slc"># (removes the soft link but not the file)</span>
-
-<span class="hl slc">## ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~</span>
-<span class="hl slc">## FILE DISPLAYING/EDITING</span>
-<span class="hl slc">## ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~</span>
-
-<span class="hl slc"># file (1) - determine file type</span>
-<span class="hl slc"># cat (1) - concatenate files and print on the standard output</span>
-<span class="hl slc"># head (1) - output the first part of files</span>
-<span class="hl slc"># tail (1) - output the last part of files</span>
-<span class="hl slc"># more (1) - file perusal filter for crt viewing</span>
-<span class="hl slc"># less (1) - opposite of more</span>
-<span class="hl slc"># gedit (1) - text editor for the GNOME Desktop</span>
-<span class="hl slc"># nano (1) - Nano&#39;s ANOther editor, an enhanced free Pico clone</span>
-<span class="hl slc"># vi (1) - Vi IMproved, a programmers text editor</span>
-
-<span class="hl slc"># create &#39;hello.c&#39; file with content up to &#39;EOF&#39; (heredoc literal)</span>
-<span class="hl kwc">cat</span> <span class="hl str">&lt;&lt; &#39;EOF&#39; &gt; hello.c</span>
-<span class="hl str">#include &lt;stdio.h&gt;</span>
-<span class="hl str"></span>
-<span class="hl str">int main(void)</span>
-<span class="hl str">{</span>
-<span class="hl str">	puts(&quot;Hello World&quot;);</span>
-<span class="hl str">	return 0;</span>
-<span class="hl str">}</span>
-<span class="hl str">EOF</span>
-<span class="hl slc"># (creates the file)</span>
-
-<span class="hl slc"># print &#39;hello.c&#39; file to the standard output</span>
-<span class="hl kwc">cat</span> hello.c
-<span class="hl slc"># #include &lt;stdio.h&gt;</span>
-<span class="hl slc">#</span>
-<span class="hl slc"># int main(void)</span>
-<span class="hl slc"># {</span>
-<span class="hl slc"># 	puts(&quot;Hello World&quot;);</span>
-<span class="hl slc"># 	return 0;</span>
-<span class="hl slc"># }</span>
-
-<span class="hl slc"># determine the type of &#39;hello.c&#39; file (traditional human readable output)</span>
-<span class="hl kwc">file</span> hello.c
-<span class="hl slc"># hello.c: C source, ASCII text</span>
-
-<span class="hl slc"># determine the type of &#39;hello.c&#39; file (mime type output)</span>
-<span class="hl kwc">file</span> <span class="hl kwb">-i</span> hello.c
-<span class="hl slc"># hello.c: text/x-c; charset=us-ascii</span>
-
-<span class="hl slc"># compile &#39;hello.c&#39; source into &#39;hello&#39; binary</span>
-gcc hello.c <span class="hl kwb">-o</span> hello
-<span class="hl slc"># (compiles the file)</span>
-
-<span class="hl slc"># run &#39;hello&#39; binary</span>
-.<span class="hl opt">/</span>hello
-<span class="hl slc"># Hello World</span>
-
-<span class="hl slc"># determine the type of &#39;hello&#39; file (traditional human readable output)</span>
-<span class="hl kwc">file</span> hello
-<span class="hl slc"># hello: ELF 64-bit LSB shared object, x86-64, version 1 (SYSV), dynamically linked, interpreter /lib64/l, for GNU/Linux 3.2.0, BuildID[sha1]=2500b0e3243b8052a5cdb06925e15447ea54c4ba, not stripped</span>
-
-<span class="hl slc"># determine the type of &#39;hello&#39; file (mime type output)</span>
-<span class="hl kwc">file</span> <span class="hl kwb">-i</span> hello
-<span class="hl slc"># hello: application/x-sharedlib; charset=binary</span>
-
-<span class="hl slc"># display the first 3 lines of &#39;hello.c&#39; file</span>
-<span class="hl kwc">head</span> <span class="hl kwb">-n</span> <span class="hl num">3</span> hello.c
-<span class="hl slc"># #include &lt;stdio.h&gt;</span>
-<span class="hl slc">#</span>
-<span class="hl slc"># int main(void)</span>
-
-<span class="hl slc"># display the last 3 lines of &#39;hello.c&#39; file</span>
-<span class="hl kwc">tail</span> <span class="hl kwb">-n</span> <span class="hl num">3</span> hello.c
-<span class="hl slc"># 	puts(&quot;Hello World&quot;);</span>
-<span class="hl slc"># 	return 0;</span>
-<span class="hl slc"># }</span>
-
-<span class="hl slc"># display the last lines of &#39;/var/log/syslog/ file and then continuously follow the file and display new output</span>
-<span class="hl kwc">tail</span> <span class="hl kwb">-f</span> <span class="hl opt">/</span>var<span class="hl opt">/</span>log<span class="hl opt">/</span>syslog
-<span class="hl slc"># (displays the file -- interrupt with Ctrl-c to quit)</span>
-
-<span class="hl slc"># display &#39;hello.c&#39; file with &#39;more&#39; pager (one page at a time)</span>
-<span class="hl kwc">more</span> hello.c
-<span class="hl slc"># (displays file one page at a time -- press &#39;space&#39; for next page if any and &#39;q&#39; to quit)</span>
-
-<span class="hl slc"># display &#39;hello.c&#39; file with &#39;less&#39; pager</span>
-<span class="hl kwc">less</span> hello.c
-<span class="hl slc"># (displays file as a pager -- press &#39;q&#39; to quit)</span>
-
-<span class="hl slc"># open &#39;hello.c&#39; file with &#39;gedit&#39; editor (editor by GNOME)</span>
-gedit hello.c
-<span class="hl slc"># (opens the file)</span>
-
-<span class="hl slc"># open &#39;hello.c&#39; file with &#39;nano&#39; editor (editor by GNU)</span>
-nano hello.c
-<span class="hl slc"># (opens the file -- press &#39;C-x&#39; to quit)</span>
-
-<span class="hl slc"># open &#39;hello.c&#39; file with &#39;vi&#39; editor (POSIX standard editor)</span>
-vi hello.c
-<span class="hl slc"># (opens the file -- type &#39;:q&#39; and press enter to quit)</span>
-
-<span class="hl slc"># open &#39;hello.c&#39; file with &#39;vim&#39; editor (vi improved)</span>
-vim hello.c
-<span class="hl slc"># (opens the file -- type &#39;:q&#39; and press enter to quit)</span>
-
-<span class="hl slc"># start tutorial for vim</span>
-vimtutor
-<span class="hl slc"># (opens the tutorial)</span>
-
-<span class="hl slc">## ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~</span>
-<span class="hl slc">## DISK OPERATIONS</span>
-<span class="hl slc">## ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~</span>
-
-<span class="hl slc"># df (1) - report file system disk space usage</span>
-<span class="hl slc"># du (1) - estimate file space usage</span>
-<span class="hl slc"># dd (1) - convert and copy a file</span>
-
-<span class="hl slc"># show file system disk space usage</span>
-df
-<span class="hl slc"># Filesystem     1K-blocks      Used Available Use% Mounted on</span>
-<span class="hl slc"># udev             1994708         0   1994708   0% /dev</span>
-<span class="hl slc"># tmpfs             403720      1556    402164   1% /run</span>
-<span class="hl slc"># /dev/sda1       10253588   5952044   3760976  62% /</span>
-<span class="hl slc"># tmpfs            2018584    100208   1918376   5% /dev/shm</span>
-<span class="hl slc"># tmpfs               5120         4      5116   1% /run/lock</span>
-<span class="hl slc"># tmpfs            2018584         0   2018584   0% /sys/fs/cgroup</span>
-<span class="hl slc"># tmpfs             403716        28    403688   1% /run/user/121</span>
-<span class="hl slc"># tmpfs             403716        28    403688   1% /run/user/1000</span>
-
-<span class="hl slc"># show file system disk space usage in human readable format</span>
-df <span class="hl kwb">-h</span>
-<span class="hl slc"># Filesystem      Size  Used Avail Use% Mounted on</span>
-<span class="hl slc"># udev            2,0G     0  2,0G   0% /dev</span>
-<span class="hl slc"># tmpfs           395M  1,6M  393M   1% /run</span>
-<span class="hl slc"># /dev/sda1       9,8G  5,7G  3,6G  62% /</span>
-<span class="hl slc"># tmpfs           2,0G   98M  1,9G   5% /dev/shm</span>
-<span class="hl slc"># tmpfs           5,0M  4,0K  5,0M   1% /run/lock</span>
-<span class="hl slc"># tmpfs           2,0G     0  2,0G   0% /sys/fs/cgroup</span>
-<span class="hl slc"># tmpfs           395M   28K  395M   1% /run/user/121</span>
-<span class="hl slc"># tmpfs           395M   28K  395M   1% /run/user/1000</span>
-
-<span class="hl slc"># show disk usage of directories in &#39;/usr&#39; directory</span>
-du <span class="hl opt">/</span>usr
-<span class="hl slc"># 15596   /usr/sbin</span>
-<span class="hl slc"># 4       /usr/local/sbin</span>
-<span class="hl slc"># ..</span>
-<span class="hl slc"># 1432    /usr/libexec</span>
-<span class="hl slc"># 2988292 /usr</span>
-
-<span class="hl slc"># show disk usage summary of &#39;/usr&#39; directory</span>
-du <span class="hl opt">/</span>usr <span class="hl kwb">-s</span>
-<span class="hl slc"># 2988292 /usr</span>
-
-<span class="hl slc"># show disk usage of directories in &#39;/usr&#39; directory with a depth of zero</span>
-du <span class="hl opt">/</span>usr <span class="hl kwb">-d0</span>
-<span class="hl slc"># 2988292 /usr</span>
-
-<span class="hl slc"># show disk usage of directories in &#39;/usr&#39; directory with a depth of one</span>
-du <span class="hl opt">/</span>usr <span class="hl kwb">-d1</span>
-<span class="hl slc"># 15596   /usr/sbin</span>
-<span class="hl slc"># 64      /usr/local</span>
-<span class="hl slc"># ..</span>
-<span class="hl slc"># 1432    /usr/libexec</span>
-<span class="hl slc"># 2988292 /usr</span>
-
-<span class="hl slc"># show disk usage in human readable form</span>
-du <span class="hl opt">/</span>usr <span class="hl kwb">-d1 -h</span>
-<span class="hl slc"># 16M     /usr/sbin</span>
-<span class="hl slc"># 64K     /usr/local</span>
-<span class="hl slc"># ..</span>
-<span class="hl slc"># 1,4M    /usr/libexec</span>
-<span class="hl slc"># 2,9G    /usr</span>
-
-<span class="hl slc"># show disk usage of &#39;/usr&#39; and &#39;/lib&#39; directories</span>
-du <span class="hl opt">/</span>usr <span class="hl opt">/</span>lib <span class="hl kwb">-d1 -h</span>
-<span class="hl slc"># 16M     /usr/sbin</span>
-<span class="hl slc"># 64K     /usr/local</span>
-<span class="hl slc"># ..</span>
-<span class="hl slc"># 1,4M    /usr/libexec</span>
-<span class="hl slc"># 2,9G    /usr</span>
-<span class="hl slc"># 12K     /lib/linux-sound-base</span>
-<span class="hl slc"># 16K     /lib/hdparm</span>
-<span class="hl slc"># ..</span>
-<span class="hl slc"># 16K     /lib/apparmor</span>
-<span class="hl slc"># 836M    /lib</span>
-
-<span class="hl slc"># show disk usage of &#39;/usr&#39; and &#39;/lib&#39; directories with a total</span>
-du <span class="hl opt">/</span>usr <span class="hl opt">/</span>lib <span class="hl kwb">-d1 -h -c</span>
-<span class="hl slc"># 16M     /usr/sbin</span>
-<span class="hl slc"># 64K     /usr/local</span>
-<span class="hl slc"># ..</span>
-<span class="hl slc"># 1,4M    /usr/libexec</span>
-<span class="hl slc"># 2,9G    /usr</span>
-<span class="hl slc"># 12K     /lib/linux-sound-base</span>
-<span class="hl slc"># 16K     /lib/hdparm</span>
-<span class="hl slc"># ..</span>
-<span class="hl slc"># 16K     /lib/apparmor</span>
-<span class="hl slc"># 836M    /lib</span>
-<span class="hl slc"># 3,7G    total</span>
-
-<span class="hl slc">## ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~</span>
-<span class="hl slc">## PIPES AND REDIRECTION</span>
-<span class="hl slc">## ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~</span>
-
-<span class="hl slc"># tee (1) - read from standard input and write to standard output and files</span>
-<span class="hl slc"># echo (1) - display a line of text</span>
-<span class="hl slc"># printf (1) - format and print data</span>
-<span class="hl slc"># strings (1) - print the strings of printable characters in files.</span>
-
-<span class="hl slc"># Pipes and Redirection</span>
-<span class="hl slc"># ~~~</span>
-<span class="hl slc"># Every process has at least 3 communication channels</span>
-<span class="hl slc">#   Standard Input (STDIN)</span>
-<span class="hl slc">#   Standard Output (STDOUT)</span>
-<span class="hl slc">#   Standard Error (STDERR)</span>
-<span class="hl slc"># Unix has file descriptors for these channels as 0, 1, and 2</span>
-<span class="hl slc"># Most commands reads from STDIN and outputs to STDOUT conventionally</span>
-<span class="hl slc"># `&lt;`, `&gt;`, and `&gt;&gt;` are used to redirect these channels from/to files</span>
-<span class="hl slc"># `|` is used to connect STDOUT of one process to STDIN of another</span>
-
-<span class="hl slc"># Special Device Files</span>
-<span class="hl slc"># ~~~</span>
-<span class="hl slc"># `/dev/null` accepts and discards all input (returns EOF)</span>
-<span class="hl slc"># `/dev/zero` accepts and discards all input (returns NUL)</span>
-<span class="hl slc"># `/dev/full` returns NUL bytes when read and ENOSPC when written</span>
-<span class="hl slc"># `/dev/random` and `/dev/urandom` produces pseudo-random numbers</span>
-<span class="hl slc"># `/dev/tty` refers to the underlying terminal</span>
-<span class="hl slc"># `/dev/stdin` refers to the STDIN of the current process</span>
-<span class="hl slc"># `/dev/stdout` refers to the STDOUT of the current process</span>
-<span class="hl slc"># `/dev/stderr` refers to the STDERR of the current process</span>
-
-<span class="hl slc"># create &#39;streams.c&#39; file with content up to &#39;EOF&#39;</span>
-<span class="hl kwc">cat</span> <span class="hl str">&lt;&lt; &#39;EOF&#39; &gt; streams.c</span>
-<span class="hl str">#include &lt;stdio.h&gt;</span>
-<span class="hl str"></span>
-<span class="hl str">int main(void)</span>
-<span class="hl str">{</span>
-<span class="hl str">	fputs(&quot;this text goes to STDOUT\n&quot;, stdout);</span>
-<span class="hl str">	fputs(&quot;this text goes to STDERR\n&quot;, stderr);</span>
-<span class="hl str">	return 0;</span>
-<span class="hl str">}</span>
-<span class="hl str">EOF</span>
-<span class="hl slc"># (creates the file)</span>
-
-<span class="hl slc"># compile &#39;streams.c&#39; source into &#39;streams&#39; binary</span>
-gcc streams.c <span class="hl kwb">-o</span> streams
-<span class="hl slc"># (compiles the file)</span>
-
-<span class="hl slc"># run &#39;streams&#39; binary</span>
-.<span class="hl opt">/</span>streams
-<span class="hl slc"># this text goes to STDOUT</span>
-<span class="hl slc"># this text goes to STDERR</span>
-
-<span class="hl slc"># run &#39;streams&#39; binary and discard its output</span>
-.<span class="hl opt">/</span>streams <span class="hl opt">&gt; /</span>dev<span class="hl opt">/</span>null
-<span class="hl slc"># this text goes to STDERR</span>
-
-<span class="hl slc"># run &#39;streams&#39; binary and discard its output</span>
-.<span class="hl opt">/</span>streams <span class="hl num">1</span><span class="hl opt">&gt; /</span>dev<span class="hl opt">/</span>null
-<span class="hl slc"># this text goes to STDERR</span>
-
-<span class="hl slc"># run &#39;streams&#39; binary and discard its errors</span>
-.<span class="hl opt">/</span>streams <span class="hl num">2</span><span class="hl opt">&gt; /</span>dev<span class="hl opt">/</span>null
-<span class="hl slc"># this text goes to STDOUT</span>
-
-<span class="hl slc"># run &#39;streams&#39; binary and discard its output and errors</span>
-.<span class="hl opt">/</span>streams <span class="hl opt">&amp;&gt; /</span>dev<span class="hl opt">/</span>null
-<span class="hl slc"># (no output)</span>
-
-<span class="hl slc"># run &#39;streams&#39; binary, discard its output, and redirect 2nd channel to 1st</span>
-.<span class="hl opt">/</span>streams <span class="hl opt">&gt; /</span>dev<span class="hl opt">/</span>null <span class="hl num">2</span><span class="hl opt">&gt;&amp;</span><span class="hl num">1</span>
-<span class="hl slc"># (no output)</span>
-
-<span class="hl slc"># print 5th line in a file (you should better use sed (1))</span>
-<span class="hl kwc">cat</span> streams.c <span class="hl opt">|</span> <span class="hl kwc">head</span> <span class="hl kwb">-n</span> <span class="hl num">5</span> <span class="hl opt">|</span> <span class="hl kwc">tail</span> <span class="hl kwb">-n</span> <span class="hl num">1</span>
-<span class="hl slc">#        fputs(&quot;this text goes to STDOUT\n&quot;, stdout);</span>
-
-<span class="hl slc"># create a random string of specified length (you should better use mkpasswd (1))</span>
-<span class="hl kwc">cat</span> <span class="hl opt">/</span>dev<span class="hl opt">/</span>urandom <span class="hl opt">|</span> <span class="hl kwc">strings</span> <span class="hl kwb">-n</span> <span class="hl num">1</span> <span class="hl opt">|</span> <span class="hl kwc">tr</span> <span class="hl kwb">-d</span> <span class="hl str">&#39;[:space:]&#39;</span> <span class="hl opt">|</span> <span class="hl kwc">head</span> <span class="hl kwb">-c</span> <span class="hl num">30</span>
-<span class="hl slc"># 8On$a?rOY_yKJ-:&gt;&lt;h5}d0o2D%6+=W</span>
-
-<span class="hl slc"># download &#39;Alice in Wonderlands&#39; book in text format and save as &#39;alice.txt&#39;</span>
-wget http<span class="hl opt">://</span>www.gutenberg.org<span class="hl opt">/</span>files<span class="hl opt">/</span><span class="hl num">11</span><span class="hl opt">/</span><span class="hl num">11</span><span class="hl kwb">-0</span>.txt <span class="hl kwb">-O</span> alice.txt
-<span class="hl slc"># (downloads the file)</span>
-
-<span class="hl slc"># word frequency challenge (http://dl.acm.org/citation.cfm?id=5948.315654)</span>
-<span class="hl kwc">cat</span> alice.txt <span class="hl opt">|</span> <span class="hl kwc">tr</span> <span class="hl kwb">-cs</span> A<span class="hl kwb">-Za-z</span> <span class="hl str">&#39;</span><span class="hl esc">\n</span><span class="hl str">&#39;</span> <span class="hl opt">|</span> <span class="hl kwc">tr</span> A<span class="hl kwb">-Z</span> a<span class="hl kwb">-z</span> <span class="hl opt">|</span> <span class="hl kwc">sort</span> <span class="hl opt">|</span> <span class="hl kwc">uniq</span> <span class="hl kwb">-c</span> <span class="hl opt">|</span> <span class="hl kwc">sort</span> <span class="hl kwb">-rn</span> <span class="hl opt">|</span> <span class="hl kwc">head</span> <span class="hl kwb">-n</span> <span class="hl num">5</span>
-<span class="hl slc">#    1818 the</span>
-<span class="hl slc">#     940 and</span>
-<span class="hl slc">#     809 to</span>
-<span class="hl slc">#     690 a</span>
-<span class="hl slc">#     631 of</span>
-
-<span class="hl slc"># run &#39;streams&#39; binary and save its output in &#39;output.txt&#39; file</span>
-.<span class="hl opt">/</span>streams <span class="hl opt">|</span> <span class="hl kwc">tee</span> output.txt
-<span class="hl slc"># this text goes to STDERR</span>
-<span class="hl slc"># this text goes to STDOUT</span>
-
-<span class="hl slc"># display &#39;output.txt&#39; file</span>
-<span class="hl kwc">cat</span> output.txt
-<span class="hl slc"># this text goes to STDOUT</span>
-
-<span class="hl slc"># run &#39;streams&#39; binary, redirect its 2nd channel to 1st, and save its output in &#39;output.txt&#39; file</span>
-.<span class="hl opt">/</span>streams <span class="hl num">2</span><span class="hl opt">&gt;&amp;</span><span class="hl num">1</span> <span class="hl opt">|</span> <span class="hl kwc">tee</span> output.txt
-<span class="hl slc"># this text goes to STDERR</span>
-<span class="hl slc"># this text goes to STDOUT</span>
-
-<span class="hl slc"># display &#39;output.txt&#39; file</span>
-<span class="hl kwc">cat</span> output.txt
-<span class="hl slc"># this text goes to STDERR</span>
-<span class="hl slc"># this text goes to STDOUT</span>
-
-<span class="hl slc"># run &#39;streams&#39; binary, redirect its 2nd channel to 1st, and append its output to &#39;output.txt&#39; file</span>
-.<span class="hl opt">/</span>streams <span class="hl num">2</span><span class="hl opt">&gt;&amp;</span><span class="hl num">1</span> <span class="hl opt">|</span> <span class="hl kwc">tee</span> <span class="hl kwb">-a</span> output.txt
-<span class="hl slc"># this text goes to STDERR</span>
-<span class="hl slc"># this text goes to STDOUT</span>
-
-<span class="hl slc"># display &#39;output.txt&#39; file</span>
-<span class="hl kwc">cat</span> output.txt
-<span class="hl slc"># this text goes to STDERR</span>
-<span class="hl slc"># this text goes to STDOUT</span>
-<span class="hl slc"># this text goes to STDERR</span>
-<span class="hl slc"># this text goes to STDOUT</span>
-
-<span class="hl slc"># remove &#39;output.txt&#39; file</span>
-<span class="hl kwc">rm</span> output.txt
-<span class="hl slc"># (removes the file)</span>
-
-<span class="hl slc"># Exercise</span>
-<span class="hl slc"># ~~~</span>
-<span class="hl slc"># Create a file containing a list of directories under root.</span>
-
-<span class="hl slc">## ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~</span>
-<span class="hl slc">## USERS</span>
-<span class="hl slc">## ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~</span>
-
-<span class="hl slc"># su (1) - change user ID or become superuser</span>
-<span class="hl slc"># sudo (8) - execute a command as another user</span>
-<span class="hl slc"># users (1) - print the user names of users currently logged in</span>
-<span class="hl slc"># w (1) - Show who is logged on and what they are doing.</span>
-<span class="hl slc"># who (1) - show who is logged on</span>
-<span class="hl slc"># whoami (1) - print effective userid</span>
-<span class="hl slc"># useradd (8) - create a new user or update default new user information</span>
-<span class="hl slc"># usermod (8) - modify a user account</span>
-<span class="hl slc"># userdel (8) - delete a user account and related files</span>
-<span class="hl slc"># passwd (1) - change user password</span>
-<span class="hl slc"># chsh (1) - change login shell</span>
-
-<span class="hl slc"># Users</span>
-<span class="hl slc"># ~~~</span>
-<span class="hl slc"># Could be real (e.g. a person) or pseudo (e.g. a service)</span>
-<span class="hl slc"># Determined by a User Identification Number (UID)</span>
-<span class="hl slc"># Accounts stored in `/etc/passwd`</span>
-<span class="hl slc"># Passwords stored in `/etc/shadow`</span>
-
-<span class="hl slc"># Exercise</span>
-<span class="hl slc"># ~~~</span>
-<span class="hl slc"># Create a new user, change its password and set an appropriate login shell.</span>
-
-<span class="hl slc">## ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~</span>
-<span class="hl slc">## GROUPS</span>
-<span class="hl slc">## ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~</span>
-
-<span class="hl slc"># id (1) - print real and effective user and group IDs</span>
-<span class="hl slc"># groups (1) - print the groups a user is in</span>
-<span class="hl slc"># groupadd (8) - create a new group</span>
-<span class="hl slc"># groupmod (8) - modify a group definition on the system</span>
-<span class="hl slc"># groupdel (8) - delete a group</span>
-
-<span class="hl slc"># Groups</span>
-<span class="hl slc"># ~~~</span>
-<span class="hl slc"># Determined by a Group Identification Number (GID)</span>
-<span class="hl slc"># A user can belong to multiple groups</span>
-<span class="hl slc"># Each user has also a group with the same name as the user name</span>
-<span class="hl slc"># Groups stored in `/etc/group`</span>
-<span class="hl slc"># Group passwords stored in `/etc/gshadow`</span>
-
-<span class="hl slc"># Exercise</span>
-<span class="hl slc"># ~~~</span>
-<span class="hl slc"># Create a new group (e.g. `cmpe`) and add the previously created user to it.</span>
-
-<span class="hl slc">## ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~</span>
-<span class="hl slc">## FILES</span>
-<span class="hl slc">## ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~</span>
-
-<span class="hl slc"># chown (1) - change file owner and group</span>
-<span class="hl slc"># chgrp (1) - change group ownership</span>
-<span class="hl slc"># chmod (1) - change file mode bits</span>
-<span class="hl slc"># umask - display or set file mode mask (shell builtin)</span>
-
-<span class="hl slc"># Files</span>
-<span class="hl slc"># ~~~</span>
-<span class="hl slc"># Everything is a file (UNIX legacy)</span>
-<span class="hl slc"># Commands are executable files</span>
-<span class="hl slc"># System privilege and permissions are controlled with files</span>
-<span class="hl slc"># Device I/O and File I/O uses files (except at the lowest level)</span>
-<span class="hl slc"># Interprocess communication uses files (UNIX pipes)</span>
-<span class="hl slc"># All disks are combined as a single tree under root (denoted with `/`)</span>
-<span class="hl slc"># File accesses are handled with ownership and protection</span>
-<span class="hl slc"># Each file has an owner user and an owner group</span>
-
-<span class="hl slc"># File Permissions</span>
-<span class="hl slc"># ~~~</span>
-<span class="hl slc"># First bit denotes the type (e.g. file/dir)</span>
-<span class="hl slc"># For each file there are 3 access sets</span>
-<span class="hl slc">#   User access (u)</span>
-<span class="hl slc">#   Group access (g)</span>
-<span class="hl slc">#   Other access (o)</span>
-<span class="hl slc"># For each access set there are 3 access types</span>
-<span class="hl slc">#   Read (r)</span>
-<span class="hl slc">#   Write (w)</span>
-<span class="hl slc">#   Execute (x)</span>
-<span class="hl slc"># In total there are 9 permissions bits</span>
-<span class="hl slc"># There are 3 more bits reserved for special purposes (setuid, setgid, sticky)</span>
-
-<span class="hl slc"># Exercise</span>
-<span class="hl slc"># ~~~</span>
-<span class="hl slc"># What is the numeric file mode equivalent of the following accesses?</span>
-<span class="hl slc">#   rwxr-xr--</span>
-<span class="hl slc">#   --x-w--wx</span>
-<span class="hl slc">#   -r-rw-x-w (is there anything wrong with this example?)</span>
-
-<span class="hl slc"># Exercise</span>
-<span class="hl slc"># ~~~</span>
-<span class="hl slc"># What is the accesses equivalent of the following numeric file modes?</span>
-<span class="hl slc">#   755</span>
-<span class="hl slc">#   644</span>
-<span class="hl slc">#   325</span>
-
-<span class="hl slc"># Exercise</span>
-<span class="hl slc"># ~~~</span>
-<span class="hl slc"># Change the owner and/or group of files/dirs and try permissions.</span>
-
-<span class="hl slc">## ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~</span>
-<span class="hl slc">## SEARCHING</span>
-<span class="hl slc">## ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~</span>
-
-<span class="hl slc"># grep (1) - print lines matching a pattern</span>
-<span class="hl slc"># find (1) - search for files in a directory hierarchy</span>
-<span class="hl slc"># which (1) - locate a command</span>
-<span class="hl slc"># locate (1) - find files by name</span>
-<span class="hl slc"># whereis (1) - locate the binary, source, and manual page files for a command</span>
-
-<span class="hl slc"># print the lines containing the pattern &#39;rabbit&#39; in &#39;alice.txt&#39; file</span>
-<span class="hl kwc">grep</span> rabbit alice.txt
-<span class="hl slc"># never before seen a rabbit with either a waistcoat-pocket, or a watch</span>
-<span class="hl slc"># rabbit-hole under the hedge.</span>
-<span class="hl slc"># The rabbit-hole went straight on like a tunnel for some way, and then</span>
-<span class="hl slc"># a rabbit! I suppose Dinah’ll be sending me on messages next!’ And she</span>
-<span class="hl slc"># rabbits. I almost wish I hadn’t gone down that rabbit-hole--and yet--and</span>
-
-<span class="hl slc"># print the lines containing the pattern &#39;rabbit&#39; in &#39;alice.txt&#39; file ignoring case</span>
-<span class="hl kwc">grep</span> <span class="hl kwb">-i</span> rabbit alice.txt
-<span class="hl slc"># CHAPTER I. Down the Rabbit-Hole</span>
-<span class="hl slc"># picking the daisies, when suddenly a White Rabbit with pink eyes ran</span>
-<span class="hl slc"># ..</span>
-<span class="hl slc"># These were the verses the White Rabbit read:--</span>
-<span class="hl slc"># The long grass rustled at her feet as the White Rabbit hurried by--the</span>
-
-<span class="hl slc"># print the lines not containing the pattern &#39;rabbit&#39; in &#39;alice.txt&#39; file</span>
-<span class="hl kwc">grep</span> <span class="hl kwb">-v</span> rabbit alice.txt
-<span class="hl slc"># Project Gutenberg’s Alice’s Adventures in Wonderland, by Lewis Carroll</span>
-<span class="hl slc">#</span>
-<span class="hl slc"># ..</span>
-<span class="hl slc"># Archive Foundation, how to help produce our new eBooks, and how to</span>
-<span class="hl slc"># subscribe to our email newsletter to hear about new eBooks.</span>
-
-<span class="hl slc"># print the lines containing the pattern &#39;rabbit&#39; recursively for all files in the current directory</span>
-<span class="hl kwc">grep</span> rabbit <span class="hl kwb">-r</span> .
-<span class="hl slc"># ./basics.sh:# print the lines containing the pattern &#39;rabbit&#39; in &#39;alice.txt&#39; file</span>
-<span class="hl slc"># ./basics.sh:grep rabbit alice.txt</span>
-<span class="hl slc"># ..</span>
-<span class="hl slc"># ./alice.txt:a rabbit! I suppose Dinah’ll be sending me on messages next!’ And she</span>
-<span class="hl slc"># ./alice.txt:rabbits. I almost wish I hadn’t gone down that rabbit-hole--and yet--and</span>
-
-<span class="hl slc"># search all files in the current directory</span>
-<span class="hl kwc">find</span> .
-<span class="hl slc"># .</span>
-<span class="hl slc"># ./streams</span>
-<span class="hl slc"># ./basics.sh</span>
-<span class="hl slc"># ./streams.c</span>
-<span class="hl slc"># ./alice.txt</span>
-<span class="hl slc"># ./demo</span>
-<span class="hl slc"># ./demo/bar.txt</span>
-<span class="hl slc"># ./demo/foo.txt</span>
-<span class="hl slc"># ./hello</span>
-<span class="hl slc"># ./hello.c</span>
-
-<span class="hl kwc">find</span> . <span class="hl kwb">-name</span> <span class="hl str">&#39;*.c&#39;</span>
-<span class="hl slc"># ./streams.c</span>
-<span class="hl slc"># ./hello.c</span>
-
-<span class="hl slc"># search all executable files in the current directory</span>
-<span class="hl kwc">find</span> . <span class="hl kwb">-executable</span>
-<span class="hl slc"># .</span>
-<span class="hl slc"># ./streams</span>
-<span class="hl slc"># ./demo</span>
-<span class="hl slc"># ./hello</span>
-
-<span class="hl slc"># search all executable regular files in the current directory</span>
-<span class="hl kwc">find</span> . <span class="hl kwb">-executable -type</span> f
-<span class="hl slc"># ./streams</span>
-<span class="hl slc"># ./hello</span>
-
-<span class="hl slc"># find the longest header files under &#39;/usr/include&#39;</span>
-<span class="hl kwc">find</span> <span class="hl opt">/</span>usr<span class="hl opt">/</span>include <span class="hl kwb">-name</span> <span class="hl str">&#39;*.h&#39;</span> <span class="hl kwb">-type</span> f <span class="hl kwb">-exec</span> <span class="hl kwc">wc</span> <span class="hl kwb">-l</span> <span class="hl opt">{}</span> \<span class="hl opt">; |</span> <span class="hl kwc">sort</span> <span class="hl kwb">-rn</span> <span class="hl opt">|</span> <span class="hl kwc">head</span>
-<span class="hl slc"># 6706 /usr/include/c++/7/bits/basic_string.h</span>
-<span class="hl slc"># 6005 /usr/include/c++/7/bits/random.h</span>
-<span class="hl slc"># 5836 /usr/include/c++/7/bits/stl_algo.h</span>
-<span class="hl slc"># 5470 /usr/include/linux/nl80211.h</span>
-<span class="hl slc"># 4106 /usr/include/reglib/nl80211.h</span>
-<span class="hl slc"># 3789 /usr/include/elf.h</span>
-<span class="hl slc"># 2967 /usr/include/c++/7/ext/vstring.h</span>
-<span class="hl slc"># 2844 /usr/include/c++/7/bits/regex.h</span>
-<span class="hl slc"># 2653 /usr/include/c++/7/bits/locale_facets.h</span>
-<span class="hl slc"># 2614 /usr/include/c++/7/bits/stl_tree.h</span>
-
-<span class="hl slc"># find the total line of C code in the current directory</span>
-<span class="hl kwc">find</span> . <span class="hl kwb">-name</span> <span class="hl str">&#39;*.[ch]&#39;</span> <span class="hl kwb">-type</span> f <span class="hl kwb">-exec</span> <span class="hl kwc">wc</span> <span class="hl kwb">-l</span> <span class="hl opt">{} +</span>
-<span class="hl slc">#   8 ./streams.c</span>
-<span class="hl slc">#   7 ./hello.c</span>
-<span class="hl slc">#  15 total</span>
-
-<span class="hl slc"># create a soft link &#39;alive&#39; to &#39;alice.txt&#39;</span>
-<span class="hl kwc">ln</span> <span class="hl kwb">-s</span> alice.txt alive
-<span class="hl slc"># (creates the link)</span>
-
-<span class="hl slc"># show if the &#39;alive&#39; file exists or not</span>
-<span class="hl kwb">test -e</span> alive <span class="hl opt">&amp;&amp;</span> <span class="hl kwb">echo</span> <span class="hl str">&#39;file exists&#39;</span> <span class="hl opt">||</span> <span class="hl kwb">echo</span> <span class="hl str">&#39;file does not exists&#39;</span>
-<span class="hl slc"># file exists</span>
-
-<span class="hl slc"># create a soft link named &#39;dead&#39; to a non-existent file</span>
-<span class="hl kwc">ln</span> <span class="hl kwb">-s</span> <span class="hl opt">/</span>path<span class="hl opt">/</span>to<span class="hl opt">/</span>non<span class="hl opt">/</span>existent<span class="hl opt">/</span><span class="hl kwc">file</span> dead
-<span class="hl slc"># (creates the link)</span>
-
-<span class="hl slc"># show if the &#39;dead&#39; file exists or not</span>
-<span class="hl kwb">test -e</span> dead <span class="hl opt">&amp;&amp;</span> <span class="hl kwb">echo</span> <span class="hl str">&#39;file exists&#39;</span> <span class="hl opt">||</span> <span class="hl kwb">echo</span> <span class="hl str">&#39;file does not exists&#39;</span>
-<span class="hl slc"># file does not exists</span>
-
-<span class="hl kwc">find</span> . <span class="hl kwb">-type</span> l
-<span class="hl slc"># ./dead</span>
-<span class="hl slc"># ./alive</span>
-
-<span class="hl kwc">find</span> . <span class="hl kwb">-type</span> l <span class="hl kwb">-print</span>
-<span class="hl slc"># ./dead</span>
-<span class="hl slc"># ./alive</span>
-
-<span class="hl kwc">find</span> . <span class="hl kwb">-type</span> l <span class="hl kwb">-print -print</span>
-<span class="hl slc"># ./dead</span>
-<span class="hl slc"># ./dead</span>
-<span class="hl slc"># ./alive</span>
-<span class="hl slc"># ./alive</span>
-
-<span class="hl slc"># find existing links in current directory</span>
-<span class="hl kwc">find</span> . <span class="hl kwb">-type</span> l <span class="hl kwb">-exec test -e</span> <span class="hl opt">{}</span> \<span class="hl opt">;</span> <span class="hl kwb">-print</span>
-<span class="hl slc"># ./alive</span>
-
-<span class="hl slc"># find broken links in current directory</span>
-<span class="hl kwc">find</span> . <span class="hl kwb">-type</span> l <span class="hl opt">-!</span> <span class="hl kwb">-exec test -e</span> <span class="hl opt">{}</span> \<span class="hl opt">;</span> <span class="hl kwb">-print</span>
-<span class="hl slc"># ./dead</span>
-
-<span class="hl slc"># remove &#39;dead&#39; and &#39;alive&#39; links</span>
-<span class="hl kwc">rm</span> dead alive
-<span class="hl slc"># (removes the links)</span>
-
-<span class="hl slc"># locate &#39;ls&#39; command</span>
-<span class="hl kwc">which ls</span>
-<span class="hl slc"># /bin/ls</span>
-
-<span class="hl slc"># locate &#39;gcc&#39; command</span>
-<span class="hl kwc">which</span> gcc
-<span class="hl slc"># /usr/local/bin/gcc</span>
-
-<span class="hl slc"># locate all &#39;gcc&#39; commands in the &#39;PATH&#39; variable</span>
-<span class="hl kwc">which</span> <span class="hl kwb">-a</span> gcc
-<span class="hl slc"># /usr/local/bin/gcc</span>
-<span class="hl slc"># /usr/bin/gcc</span>
-
-<span class="hl kwc">locate</span> stdio.h
-<span class="hl slc"># /usr/include/stdio.h</span>
-<span class="hl slc"># /usr/include/c++/7/tr1/stdio.h</span>
-<span class="hl slc"># /usr/include/x86_64-linux-gnu/bits/stdio.h</span>
-<span class="hl slc"># /usr/lib/x86_64-linux-gnu/perl/5.26.1/CORE/nostdio.h</span>
-
-<span class="hl kwc">whereis</span> gcc
-<span class="hl slc"># gcc: /usr/bin/gcc /usr/lib/gcc /usr/share/man/man1/gcc.1.gz</span>
-
-<span class="hl slc">## ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~</span>
-<span class="hl slc">## COMMANDS</span>
-<span class="hl slc">## ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~</span>
-
-<span class="hl slc"># Commands</span>
-<span class="hl slc"># ~~~</span>
-<span class="hl slc"># An executable file in `$PATH`</span>
-<span class="hl slc"># A shell builtin (implemented either as necessity or performance)</span>
-<span class="hl slc"># An alias (defined with `alias` builtin)</span>
-<span class="hl slc"># Relative/Absolute path to an executable file</span>
-
-<span class="hl slc"># show &#39;PATH&#39; variable</span>
-<span class="hl kwb">echo</span> <span class="hl kwd">$PATH</span>
-<span class="hl slc"># /home/gokcehan/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin</span>
-
-<span class="hl slc"># show directories in &#39;PATH&#39; variable line by line</span>
-<span class="hl kwb">echo</span> <span class="hl kwd">$PATH</span> <span class="hl opt">|</span> <span class="hl kwc">tr</span> <span class="hl opt">:</span> <span class="hl str">&#39;</span><span class="hl esc">\n</span><span class="hl str">&#39;</span>
-<span class="hl slc"># /home/gokcehan/.local/bin</span>
-<span class="hl slc"># /usr/local/sbin</span>
-<span class="hl slc"># /usr/local/bin</span>
-<span class="hl slc"># /usr/sbin</span>
-<span class="hl slc"># /usr/bin</span>
-<span class="hl slc"># /sbin</span>
-<span class="hl slc"># /bin</span>
-<span class="hl slc"># /usr/games</span>
-<span class="hl slc"># /usr/local/games</span>
-<span class="hl slc"># /snap/bin</span>
-
-<span class="hl slc"># show the type of &#39;mkdir&#39; command</span>
-<span class="hl kwb">type</span> <span class="hl kwc">mkdir</span>
-<span class="hl slc"># mkdir is /bin/mkdir</span>
-
-<span class="hl slc"># show all types of &#39;cd&#39; command</span>
-<span class="hl kwb">type -a cd</span>
-<span class="hl slc"># cd is a shell builtin</span>
-
-<span class="hl slc"># show all types of &#39;echo&#39; command</span>
-<span class="hl kwb">type -a echo</span>
-<span class="hl slc"># echo is a shell builtin</span>
-<span class="hl slc"># echo is /bin/echo</span>
-
-<span class="hl slc"># show the type of &#39;grep&#39; command</span>
-<span class="hl kwb">type</span> <span class="hl kwc">grep</span>
-<span class="hl slc"># grep is aliased to `grep --color=auto&#39;</span>
-
-<span class="hl slc"># show the type of &#39;./hello&#39; command</span>
-<span class="hl kwb">type</span> .<span class="hl opt">/</span>hello
-<span class="hl slc"># ./hello is ./hello</span>
-
-<span class="hl slc"># create &#39;cat.c&#39; file with content up to &#39;EOF&#39; (from K&amp;R)</span>
-<span class="hl kwc">cat</span> <span class="hl str">&lt;&lt; &#39;EOF&#39; &gt; cat.c</span>
-<span class="hl str">#include &lt;stdio.h&gt;</span>
-<span class="hl str"></span>
-<span class="hl str">main()</span>
-<span class="hl str">{</span>
-<span class="hl str">	int c;</span>
-<span class="hl str">	while ((c = getchar()) != EOF</span><span class="hl opt">)</span>
-		putchar<span class="hl opt">(</span>c<span class="hl opt">);</span>
-	<span class="hl kwb">return</span> <span class="hl num">0</span><span class="hl opt">;</span>
-<span class="hl opt">}</span>
+# /usr/local/man:/usr/local/share/man:/usr/share/man
+
+# display info page of &apos;ls&apos; command
+info ls
+# (displays info page in info viewer)
+
+# display manual page of &apos;cd&apos; command
+man cd
+# No manual entry for cd
+
+# display shell help of &apos;cd&apos; command
+help cd
+# cd: cd [-L|[-P [-e]] [-@]] [dir]
+#     Change the shell working directory.
+# ..
+#     Exit Status:
+#     Returns 0 if the directory is changed, and if $PWD is set successfully when
+#     -P is used; non-zero otherwise.
+
+# display command type of &apos;ls&apos; command
+type ls
+# ls is /bin/ls
+
+# display command type of &apos;cd&apos; command
+type cd
+# cd is a shell builtin
+
+## ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+## PATH NAVIGATION
+## ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+# Unix paths
+# ~~~
+# Root directory is denoted with `/`
+# Home directory is denoted with `~` (expanded by shell)
+# Path separator is `/`
+# Current directory is denoted with `.`
+# Parent directory is denoted with `..`
+# Absolute paths are those that start with `/`
+# Relative paths are those that does not start with `/`
+
+# pwd (1) - print name of current/working directory
+# cd (change directory) (shell builtin)
+
+# display present working directory
+pwd
+# /home/gokcehan/cmpe230/basics
+
+# change working directory to parent
+cd ..
+# (changes to parent directory)
+
+# change working directory to &apos;basics&apos; from current directory (relative path)
+cd basics
+# (changes to &apos;basics&apos; directory in current directory)
+
+# change working directory to &apos;/etc&apos; (full path / absolute path)
+cd /etc
+# (changes to &apos;/etc&apos; directory)
+
+# change working directory to home directory of current user
+cd ~
+# (changes to home directory)
+
+# change working directory to home directory of current user
+cd
+# (changes to home directory)
+
+# change working directory to previous
+cd -
+# (changes to previous directory)
+
+# Exercise
+# ~~~
+# Examine the file system (see `man hier`).
+
+## ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+## FILE/DIRECTORY OPERATIONS
+## ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+# mkdir (1) - make directories
+# rmdir (1) - remove empty directories
+# touch (1) - change file timestamps
+# rm (1) - remove files or directories
+# cp (1) - copy files and directories
+# mv (1) - move (rename) files
+# ln (1) - make links between files
+
+# create and then remove &apos;demo&apos; directory (empty)
+mkdir demo
+rmdir demo
+# (creates and then removes &apos;demo&apos; directory)
+
+# create and then remove &apos;demo&apos; directory (non-empty)
+mkdir demo
+touch demo/foo.txt
+rmdir demo
+# rmdir: failed to remove &apos;demo&apos;: Directory not empty
+
+# recursively remove &apos;demo&apos; directory along with its children
+rm -r demo
+# (removes the directory)
+
+# create a nested directory &apos;demo/foo/bar/baz&apos; along with its parents
+mkdir demo/foo/bar/baz
+# mkdir: cannot create directory ‘demo/foo/bar/baz’: No such file or directory
+
+# create a nested directory &apos;demo/foo/bar/baz&apos; and then remove them
+mkdir -p demo/foo/bar/baz
+rmdir /demo/foo/bar/baz
+rmdir /demo/foo/bar
+rmdir /demo/foo
+# (creates &apos;demo/foo/bar/baz&apos; along with its parents and then removes them)
+
+# copy &apos;demo/foo.txt&apos; file to &apos;demo/bar.txt&apos;
+mkdir demo
+touch demo/foo.txt
+cp demo/foo.txt demo/bar.txt
+# (copies the file)
+
+# copy &apos;demo&apos; directory to &apos;demo2&apos;
+cp demo demo2
+# cp: omitting directory &apos;demo&apos;
+
+# copy &apos;demo&apos; directory to &apos;demo2&apos;
+cp -r demo demo2
+# (copies the directory)
+
+# move &apos;demo2&apos; directory to &apos;demo3&apos;
+mv demo2 demo3
+# (moves the directory)
+
+# remove &apos;demo3&apos; directory
+rm -r demo3
+# (removes the directory)
+
+# Hard Links vs Soft (Symbolic) Links
+# ~~~
+# A hard link is a new entry pointing to the same file content in the filesystem
+# A soft link is a new link file pointing to a file path
+# Hard links continue to work when the original file is moved or removed
+# Soft links only work when there is an existing file in the linked path
+# Hard links can only be used for files
+# Soft links can be used for files or directories
+# Hard links can only be used for a file in the current filesystem
+# Soft links can span over different filesystems
+
+# create a hard link named &apos;hard&apos; to &apos;demo/foo.txt&apos;
+ln demo/foo.txt hard
+# (creates the hard link)
+
+# remove &apos;hard&apos; file
+rm hard
+# (removes the hard link but not the file)
+
+# create a soft link named &apos;soft&apos; to &apos;demo/foo.txt&apos;
+ln -s demo/foo.txt soft
+# (creates the soft link)
+
+# remove &apos;soft&apos; link
+rm soft
+# (removes the soft link but not the file)
+
+## ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+## FILE DISPLAYING/EDITING
+## ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+# file (1) - determine file type
+# cat (1) - concatenate files and print on the standard output
+# head (1) - output the first part of files
+# tail (1) - output the last part of files
+# more (1) - file perusal filter for crt viewing
+# less (1) - opposite of more
+# gedit (1) - text editor for the GNOME Desktop
+# nano (1) - Nano&apos;s ANOther editor, an enhanced free Pico clone
+# vi (1) - Vi IMproved, a programmers text editor
+
+# create &apos;hello.c&apos; file with content up to &apos;EOF&apos; (heredoc literal)
+cat &lt;&lt; &apos;EOF&apos; &gt; hello.c
+#include &lt;stdio.h&gt;
+
+int main(void)
+{
+	puts(&quot;Hello World&quot;);
+	return 0;
+}
 EOF
-<span class="hl slc"># (creates the file)</span>
+# (creates the file)
 
-<span class="hl slc"># compile &#39;cat.c&#39; source into &#39;cat&#39; binary</span>
-gcc <span class="hl kwc">cat</span>.c <span class="hl kwb">-o</span> <span class="hl kwc">cat</span>
-<span class="hl slc"># (compiles the file)</span>
+# print &apos;hello.c&apos; file to the standard output
+cat hello.c
+# #include &lt;stdio.h&gt;
+#
+# int main(void)
+# {
+# 	puts(&quot;Hello World&quot;);
+# 	return 0;
+# }
 
-<span class="hl slc"># copy &#39;alice.txt&#39; file to &#39;alice.txt.bak&#39;</span>
-.<span class="hl opt">/</span><span class="hl kwc">cat</span> <span class="hl opt">&lt;</span> alice.txt <span class="hl opt">&gt;</span> alice.txt.bak
-<span class="hl slc"># (copies the file)</span>
+# determine the type of &apos;hello.c&apos; file (traditional human readable output)
+file hello.c
+# hello.c: C source, ASCII text
 
-<span class="hl slc"># compare the contents of &#39;alice.txt&#39; and &#39;alice.txt.bak&#39;</span>
-<span class="hl kwc">cmp</span> alice.txt alice.txt.bak
-<span class="hl slc"># (no output -- files are identical)</span>
+# determine the type of &apos;hello.c&apos; file (mime type output)
+file -i hello.c
+# hello.c: text/x-c; charset=us-ascii
 
-<span class="hl slc"># remove &#39;alice.txt.bak&#39; file</span>
-<span class="hl kwc">rm</span> alice.txt.bak
-<span class="hl slc"># (removes the file)</span>
+# compile &apos;hello.c&apos; source into &apos;hello&apos; binary
+gcc hello.c -o hello
+# (compiles the file)
 
-<span class="hl slc"># create &#39;echo.c&#39; file with content up to &#39;EOF&#39; (from K&amp;R)</span>
-<span class="hl kwc">cat</span> <span class="hl str">&lt;&lt; &#39;EOF&#39; &gt; echo.c</span>
-<span class="hl str">#include &lt;stdio.h&gt;</span>
-<span class="hl str"></span>
-<span class="hl str">main(int argc, char *argv[])</span>
-<span class="hl str">{</span>
-<span class="hl str">    while (--argc &gt; 0)</span>
-<span class="hl str">        printf(&quot;%s%s&quot;, *++argv, (argc &gt; 1) ? &quot; &quot; : &quot;&quot;);</span>
-<span class="hl str">    printf(&quot;\n&quot;);</span>
-<span class="hl str">}</span>
-<span class="hl str">EOF</span>
-<span class="hl slc"># (creates the file)</span>
+# run &apos;hello&apos; binary
+./hello
+# Hello World
 
-<span class="hl slc"># compile &#39;echo.c&#39; source into &#39;echo&#39; binary</span>
-gcc <span class="hl kwb">echo</span>.c <span class="hl kwb">-o echo</span>
-<span class="hl slc"># (compiles the file)</span>
+# determine the type of &apos;hello&apos; file (traditional human readable output)
+file hello
+# hello: ELF 64-bit LSB shared object, x86-64, version 1 (SYSV), dynamically linked, interpreter /lib64/l, for GNU/Linux 3.2.0, BuildID[sha1]=2500b0e3243b8052a5cdb06925e15447ea54c4ba, not stripped
 
-<span class="hl slc"># run &#39;echo&#39; binary with arguments &#39;hello&#39; and &#39;world&#39;</span>
-.<span class="hl opt">/</span><span class="hl kwb">echo</span> hello world
-<span class="hl slc"># hello world</span>
+# determine the type of &apos;hello&apos; file (mime type output)
+file -i hello
+# hello: application/x-sharedlib; charset=binary
 
-<span class="hl slc"># create &#39;shell.c&#39; file with content up to &#39;EOF&#39;</span>
-<span class="hl kwc">cat</span> <span class="hl str">&lt;&lt; &#39;EOF&#39; &gt; shell.c</span>
-<span class="hl str">#include &lt;stdio.h&gt;</span>
-<span class="hl str">#include &lt;stdlib.h&gt;</span>
-<span class="hl str">#include &lt;string.h&gt;</span>
-<span class="hl str">#include &lt;unistd.h&gt;</span>
-<span class="hl str">#include &lt;sys/wait.h&gt;</span>
-<span class="hl str"></span>
-<span class="hl str">#define MAXLINE 1000</span>
-<span class="hl str">#define MAXARGS 64</span>
-<span class="hl str">#define DELIMITERS &quot; \f\n\r\t\v&quot;</span>
-<span class="hl str"></span>
-<span class="hl str">int main(void)</span>
-<span class="hl str">{</span>
-<span class="hl str">	char line[MAXLINE];</span>
-<span class="hl str"></span>
-<span class="hl str">	size_t ind;</span>
-<span class="hl str">	char *tok;</span>
-<span class="hl str">	char *toks[MAXARGS+1];</span>
-<span class="hl str"></span>
-<span class="hl str">	while (1) {</span>
-<span class="hl str">		printf(&quot;shell&gt; &quot;);</span>
-<span class="hl str">		if (fgets(line, MAXLINE, stdin) == NULL) { break; }</span>
-<span class="hl str">		ind = 0;</span>
-<span class="hl str">		tok = strtok(line, DELIMITERS);</span>
-<span class="hl str">		while (tok != NULL) {</span>
-<span class="hl str">			toks[ind++] = tok;</span>
-<span class="hl str">			tok = strtok(NULL, DELIMITERS);</span>
-<span class="hl str">		}</span>
-<span class="hl str">		toks[ind] = NULL;</span>
-<span class="hl str">		if (toks[0] == NULL) { continue; }</span>
-<span class="hl str">		if (strcmp(toks[0], &quot;cd&quot;) == 0) {</span>
-<span class="hl str">			chdir(toks[1] ? toks[1] : getenv(&quot;HOME&quot;));</span>
-<span class="hl str">			continue;</span>
-<span class="hl str">		}</span>
-<span class="hl str">		if (fork() == 0) { exit(execvp(toks[0], toks)); }</span>
-<span class="hl str">		wait(NULL);</span>
-<span class="hl str">	}</span>
-<span class="hl str"></span>
-<span class="hl str">	return 0;</span>
-<span class="hl str">}</span>
-<span class="hl str">EOF</span>
-<span class="hl slc"># (creates the file)</span>
+# display the first 3 lines of &apos;hello.c&apos; file
+head -n 3 hello.c
+# #include &lt;stdio.h&gt;
+#
+# int main(void)
 
-<span class="hl slc"># compile &#39;shell.c&#39; source into &#39;shell&#39; binary</span>
-gcc shell.c <span class="hl kwb">-o</span> shell
-<span class="hl slc"># (compiles the file)</span>
+# display the last 3 lines of &apos;hello.c&apos; file
+tail -n 3 hello.c
+# 	puts(&quot;Hello World&quot;);
+# 	return 0;
+# }
 
-<span class="hl slc"># run and interact with &#39;shell&#39; binary</span>
-.<span class="hl opt">/</span>shell
-<span class="hl slc"># shell&gt; ls /usr</span>
-<span class="hl slc"># bin  games  include  lib  libexec  local  sbin  share  src</span>
-<span class="hl slc"># shell&gt; ls /path/to/non/existent/file</span>
-<span class="hl slc"># ls: cannot access &#39;/path/to/non/existent/file&#39;: No such file or directory</span>
-<span class="hl slc"># shell&gt; pwd</span>
-<span class="hl slc"># /home/gokcehan/cmpe230/basics</span>
-<span class="hl slc"># shell&gt; cd ..</span>
-<span class="hl slc"># shell&gt; pwd</span>
-<span class="hl slc"># /home/gokcehan/cmpe230</span>
-<span class="hl slc"># shell&gt; cd basics</span>
-<span class="hl slc"># shell&gt; pwd</span>
-<span class="hl slc"># /home/gokcehan/cmpe230/basics</span>
-<span class="hl slc"># shell&gt; echo hello world</span>
-<span class="hl slc"># hello world</span>
+# display the last lines of &apos;/var/log/syslog/ file and then continuously follow the file and display new output
+tail -f /var/log/syslog
+# (displays the file -- interrupt with Ctrl-c to quit)
 
-<span class="hl slc"># create an alias named &#39;loc&#39; with an argument at the end</span>
-<span class="hl kwb">alias</span> loc<span class="hl opt">=</span><span class="hl str">&quot;find . -name &#39;*.[ch]&#39; -type f -exec wc -l {} + | sort -rn | head -n&quot;</span>
-<span class="hl slc"># (defines the alias)</span>
+# display &apos;hello.c&apos; file with &apos;more&apos; pager (one page at a time)
+more hello.c
+# (displays file one page at a time -- press &apos;space&apos; for next page if any and &apos;q&apos; to quit)
 
-<span class="hl slc"># run &#39;loc&#39; alias with the argument &#39;5&#39;</span>
-loc <span class="hl num">5</span>
-<span class="hl slc">#   71 total</span>
-<span class="hl slc">#   39 ./shell.c</span>
-<span class="hl slc">#    9 ./cat.c</span>
-<span class="hl slc">#    8 ./streams.c</span>
-<span class="hl slc">#    8 ./echo.c</span>
+# display &apos;hello.c&apos; file with &apos;less&apos; pager
+less hello.c
+# (displays file as a pager -- press &apos;q&apos; to quit)
 
-<span class="hl slc"># remove alias &#39;loc&#39;</span>
-<span class="hl kwb">unalias</span> loc
-<span class="hl slc"># (removes the alias)</span>
+# open &apos;hello.c&apos; file with &apos;gedit&apos; editor (editor by GNOME)
+gedit hello.c
+# (opens the file)
 
-<span class="hl slc"># create a function named &#39;loc&#39; with an argument at an arbitrary location</span>
-loc<span class="hl opt">() {</span> <span class="hl kwc">find</span> <span class="hl str">&quot;</span><span class="hl ipl">$1</span><span class="hl str">&quot;</span> <span class="hl kwb">-name</span> <span class="hl str">&#39;*.[ch]&#39;</span> <span class="hl kwb">-type</span> f <span class="hl kwb">-exec</span> <span class="hl kwc">wc</span> <span class="hl kwb">-l</span> <span class="hl opt">{} + |</span> <span class="hl kwc">sort</span> <span class="hl kwb">-rn</span> <span class="hl opt">|</span> <span class="hl kwc">head</span><span class="hl opt">; }</span>
-<span class="hl slc"># (defines the function)</span>
+# open &apos;hello.c&apos; file with &apos;nano&apos; editor (editor by GNU)
+nano hello.c
+# (opens the file -- press &apos;C-x&apos; to quit)
+
+# open &apos;hello.c&apos; file with &apos;vi&apos; editor (POSIX standard editor)
+vi hello.c
+# (opens the file -- type &apos;:q&apos; and press enter to quit)
+
+# open &apos;hello.c&apos; file with &apos;vim&apos; editor (vi improved)
+vim hello.c
+# (opens the file -- type &apos;:q&apos; and press enter to quit)
+
+# start tutorial for vim
+vimtutor
+# (opens the tutorial)
+
+## ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+## DISK OPERATIONS
+## ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+# df (1) - report file system disk space usage
+# du (1) - estimate file space usage
+# dd (1) - convert and copy a file
+
+# show file system disk space usage
+df
+# Filesystem     1K-blocks      Used Available Use% Mounted on
+# udev             1994708         0   1994708   0% /dev
+# tmpfs             403720      1556    402164   1% /run
+# /dev/sda1       10253588   5952044   3760976  62% /
+# tmpfs            2018584    100208   1918376   5% /dev/shm
+# tmpfs               5120         4      5116   1% /run/lock
+# tmpfs            2018584         0   2018584   0% /sys/fs/cgroup
+# tmpfs             403716        28    403688   1% /run/user/121
+# tmpfs             403716        28    403688   1% /run/user/1000
+
+# show file system disk space usage in human readable format
+df -h
+# Filesystem      Size  Used Avail Use% Mounted on
+# udev            2,0G     0  2,0G   0% /dev
+# tmpfs           395M  1,6M  393M   1% /run
+# /dev/sda1       9,8G  5,7G  3,6G  62% /
+# tmpfs           2,0G   98M  1,9G   5% /dev/shm
+# tmpfs           5,0M  4,0K  5,0M   1% /run/lock
+# tmpfs           2,0G     0  2,0G   0% /sys/fs/cgroup
+# tmpfs           395M   28K  395M   1% /run/user/121
+# tmpfs           395M   28K  395M   1% /run/user/1000
+
+# show disk usage of directories in &apos;/usr&apos; directory
+du /usr
+# 15596   /usr/sbin
+# 4       /usr/local/sbin
+# ..
+# 1432    /usr/libexec
+# 2988292 /usr
+
+# show disk usage summary of &apos;/usr&apos; directory
+du /usr -s
+# 2988292 /usr
+
+# show disk usage of directories in &apos;/usr&apos; directory with a depth of zero
+du /usr -d0
+# 2988292 /usr
+
+# show disk usage of directories in &apos;/usr&apos; directory with a depth of one
+du /usr -d1
+# 15596   /usr/sbin
+# 64      /usr/local
+# ..
+# 1432    /usr/libexec
+# 2988292 /usr
+
+# show disk usage in human readable form
+du /usr -d1 -h
+# 16M     /usr/sbin
+# 64K     /usr/local
+# ..
+# 1,4M    /usr/libexec
+# 2,9G    /usr
+
+# show disk usage of &apos;/usr&apos; and &apos;/lib&apos; directories
+du /usr /lib -d1 -h
+# 16M     /usr/sbin
+# 64K     /usr/local
+# ..
+# 1,4M    /usr/libexec
+# 2,9G    /usr
+# 12K     /lib/linux-sound-base
+# 16K     /lib/hdparm
+# ..
+# 16K     /lib/apparmor
+# 836M    /lib
+
+# show disk usage of &apos;/usr&apos; and &apos;/lib&apos; directories with a total
+du /usr /lib -d1 -h -c
+# 16M     /usr/sbin
+# 64K     /usr/local
+# ..
+# 1,4M    /usr/libexec
+# 2,9G    /usr
+# 12K     /lib/linux-sound-base
+# 16K     /lib/hdparm
+# ..
+# 16K     /lib/apparmor
+# 836M    /lib
+# 3,7G    total
+
+## ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+## PIPES AND REDIRECTION
+## ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+# tee (1) - read from standard input and write to standard output and files
+# echo (1) - display a line of text
+# printf (1) - format and print data
+# strings (1) - print the strings of printable characters in files.
+
+# Pipes and Redirection
+# ~~~
+# Every process has at least 3 communication channels
+#   Standard Input (STDIN)
+#   Standard Output (STDOUT)
+#   Standard Error (STDERR)
+# Unix has file descriptors for these channels as 0, 1, and 2
+# Most commands reads from STDIN and outputs to STDOUT conventionally
+# `&lt;`, `&gt;`, and `&gt;&gt;` are used to redirect these channels from/to files
+# `|` is used to connect STDOUT of one process to STDIN of another
+
+# Special Device Files
+# ~~~
+# `/dev/null` accepts and discards all input (returns EOF)
+# `/dev/zero` accepts and discards all input (returns NUL)
+# `/dev/full` returns NUL bytes when read and ENOSPC when written
+# `/dev/random` and `/dev/urandom` produces pseudo-random numbers
+# `/dev/tty` refers to the underlying terminal
+# `/dev/stdin` refers to the STDIN of the current process
+# `/dev/stdout` refers to the STDOUT of the current process
+# `/dev/stderr` refers to the STDERR of the current process
+
+# create &apos;streams.c&apos; file with content up to &apos;EOF&apos;
+cat &lt;&lt; &apos;EOF&apos; &gt; streams.c
+#include &lt;stdio.h&gt;
+
+int main(void)
+{
+	fputs(&quot;this text goes to STDOUT\n&quot;, stdout);
+	fputs(&quot;this text goes to STDERR\n&quot;, stderr);
+	return 0;
+}
+EOF
+# (creates the file)
+
+# compile &apos;streams.c&apos; source into &apos;streams&apos; binary
+gcc streams.c -o streams
+# (compiles the file)
+
+# run &apos;streams&apos; binary
+./streams
+# this text goes to STDOUT
+# this text goes to STDERR
+
+# run &apos;streams&apos; binary and discard its output
+./streams &gt; /dev/null
+# this text goes to STDERR
+
+# run &apos;streams&apos; binary and discard its output
+./streams 1&gt; /dev/null
+# this text goes to STDERR
+
+# run &apos;streams&apos; binary and discard its errors
+./streams 2&gt; /dev/null
+# this text goes to STDOUT
+
+# run &apos;streams&apos; binary and discard its output and errors
+./streams &amp;&gt; /dev/null
+# (no output)
+
+# run &apos;streams&apos; binary, discard its output, and redirect 2nd channel to 1st
+./streams &gt; /dev/null 2&gt;&amp;1
+# (no output)
+
+# print 5th line in a file (you should better use sed (1))
+cat streams.c | head -n 5 | tail -n 1
+#        fputs(&quot;this text goes to STDOUT\n&quot;, stdout);
+
+# create a random string of specified length (you should better use mkpasswd (1))
+cat /dev/urandom | strings -n 1 | tr -d &apos;[:space:]&apos; | head -c 30
+# 8On$a?rOY_yKJ-:&gt;&lt;h5}d0o2D%6+=W
+
+# download &apos;Alice in Wonderlands&apos; book in text format and save as &apos;alice.txt&apos;
+wget http://www.gutenberg.org/files/11/11-0.txt -O alice.txt
+# (downloads the file)
+
+# word frequency challenge (http://dl.acm.org/citation.cfm?id=5948.315654)
+cat alice.txt | tr -cs A-Za-z &apos;\n&apos; | tr A-Z a-z | sort | uniq -c | sort -rn | head -n 5
+#    1818 the
+#     940 and
+#     809 to
+#     690 a
+#     631 of
+
+# run &apos;streams&apos; binary and save its output in &apos;output.txt&apos; file
+./streams | tee output.txt
+# this text goes to STDERR
+# this text goes to STDOUT
+
+# display &apos;output.txt&apos; file
+cat output.txt
+# this text goes to STDOUT
+
+# run &apos;streams&apos; binary, redirect its 2nd channel to 1st, and save its output in &apos;output.txt&apos; file
+./streams 2&gt;&amp;1 | tee output.txt
+# this text goes to STDERR
+# this text goes to STDOUT
+
+# display &apos;output.txt&apos; file
+cat output.txt
+# this text goes to STDERR
+# this text goes to STDOUT
+
+# run &apos;streams&apos; binary, redirect its 2nd channel to 1st, and append its output to &apos;output.txt&apos; file
+./streams 2&gt;&amp;1 | tee -a output.txt
+# this text goes to STDERR
+# this text goes to STDOUT
+
+# display &apos;output.txt&apos; file
+cat output.txt
+# this text goes to STDERR
+# this text goes to STDOUT
+# this text goes to STDERR
+# this text goes to STDOUT
+
+# remove &apos;output.txt&apos; file
+rm output.txt
+# (removes the file)
+
+# Exercise
+# ~~~
+# Create a file containing a list of directories under root.
+
+## ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+## USERS
+## ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+# su (1) - change user ID or become superuser
+# sudo (8) - execute a command as another user
+# users (1) - print the user names of users currently logged in
+# w (1) - Show who is logged on and what they are doing.
+# who (1) - show who is logged on
+# whoami (1) - print effective userid
+# useradd (8) - create a new user or update default new user information
+# usermod (8) - modify a user account
+# userdel (8) - delete a user account and related files
+# passwd (1) - change user password
+# chsh (1) - change login shell
+
+# Users
+# ~~~
+# Could be real (e.g. a person) or pseudo (e.g. a service)
+# Determined by a User Identification Number (UID)
+# Accounts stored in `/etc/passwd`
+# Passwords stored in `/etc/shadow`
+
+# Exercise
+# ~~~
+# Create a new user, change its password and set an appropriate login shell.
+
+## ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+## GROUPS
+## ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+# id (1) - print real and effective user and group IDs
+# groups (1) - print the groups a user is in
+# groupadd (8) - create a new group
+# groupmod (8) - modify a group definition on the system
+# groupdel (8) - delete a group
+
+# Groups
+# ~~~
+# Determined by a Group Identification Number (GID)
+# A user can belong to multiple groups
+# Each user has also a group with the same name as the user name
+# Groups stored in `/etc/group`
+# Group passwords stored in `/etc/gshadow`
+
+# Exercise
+# ~~~
+# Create a new group (e.g. `cmpe`) and add the previously created user to it.
+
+## ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+## FILES
+## ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+# chown (1) - change file owner and group
+# chgrp (1) - change group ownership
+# chmod (1) - change file mode bits
+# umask - display or set file mode mask (shell builtin)
+
+# Files
+# ~~~
+# Everything is a file (UNIX legacy)
+# Commands are executable files
+# System privilege and permissions are controlled with files
+# Device I/O and File I/O uses files (except at the lowest level)
+# Interprocess communication uses files (UNIX pipes)
+# All disks are combined as a single tree under root (denoted with `/`)
+# File accesses are handled with ownership and protection
+# Each file has an owner user and an owner group
+
+# File Permissions
+# ~~~
+# First bit denotes the type (e.g. file/dir)
+# For each file there are 3 access sets
+#   User access (u)
+#   Group access (g)
+#   Other access (o)
+# For each access set there are 3 access types
+#   Read (r)
+#   Write (w)
+#   Execute (x)
+# In total there are 9 permissions bits
+# There are 3 more bits reserved for special purposes (setuid, setgid, sticky)
+
+# Exercise
+# ~~~
+# What is the numeric file mode equivalent of the following accesses?
+#   rwxr-xr--
+#   --x-w--wx
+#   -r-rw-x-w (is there anything wrong with this example?)
+
+# Exercise
+# ~~~
+# What is the accesses equivalent of the following numeric file modes?
+#   755
+#   644
+#   325
+
+# Exercise
+# ~~~
+# Change the owner and/or group of files/dirs and try permissions.
+
+## ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+## SEARCHING
+## ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+# grep (1) - print lines matching a pattern
+# find (1) - search for files in a directory hierarchy
+# which (1) - locate a command
+# locate (1) - find files by name
+# whereis (1) - locate the binary, source, and manual page files for a command
+
+# print the lines containing the pattern &apos;rabbit&apos; in &apos;alice.txt&apos; file
+grep rabbit alice.txt
+# never before seen a rabbit with either a waistcoat-pocket, or a watch
+# rabbit-hole under the hedge.
+# The rabbit-hole went straight on like a tunnel for some way, and then
+# a rabbit! I suppose Dinah’ll be sending me on messages next!’ And she
+# rabbits. I almost wish I hadn’t gone down that rabbit-hole--and yet--and
+
+# print the lines containing the pattern &apos;rabbit&apos; in &apos;alice.txt&apos; file ignoring case
+grep -i rabbit alice.txt
+# CHAPTER I. Down the Rabbit-Hole
+# picking the daisies, when suddenly a White Rabbit with pink eyes ran
+# ..
+# These were the verses the White Rabbit read:--
+# The long grass rustled at her feet as the White Rabbit hurried by--the
+
+# print the lines not containing the pattern &apos;rabbit&apos; in &apos;alice.txt&apos; file
+grep -v rabbit alice.txt
+# Project Gutenberg’s Alice’s Adventures in Wonderland, by Lewis Carroll
+#
+# ..
+# Archive Foundation, how to help produce our new eBooks, and how to
+# subscribe to our email newsletter to hear about new eBooks.
+
+# print the lines containing the pattern &apos;rabbit&apos; recursively for all files in the current directory
+grep rabbit -r .
+# ./basics.sh:# print the lines containing the pattern &apos;rabbit&apos; in &apos;alice.txt&apos; file
+# ./basics.sh:grep rabbit alice.txt
+# ..
+# ./alice.txt:a rabbit! I suppose Dinah’ll be sending me on messages next!’ And she
+# ./alice.txt:rabbits. I almost wish I hadn’t gone down that rabbit-hole--and yet--and
+
+# search all files in the current directory
+find .
+# .
+# ./streams
+# ./basics.sh
+# ./streams.c
+# ./alice.txt
+# ./demo
+# ./demo/bar.txt
+# ./demo/foo.txt
+# ./hello
+# ./hello.c
+
+find . -name &apos;*.c&apos;
+# ./streams.c
+# ./hello.c
+
+# search all executable files in the current directory
+find . -executable
+# .
+# ./streams
+# ./demo
+# ./hello
+
+# search all executable regular files in the current directory
+find . -executable -type f
+# ./streams
+# ./hello
+
+# find the longest header files under &apos;/usr/include&apos;
+find /usr/include -name &apos;*.h&apos; -type f -exec wc -l {} \; | sort -rn | head
+# 6706 /usr/include/c++/7/bits/basic_string.h
+# 6005 /usr/include/c++/7/bits/random.h
+# 5836 /usr/include/c++/7/bits/stl_algo.h
+# 5470 /usr/include/linux/nl80211.h
+# 4106 /usr/include/reglib/nl80211.h
+# 3789 /usr/include/elf.h
+# 2967 /usr/include/c++/7/ext/vstring.h
+# 2844 /usr/include/c++/7/bits/regex.h
+# 2653 /usr/include/c++/7/bits/locale_facets.h
+# 2614 /usr/include/c++/7/bits/stl_tree.h
+
+# find the total line of C code in the current directory
+find . -name &apos;*.[ch]&apos; -type f -exec wc -l {} +
+#   8 ./streams.c
+#   7 ./hello.c
+#  15 total
+
+# create a soft link &apos;alive&apos; to &apos;alice.txt&apos;
+ln -s alice.txt alive
+# (creates the link)
+
+# show if the &apos;alive&apos; file exists or not
+test -e alive &amp;&amp; echo &apos;file exists&apos; || echo &apos;file does not exists&apos;
+# file exists
+
+# create a soft link named &apos;dead&apos; to a non-existent file
+ln -s /path/to/non/existent/file dead
+# (creates the link)
+
+# show if the &apos;dead&apos; file exists or not
+test -e dead &amp;&amp; echo &apos;file exists&apos; || echo &apos;file does not exists&apos;
+# file does not exists
+
+find . -type l
+# ./dead
+# ./alive
+
+find . -type l -print
+# ./dead
+# ./alive
+
+find . -type l -print -print
+# ./dead
+# ./dead
+# ./alive
+# ./alive
+
+# find existing links in current directory
+find . -type l -exec test -e {} \; -print
+# ./alive
+
+# find broken links in current directory
+find . -type l -! -exec test -e {} \; -print
+# ./dead
+
+# remove &apos;dead&apos; and &apos;alive&apos; links
+rm dead alive
+# (removes the links)
+
+# locate &apos;ls&apos; command
+which ls
+# /bin/ls
+
+# locate &apos;gcc&apos; command
+which gcc
+# /usr/local/bin/gcc
+
+# locate all &apos;gcc&apos; commands in the &apos;PATH&apos; variable
+which -a gcc
+# /usr/local/bin/gcc
+# /usr/bin/gcc
+
+locate stdio.h
+# /usr/include/stdio.h
+# /usr/include/c++/7/tr1/stdio.h
+# /usr/include/x86_64-linux-gnu/bits/stdio.h
+# /usr/lib/x86_64-linux-gnu/perl/5.26.1/CORE/nostdio.h
+
+whereis gcc
+# gcc: /usr/bin/gcc /usr/lib/gcc /usr/share/man/man1/gcc.1.gz
+
+## ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+## COMMANDS
+## ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+# Commands
+# ~~~
+# An executable file in `$PATH`
+# A shell builtin (implemented either as necessity or performance)
+# An alias (defined with `alias` builtin)
+# Relative/Absolute path to an executable file
+
+# show &apos;PATH&apos; variable
+echo $PATH
+# /home/gokcehan/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin
+
+# show directories in &apos;PATH&apos; variable line by line
+echo $PATH | tr : &apos;\n&apos;
+# /home/gokcehan/.local/bin
+# /usr/local/sbin
+# /usr/local/bin
+# /usr/sbin
+# /usr/bin
+# /sbin
+# /bin
+# /usr/games
+# /usr/local/games
+# /snap/bin
+
+# show the type of &apos;mkdir&apos; command
+type mkdir
+# mkdir is /bin/mkdir
+
+# show all types of &apos;cd&apos; command
+type -a cd
+# cd is a shell builtin
+
+# show all types of &apos;echo&apos; command
+type -a echo
+# echo is a shell builtin
+# echo is /bin/echo
+
+# show the type of &apos;grep&apos; command
+type grep
+# grep is aliased to `grep --color=auto&apos;
+
+# show the type of &apos;./hello&apos; command
+type ./hello
+# ./hello is ./hello
+
+# create &apos;cat.c&apos; file with content up to &apos;EOF&apos; (from K&amp;R)
+cat &lt;&lt; &apos;EOF&apos; &gt; cat.c
+#include &lt;stdio.h&gt;
+
+main()
+{
+	int c;
+	while ((c = getchar()) != EOF)
+		putchar(c);
+	return 0;
+}
+EOF
+# (creates the file)
+
+# compile &apos;cat.c&apos; source into &apos;cat&apos; binary
+gcc cat.c -o cat
+# (compiles the file)
+
+# copy &apos;alice.txt&apos; file to &apos;alice.txt.bak&apos;
+./cat &lt; alice.txt &gt; alice.txt.bak
+# (copies the file)
+
+# compare the contents of &apos;alice.txt&apos; and &apos;alice.txt.bak&apos;
+cmp alice.txt alice.txt.bak
+# (no output -- files are identical)
+
+# remove &apos;alice.txt.bak&apos; file
+rm alice.txt.bak
+# (removes the file)
+
+# create &apos;echo.c&apos; file with content up to &apos;EOF&apos; (from K&amp;R)
+cat &lt;&lt; &apos;EOF&apos; &gt; echo.c
+#include &lt;stdio.h&gt;
+
+main(int argc, char *argv[])
+{
+    while (--argc &gt; 0)
+        printf(&quot;%s%s&quot;, *++argv, (argc &gt; 1) ? &quot; &quot; : &quot;&quot;);
+    printf(&quot;\n&quot;);
+}
+EOF
+# (creates the file)
+
+# compile &apos;echo.c&apos; source into &apos;echo&apos; binary
+gcc echo.c -o echo
+# (compiles the file)
+
+# run &apos;echo&apos; binary with arguments &apos;hello&apos; and &apos;world&apos;
+./echo hello world
+# hello world
+
+# create &apos;shell.c&apos; file with content up to &apos;EOF&apos;
+cat &lt;&lt; &apos;EOF&apos; &gt; shell.c
+#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;string.h&gt;
+#include &lt;unistd.h&gt;
+#include &lt;sys/wait.h&gt;
+
+#define MAXLINE 1000
+#define MAXARGS 64
+#define DELIMITERS &quot; \f\n\r\t\v&quot;
+
+int main(void)
+{
+	char line[MAXLINE];
+
+	size_t ind;
+	char *tok;
+	char *toks[MAXARGS+1];
+
+	while (1) {
+		printf(&quot;shell&gt; &quot;);
+		if (fgets(line, MAXLINE, stdin) == NULL) { break; }
+		ind = 0;
+		tok = strtok(line, DELIMITERS);
+		while (tok != NULL) {
+			toks[ind++] = tok;
+			tok = strtok(NULL, DELIMITERS);
+		}
+		toks[ind] = NULL;
+		if (toks[0] == NULL) { continue; }
+		if (strcmp(toks[0], &quot;cd&quot;) == 0) {
+			chdir(toks[1] ? toks[1] : getenv(&quot;HOME&quot;));
+			continue;
+		}
+		if (fork() == 0) { exit(execvp(toks[0], toks)); }
+		wait(NULL);
+	}
+
+	return 0;
+}
+EOF
+# (creates the file)
+
+# compile &apos;shell.c&apos; source into &apos;shell&apos; binary
+gcc shell.c -o shell
+# (compiles the file)
+
+# run and interact with &apos;shell&apos; binary
+./shell
+# shell&gt; ls /usr
+# bin  games  include  lib  libexec  local  sbin  share  src
+# shell&gt; ls /path/to/non/existent/file
+# ls: cannot access &apos;/path/to/non/existent/file&apos;: No such file or directory
+# shell&gt; pwd
+# /home/gokcehan/cmpe230/basics
+# shell&gt; cd ..
+# shell&gt; pwd
+# /home/gokcehan/cmpe230
+# shell&gt; cd basics
+# shell&gt; pwd
+# /home/gokcehan/cmpe230/basics
+# shell&gt; echo hello world
+# hello world
+
+# create an alias named &apos;loc&apos; with an argument at the end
+alias loc=&quot;find . -name &apos;*.[ch]&apos; -type f -exec wc -l {} + | sort -rn | head -n&quot;
+# (defines the alias)
+
+# run &apos;loc&apos; alias with the argument &apos;5&apos;
+loc 5
+#   71 total
+#   39 ./shell.c
+#    9 ./cat.c
+#    8 ./streams.c
+#    8 ./echo.c
+
+# remove alias &apos;loc&apos;
+unalias loc
+# (removes the alias)
+
+# create a function named &apos;loc&apos; with an argument at an arbitrary location
+loc() { find &quot;$1&quot; -name &apos;*.[ch]&apos; -type f -exec wc -l {} + | sort -rn | head; }
+# (defines the function)
 
 loc .
-<span class="hl slc">#   71 total</span>
-<span class="hl slc">#   39 ./shell.c</span>
-<span class="hl slc">#    9 ./cat.c</span>
-<span class="hl slc">#    8 ./streams.c</span>
-<span class="hl slc">#    8 ./echo.c</span>
-<span class="hl slc">#    7 ./hello.c</span>
+#   71 total
+#   39 ./shell.c
+#    9 ./cat.c
+#    8 ./streams.c
+#    8 ./echo.c
+#    7 ./hello.c
 
-loc <span class="hl opt">/</span>usr<span class="hl opt">/</span>include<span class="hl opt">/</span>
-<span class="hl slc">#   361341 total</span>
-<span class="hl slc">#     6706 /usr/include/c++/7/bits/basic_string.h</span>
-<span class="hl slc">#     6005 /usr/include/c++/7/bits/random.h</span>
-<span class="hl slc">#     5836 /usr/include/c++/7/bits/stl_algo.h</span>
-<span class="hl slc">#     5470 /usr/include/linux/nl80211.h</span>
-<span class="hl slc">#     4106 /usr/include/reglib/nl80211.h</span>
-<span class="hl slc">#     3789 /usr/include/elf.h</span>
-<span class="hl slc">#     2967 /usr/include/c++/7/ext/vstring.h</span>
-<span class="hl slc">#     2844 /usr/include/c++/7/bits/regex.h</span>
-<span class="hl slc">#     2653 /usr/include/c++/7/bits/locale_facets.h</span>
+loc /usr/include/
+#   361341 total
+#     6706 /usr/include/c++/7/bits/basic_string.h
+#     6005 /usr/include/c++/7/bits/random.h
+#     5836 /usr/include/c++/7/bits/stl_algo.h
+#     5470 /usr/include/linux/nl80211.h
+#     4106 /usr/include/reglib/nl80211.h
+#     3789 /usr/include/elf.h
+#     2967 /usr/include/c++/7/ext/vstring.h
+#     2844 /usr/include/c++/7/bits/regex.h
+#     2653 /usr/include/c++/7/bits/locale_facets.h
 
-<span class="hl slc"># Exercise</span>
-<span class="hl slc"># ~~~</span>
-<span class="hl slc"># Echo the words `hello` and `world` with more than one space between them.</span>
+# Exercise
+# ~~~
+# Echo the words `hello` and `world` with more than one space between them.
 
-<span class="hl slc"># Exercise</span>
-<span class="hl slc"># ~~~</span>
-<span class="hl slc"># Improve our rudimentary shell &#39;shell.c&#39; by adding more features.</span>
-<span class="hl slc"># Some of the things you can try:</span>
-<span class="hl slc">#   Show current directory in the prompt line</span>
-<span class="hl slc">#   Handle quoting for arguments (e.g. `touch &quot;fname with spaces&quot;` should work)</span>
-<span class="hl slc">#   Tilde expansion (e.g. `cd ~` should change to the home folder)</span>
-<span class="hl slc">#   Parameter expansion (e.g. `cd $HOME` should change to the home folder)</span>
-<span class="hl slc">#   (Advanced) Signal handling (see `man signal`)</span>
-<span class="hl slc">#   (Advanced) Pipes and redirection</span>
+# Exercise
+# ~~~
+# Improve our rudimentary shell &apos;shell.c&apos; by adding more features.
+# Some of the things you can try:
+#   Show current directory in the prompt line
+#   Handle quoting for arguments (e.g. `touch &quot;fname with spaces&quot;` should work)
+#   Tilde expansion (e.g. `cd ~` should change to the home folder)
+#   Parameter expansion (e.g. `cd $HOME` should change to the home folder)
+#   (Advanced) Signal handling (see `man signal`)
+#   (Advanced) Pipes and redirection
 
-<span class="hl slc">## ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~</span>
-<span class="hl slc">## ARCHIVES</span>
-<span class="hl slc">## ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~</span>
+## ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+## ARCHIVES
+## ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-<span class="hl slc"># tar (1) - The GNU version of the tar archiving utility</span>
-<span class="hl slc"># unzip (1) - list, test and extract compressed files in a ZIP archive</span>
-<span class="hl slc"># unrar-nonfree (1) - extract files from rar archives</span>
-<span class="hl slc"># 7z (1) - A file archiver with highest compression ratio</span>
+# tar (1) - The GNU version of the tar archiving utility
+# unzip (1) - list, test and extract compressed files in a ZIP archive
+# unrar-nonfree (1) - extract files from rar archives
+# 7z (1) - A file archiver with highest compression ratio
 
-<span class="hl slc"># create a tar file &#39;src.tar&#39; from c files</span>
-<span class="hl kwc">tar</span> cf src.<span class="hl kwc">tar</span> <span class="hl opt">*</span>.c
-<span class="hl slc"># (creates the file)</span>
+# create a tar file &apos;src.tar&apos; from c files
+tar cf src.tar *.c
+# (creates the file)
 
-<span class="hl slc"># list contents of &#39;src.tar&#39; file</span>
-<span class="hl kwc">tar</span> tf src.<span class="hl kwc">tar</span>
-<span class="hl slc"># cat.c</span>
-<span class="hl slc"># echo.c</span>
-<span class="hl slc"># hello.c</span>
-<span class="hl slc"># shell.c</span>
-<span class="hl slc"># streams.c</span>
+# list contents of &apos;src.tar&apos; file
+tar tf src.tar
+# cat.c
+# echo.c
+# hello.c
+# shell.c
+# streams.c
 
-<span class="hl slc"># extract &#39;src.tar&#39; file</span>
-<span class="hl kwc">tar</span> xf src.<span class="hl kwc">tar</span>
-<span class="hl slc"># (extracts the file)</span>
+# extract &apos;src.tar&apos; file
+tar xf src.tar
+# (extracts the file)
 
-<span class="hl slc"># create a gunzipped tar file &#39;src.tar.gz&#39; from c files</span>
-<span class="hl kwc">tar</span> czf src.<span class="hl kwc">tar</span>.gz <span class="hl opt">*</span>.c
-<span class="hl slc"># (creates the file)</span>
+# create a gunzipped tar file &apos;src.tar.gz&apos; from c files
+tar czf src.tar.gz *.c
+# (creates the file)
 
-<span class="hl slc"># uncompress and extract &#39;src.tar.gz&#39; file</span>
-<span class="hl kwc">tar</span> xzf src.<span class="hl kwc">tar</span>.gz
-<span class="hl slc"># (extracts the file)</span>
+# uncompress and extract &apos;src.tar.gz&apos; file
+tar xzf src.tar.gz
+# (extracts the file)
 
-<span class="hl slc">## ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~</span>
-<span class="hl slc">## PACKAGES</span>
-<span class="hl slc">## ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~</span>
+## ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+## PACKAGES
+## ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-<span class="hl slc"># apt (8) - command-line interface</span>
-<span class="hl slc"># apt-get (8) - APT package handling utility - - command-line interface</span>
-<span class="hl slc"># apt-cache (8) - query the APT cache</span>
-<span class="hl slc"># dpkg (1) - package manager for Debian</span>
-<span class="hl slc"># rpm (8) - RPM Package Manager</span>
-<span class="hl slc"># yum (8) - Yellowdog Updater Modified</span>
+# apt (8) - command-line interface
+# apt-get (8) - APT package handling utility - - command-line interface
+# apt-cache (8) - query the APT cache
+# dpkg (1) - package manager for Debian
+# rpm (8) - RPM Package Manager
+# yum (8) - Yellowdog Updater Modified
 
-<span class="hl slc"># Packages</span>
-<span class="hl slc"># ~~~</span>
-<span class="hl slc"># Software distribution in archive files</span>
-<span class="hl slc"># Collected in repositories by distributions</span>
-<span class="hl slc"># Comes as either pre-built binary (usually) or source code forms</span>
-<span class="hl slc"># Handled by package managers:</span>
-<span class="hl slc">#   Installation</span>
-<span class="hl slc">#   Upgrading</span>
-<span class="hl slc">#   Configuring</span>
-<span class="hl slc">#   Removal</span>
+# Packages
+# ~~~
+# Software distribution in archive files
+# Collected in repositories by distributions
+# Comes as either pre-built binary (usually) or source code forms
+# Handled by package managers:
+#   Installation
+#   Upgrading
+#   Configuring
+#   Removal
 
-<span class="hl slc"># search packages containing the word &#39;wget&#39;</span>
+# search packages containing the word &apos;wget&apos;
 apt search wget
-apt<span class="hl kwb">-cache</span> search wget
+apt-cache search wget
 
-<span class="hl slc"># show information about &#39;wget&#39; package</span>
+# show information about &apos;wget&apos; package
 apt show wget
-apt<span class="hl kwb">-cache</span> show wget
+apt-cache show wget
 
-<span class="hl slc"># install &#39;wget&#39; package</span>
-sudo apt <span class="hl kwc">install</span> wget
-sudo apt<span class="hl kwb">-get</span> <span class="hl kwc">install</span> wget
+# install &apos;wget&apos; package
+sudo apt install wget
+sudo apt-get install wget
 
-<span class="hl slc"># remove &#39;wget&#39; package</span>
+# remove &apos;wget&apos; package
 sudo apt remove wget
-sudo apt<span class="hl kwb">-get</span> remove wget
+sudo apt-get remove wget
 
-<span class="hl slc"># update list of packages</span>
+# update list of packages
 sudo apt update
-sudo apt<span class="hl kwb">-get</span> update
+sudo apt-get update
 
-<span class="hl slc"># upgrade all installed packages</span>
+# upgrade all installed packages
 sudo apt upgrade
-sudo apt<span class="hl kwb">-get</span> upgrade
+sudo apt-get upgrade
 
-<span class="hl slc"># list installed files of &#39;wget&#39; package</span>
-dpkg <span class="hl kwb">-L</span> wget
-<span class="hl slc"># /.</span>
-<span class="hl slc"># /etc</span>
-<span class="hl slc"># /etc/wgetrc</span>
-<span class="hl slc"># /usr</span>
-<span class="hl slc"># /usr/bin</span>
-<span class="hl slc"># /usr/bin/wget</span>
-<span class="hl slc"># /usr/share</span>
-<span class="hl slc"># /usr/share/doc</span>
-<span class="hl slc"># /usr/share/doc/wget</span>
-<span class="hl slc"># /usr/share/doc/wget/AUTHORS</span>
-<span class="hl slc"># /usr/share/doc/wget/MAILING-LIST</span>
-<span class="hl slc"># /usr/share/doc/wget/NEWS.gz</span>
-<span class="hl slc"># /usr/share/doc/wget/README</span>
-<span class="hl slc"># /usr/share/doc/wget/changelog.Debian.gz</span>
-<span class="hl slc"># /usr/share/doc/wget/copyright</span>
-<span class="hl slc"># /usr/share/info</span>
-<span class="hl slc"># /usr/share/info/wget.info.gz</span>
-<span class="hl slc"># /usr/share/man</span>
-<span class="hl slc"># /usr/share/man/man1</span>
-<span class="hl slc"># /usr/share/man/man1/wget.1.gz</span>
+# list installed files of &apos;wget&apos; package
+dpkg -L wget
+# /.
+# /etc
+# /etc/wgetrc
+# /usr
+# /usr/bin
+# /usr/bin/wget
+# /usr/share
+# /usr/share/doc
+# /usr/share/doc/wget
+# /usr/share/doc/wget/AUTHORS
+# /usr/share/doc/wget/MAILING-LIST
+# /usr/share/doc/wget/NEWS.gz
+# /usr/share/doc/wget/README
+# /usr/share/doc/wget/changelog.Debian.gz
+# /usr/share/doc/wget/copyright
+# /usr/share/info
+# /usr/share/info/wget.info.gz
+# /usr/share/man
+# /usr/share/man/man1
+# /usr/share/man/man1/wget.1.gz
 
-<span class="hl slc"># find the owner package of a file</span>
-dpkg<span class="hl kwb">-query -S</span> <span class="hl opt">/</span>bin<span class="hl opt">/</span><span class="hl kwc">ls</span>
-<span class="hl slc"># coreutils: /bin/ls</span>
+# find the owner package of a file
+dpkg-query -S /bin/ls
+# coreutils: /bin/ls
 
-<span class="hl slc"># Manual Installation</span>
-<span class="hl slc"># ~~~</span>
-<span class="hl slc"># A package might not be available in the distro’s repositories</span>
-<span class="hl slc"># The package version in the repositories might be outdated</span>
-<span class="hl slc"># Traditionally installed under `/usr/local` or `/opt`</span>
-<span class="hl slc"># Most packages use the convention `./configure; make; make install`</span>
+# Manual Installation
+# ~~~
+# A package might not be available in the distro’s repositories
+# The package version in the repositories might be outdated
+# Traditionally installed under `/usr/local` or `/opt`
+# Most packages use the convention `./configure; make; make install`
 
-<span class="hl slc"># Exercise</span>
-<span class="hl slc"># ~~~</span>
-<span class="hl slc"># Install a package manually.</span>
-</pre>
+# Exercise
+# ~~~
+# Install a package manually.
+</code></pre>
+
 </body>
+
 </html>
-<!--HTML generated by highlight 3.62, http://www.andre-simon.de/-->
