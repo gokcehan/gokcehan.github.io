@@ -26,7 +26,7 @@ time {
 }
 
 time::before {
-  content: "\1F4C5  ";
+  content: "\1F4C5\0020";
 }
 
 main {
