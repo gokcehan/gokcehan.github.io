@@ -21,12 +21,8 @@ h2 {
   margin-top: 2em;
 }
 
-time {
-  color: gray;
-}
-
-time::before {
-  content: "\1F4C5\0020";
+ul {
+  line-height: 2.0;
 }
 
 main {
