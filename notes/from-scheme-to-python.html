@@ -521,24 +521,23 @@ We can try using memoization strategy for efficiency:
 </p>
 
 <pre><code class="language-python"># Python
+from functools import lru_cache
+
 coins = [1, 5, 10, 25, 50]
 
 def count_memo(amount):
-    memo = {}
-    def helper(amount, kinds):
-        if amount == 0:
-            return 1
-        elif amount &lt; 0 or kinds == 0:
-            return 0
-        elif (amount, kinds) in memo:
-            return memo[amount, kinds]
-        else:
-            c1 = helper(amount, kinds-1)
-            c2 = helper(amount - coins[kinds-1], kinds)
-            c = c1 + c2
-            memo[amount, kinds] = c
-            return c
-    return helper(amount, len(coins))
+    return count_memo_iter(amount, len(coins))
+
+@lru_cache(maxsize=None)
+def count_memo_iter(amount, kinds):
+    if amount == 0:
+        return 1
+    elif amount &lt; 0 or kinds == 0:
+        return 0
+    else:
+        c1 = count_memo_iter(amount, kinds-1)
+        c2 = count_memo_iter(amount - coins[kinds-1], kinds)
+        return c1 + c2
 </code></pre>
 
 <p>
