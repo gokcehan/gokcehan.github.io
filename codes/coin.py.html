@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="color-scheme" content="light dark">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>coin.py</title>
+  <link rel="stylesheet" href="../style/code.css">
+  <link rel="stylesheet" href="../highlightjs/github.min.css" media="screen and (prefers-color-scheme: light)">
+  <link rel="stylesheet" href="../highlightjs/github-dark.min.css" media="screen and (prefers-color-scheme: dark)">
+  <script src="../highlightjs/highlight-python.min.js"></script>
+  <script>hljs.highlightAll();</script>
+</head>
+
+<body>
+
+<pre><code class="language-python">#!/usr/bin/env python
+#
+# coin.py
+#
+# Calculates the solution to the following problem:
+#
+# How many different ways can we make change of $1.00, given half-dollars,
+# quarters, dimes, nickels, and pennies?  More generally, can we write a
+# procedure to compute the number of ways to change any given amount of money?
+#
+# This problem is taken from the following book:
+#
+# Harold Abelson and Gerald Jay Sussman with Julie Sussman.
+# Structure and Interpretation of Computer Programs (SICP), Second edition.
+# The MIT Press, 1996.
+# https://mitpress.mit.edu/sicp
+#
+
+coins = [1, 5, 10, 25, 50]
+
+def count(amount):
+    return count_iter(amount, len(coins))
+
+def count_iter(amount, kinds):
+    if amount == 0:
+        return 1
+    elif amount &lt; 0 or kinds == 0:
+        return 0
+    else:
+        c1 = count_iter(amount, kinds-1)
+        c2 = count_iter(amount - coins[kinds-1], kinds)
+        return c1 + c2
+
+print(count(100))  # 292
+print(count(500))  # 59576
+# print(count(1000)) # RecursionError: maximum recursion depth exceeded in comparison
+
+def count_memo(amount):
+    memo = {}
+    def helper(amount, kinds):
+        if amount == 0:
+            return 1
+        elif amount &lt; 0 or kinds == 0:
+            return 0
+        elif (amount, kinds) in memo:
+            return memo[amount, kinds]
+        else:
+            c1 = helper(amount, kinds-1)
+            c2 = helper(amount - coins[kinds-1], kinds)
+            c = c1 + c2
+            memo[amount, kinds] = c
+            return c
+    return helper(amount, len(coins))
+
+print(count_memo(100))  # 292
+print(count_memo(500))  # 59576
+# print(count_memo(1000)) # RecursionError: maximum recursion depth exceeded in comparison
+
+def count_table(amount):
+    table = [[0 for i in range(len(coins)+1)] for j in range(amount+1)]
+    for i in range(len(coins)+1):
+        table[0][i] = 1
+    for i in range(1, len(coins)+1):
+        for j in range(1, amount+1):
+            c1 = table[j][i-1]
+            c2 = table[j-coins[i-1]][i] if j &gt;= coins[i-1] else 0
+            table[j][i] = c1 + c2
+    return table[amount][len(coins)]
+
+print(count_table(100))  # 292
+print(count_table(500))  # 59576
+print(count_table(1000)) # 801451
+</code></pre>
+
+</body>
+
+</html>

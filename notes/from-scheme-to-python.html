@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="color-scheme" content="light dark">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>From Scheme to Python</title>
+  <link rel="stylesheet" href="../style/base.css">
+  <link rel="stylesheet" href="../highlightjs/github.min.css" media="screen and (prefers-color-scheme: light)">
+  <link rel="stylesheet" href="../highlightjs/github-dark.min.css" media="screen and (prefers-color-scheme: dark)">
+  <script src="../highlightjs/highlight-python-scheme.min.js"></script>
+  <script>hljs.highlightAll();</script>
+</head>
+
+<body>
+
+<header>
+  <h1>From Scheme to Python</h1>
+</header>
+
+<main>
+
+<p>
+This post mentions some practical considerations for using recursion to solve problems.
+Most of the material is summarized from the Section 1.2 of the following book:
+</p>
+
+<cite>
+Harold Abelson and Gerald Jay Sussman with Julie Sussman.</br>
+Structure and Interpretation of Computer Programs (SICP), Second edition.</br>
+The MIT Press, 1996.</br>
+<a href="https://mitpress.mit.edu/sicp">website</a>
+</cite>
+
+<p>
+You can refer to this book for more detailed discussion of the topic.
+Python examples are derived from Scheme versions found in this book.
+Scheme language guarantees optimization of <a href="https://en.wikipedia.org/wiki/Tail_call">tail calls</a> in the language specification like most functional programming languages.
+On the other hand, Python language is a representative for mainstream languages in which this optimization is neither guaranteed nor performed.
+</p>
+
+<h2>Linear Recursion</h2>
+
+<p>
+A factorial function can be written in recursive form as follows:
+</p>
+
+<pre><code class="language-scheme">; Scheme
+(define (fact n)
+  (if (= n 1)
+      1
+      (* n (fact (- n 1)))))
+</code></pre>
+
+<pre><code class="language-python"># Python
+def fact(n):
+    if n == 0:
+        return 1
+    else:
+        return n * fact(n - 1)
+</code></pre>
+
+<p>
+Evaluation of this calculation is as follows:
+</p>
+
+<pre><code class="language-scheme">; Scheme
+(fact 5)
+  (fact 4)
+    (fact 3)
+      (fact 2)
+        (fact 1)
+          (fact 0)
+          1
+        1
+      2
+    6
+  24
+120
+</code></pre>
+
+<pre><code class="language-python"># Python
+fact(5)
+  fact(4)
+    fact(3)
+      fact(2)
+        fact(1)
+          fact(0)
+          1
+        1
+      2
+    6
+  24
+120
+</code></pre>
+
+<p>
+Note, function call stack grows in both languages, meaning that one can get a stack overflow error with a big enough argument.
+We can instead write the function in tail recursive form as an iterative process as follows:
+</p>
+
+<pre><code class="language-scheme">; Scheme
+(define (fact n)
+  (fact-iter 1 1 n))
+
+(define (fact-iter acc counter max-count)
+  (if (&gt; counter max-count)
+      acc
+      (fact-iter (* counter acc)
+                 (+ counter 1)
+                 max-count)))
+</code></pre>
+
+<pre><code class="language-python"># Python
+def fact(n):
+    return fact_iter(1, 1, n)
+
+def fact_iter(acc, counter, max_count):
+    if counter &gt; max_count:
+        return acc
+    else:
+        return fact_iter(counter * acc,
+                         counter + 1,
+                         max_count)
+</code></pre>
+
+<p>
+Evaluation of this calculation is as follows:
+</p>
+
+<pre><code class="language-scheme">; Scheme
+(fact 5)
+(fact-iter   1 1 5)
+(fact-iter   1 2 5)
+(fact-iter   2 3 5)
+(fact-iter   6 4 5)
+(fact-iter  24 5 5)
+(fact-iter 120 6 5)
+120
+</code></pre>
+
+<pre><code class="language-python"># Python
+fact(5)
+  fact_iter(1, 1, 5)
+    fact_iter(1, 2, 5)
+      fact_iter(2, 3, 5)
+        fact_iter(6, 4, 5)
+          fact_iter(24, 5, 5)
+            fact_iter(120, 6, 5)
+            120
+          120
+        120
+      120
+    120
+  120
+120
+</code></pre>
+
+<p>
+In this case, function call stack still grows in Python but not in Scheme.
+This is due to tail call optimization performed in Scheme to avoid deferred function calls when they are at tail positions.
+On the other hand, a more idiomatic way to write an iterative factorial function in Python is as follows:
+</p>
+
+<pre><code class="language-python"># Python
+def fact(n):
+    acc = 1
+    for i in range(1, n + 1):
+        acc *= i
+    return acc
+</code></pre>
+
+<p>
+In this form, there is only a single function call so the call stack does not grow.
+</p>
+
+<h2>Tree Recursion</h2>
+
+<p>
+A fibonacci function can be written in recursive form as follows:
+</p>
+
+<pre><code class="language-scheme">; Scheme
+(define (fib n)
+  (cond ((= n 0) 0)
+        ((= n 1) 1)
+        (else (+ (fib (- n 1))
+                 (fib (- n 2))))))
+</code></pre>
+
+<pre><code class="language-python"># Python
+def fib(n):
+    if n == 0:
+        return 0
+    elif n == 1:
+        return 1
+    else:
+        return fib(n - 1) + fib(n - 2)
+</code></pre>
+
+<p>
+Evaluation of this calculation is as follows:
+</p>
+
+<pre><code class="language-scheme">; Scheme
+(fib 5)
+  (fib 4)
+    (fib 3)
+      (fib 2)
+        (fib 1)
+        1
+        (fib 0)
+        0
+      1
+      (fib 1)
+      1
+    2
+    (fib 2)
+      (fib 1)
+      1
+      (fib 0)
+      0
+    1
+    (fib 1)
+    1
+  3
+  (fib 3)
+    (fib 2)
+      (fib 1)
+      1
+      (fib 0)
+      0
+    1
+    (fib 1)
+    1
+  2
+5
+</code></pre>
+
+<pre><code class="language-python"># Python
+fib(5)
+  fib(4)
+    fib(3)
+      fib(2)
+        fib(1)
+        1
+        fib(0)
+        0
+      1
+      fib(1)
+      1
+    2
+    fib(2)
+      fib(1)
+      1
+      fib(0)
+      0
+    1
+    fib(1)
+    1
+  3
+  fib(3)
+    fib(2)
+      fib(1)
+      1
+      fib(0)
+      0
+    1
+    fib(1)
+    1
+  2
+5
+</code></pre>
+
+<p>
+Note, same calculations occur at multiple points in the tree, meaning that the computation is not efficient and it may not finish with a big enough argument.
+We can instead write the function in tail recursive form as an iterative process as follows:
+</p>
+
+<pre><code class="language-scheme">; Scheme
+(define (fib n)
+  (fib-iter 1 0 n))
+
+(define (fib-iter a b counter)
+  (if (= counter 0)
+      b
+      (fib-iter (+ a b) a (- counter 1))))
+</code></pre>
+
+<pre><code class="language-python"># Python
+def fib(n):
+    return fib_iter(1, 0, n)
+
+def fib_iter(a, b, counter):
+    if counter == 0:
+        return b
+    else:
+        return fib_iter(a + b, a, counter - 1)
+</code></pre>
+
+<p>
+Evaluation of this calculation is as follows:
+</p>
+
+<pre><code class="language-scheme">; Scheme
+(fib 5)
+(fib-iter 1 0 5)
+(fib-iter 1 1 4)
+(fib-iter 2 1 3)
+(fib-iter 3 2 2)
+(fib-iter 5 3 1)
+(fib-iter 8 5 0)
+5
+</code></pre>
+
+<pre><code class="language-python"># Python
+fib(5)
+  fib_iter(1, 0, 5)
+    fib_iter(1, 1, 4)
+      fib_iter(2, 1, 3)
+        fib_iter(3, 2, 2)
+          fib_iter(5, 3, 1)
+            fib_iter(8, 5, 0)
+            5
+          5
+        5
+      5
+    5
+  5
+5
+</code></pre>
+
+<p>
+Similarly in this case, function call stack still grows in Python but not in Scheme.
+On the other hand, a more idiomatic way to write an iterative fibonacci function in Python is as follows:
+</p>
+
+<pre><code class="language-python"># Python
+def fib(n):
+    a, b = 0, 1
+    for i in range(n):
+        a, b = b, a + b
+    return a
+</code></pre>
+
+<p>
+In this form, there is only a single function call so the call stack does not grow.
+</p>
+
+<h2>Dynamic Programming</h2>
+
+<p>
+Factorial and fibonacci examples are easily implemented as iterative calculations.
+However, we may not always be able to convert all problems to such an explicit iterative form in general.
+For example, <a href="https://en.wikipedia.org/wiki/Dynamic_programming">dynamic programming</a> requires dividing the original problem into simpler sub-problems in a recursive manner.
+There are two common techniques used in dynamic programming to avoid repetitive calculations for efficiency namely memoization and tabulation.
+Next we demonstrate these techniques over the fibonacci example and then use them to solve a more complicated problem.
+</p>
+
+<h2>Memoization</h2>
+
+<p>
+Memoization involves caching calculated results in a lookup table to avoid doing same calculations multiple times.
+This strategy is a top-down approach starting from the original problem to divide it into smaller problems.
+A memoized fibonacci function in Python can be written as follows:
+</p>
+
+<pre><code class="language-python"># Python
+def fib(n, memo={}):
+    if n == 0:
+        return 0
+    elif n == 1:
+        return 1
+    elif n in memo:
+        return memo[n]
+    else:
+        f = fib(n - 1) + fib(n - 2)
+        memo[n] = f
+        return f
+</code></pre>
+
+<p>
+Or more simply using <a href="https://docs.python.org/3/library/functools.html#functools.lru_cache">functools.lru_cache</a> decorator from the standard library:
+</p>
+
+<pre><code class="language-python"># Python
+from functools import lru_cache
+
+@lru_cache(maxsize=None)
+def fib(n):
+    if n == 0:
+        return 0
+    if n == 1:
+        return 1
+    return fib(n - 1) + fib(n - 2)
+</code></pre>
+
+<p>
+In this form, each fibonacci number is only calculated once at most.
+</p>
+
+<h2>Tabulation</h2>
+
+<p>
+Memoized functions still keep the recursive structure in the definition but avoid doing same calculations multiple times for tree recursive algorithms.
+Since the calculations are still performed recursively, function call stack can grow large with big arguments to result in a stack overflow error.
+One may need to use tabulation to avoid such problems.
+In this approach, one allocates a table for each possible values of the arguments and then fills this table in an appropriate order.
+This strategy is a bottom-up approach starting from smaller problems to solve the original problem.
+A tabulated fibonacci function in Python can be written as follows:
+</p>
+
+<pre><code class="language-python"># Python
+def fib(n):
+    table = [0 for i in range(n + 1)]
+    table[0] = 0
+    table[1] = 1
+    for i in range(2, n + 1):
+        table[i] = table[i - 1] + table[i - 2]
+    return table[n]
+</code></pre>
+
+<p>
+In this form, each fibonacci number is only calculated once.
+Note, consecutive calls to this function reinitializes the table from the start, though this can also be eliminated by using a global table instead.
+</p>
+
+<h2>Coin Change Problem</h2>
+
+<p>
+Fibonacci is a trivial example which makes it difficult to see how these techniques can be useful in practice.
+Instead, consider the following problem given in the Section 1.2.2 of the book:
+</p>
+
+<blockquote>
+How many different ways can we make change of $1.00, given half-dollars, quarters, dimes, nickels, and pennies?
+More generally, can we write a procedure to compute the number of ways to change any given amount of money?
+</blockquote>
+
+<p>
+This problem has a simple recursive solution using the following observation provided in the book:
+</p>
+
+<blockquote>
+The number of ways to change amount <var>a</var> using <var>n</var> kinds of coins equals;
+(1) the number of ways to change amount <var>a</var> using all but the first kind of coin, plus
+(2) the number of ways to change amount <var>a</var> - <var>d</var> using all <var>n</var> kinds of coins, where <var>d</var> is the denomination of the first kind of coin. 
+</blockquote>
+
+<p>
+Using this observation, the solution provided for this problem in the book is as follows:
+</p>
+
+<pre><code class="language-scheme">; Scheme
+(define (count-change amount)
+  (cc amount 5))
+(define (cc amount kinds-of-coins)
+  (cond ((= amount 0) 1)
+        ((or (&lt; amount 0) (= kinds-of-coins 0)) 0)
+        (else (+ (cc amount
+                     (- kinds-of-coins 1))
+                 (cc (- amount
+                        (first-denomination kinds-of-coins))
+                     kinds-of-coins)))))
+(define (first-denomination kinds-of-coins)
+  (cond ((= kinds-of-coins 1) 1)
+        ((= kinds-of-coins 2) 5)
+        ((= kinds-of-coins 3) 10)
+        ((= kinds-of-coins 4) 25)
+        ((= kinds-of-coins 5) 50)))
+</code></pre>
+
+<p>
+A rough Python translation of this solution is as follows:
+</p>
+
+<pre><code class="language-python"># Python
+coins = [1, 5, 10, 25, 50]
+
+def count(amount):
+    return count_iter(amount, len(coins))
+
+def count_iter(amount, kinds):
+    if amount == 0:
+        return 1
+    elif amount &lt; 0 or kinds == 0:
+        return 0
+    else:
+        c1 = count_iter(amount, kinds-1)
+        c2 = count_iter(amount - coins[kinds-1], kinds)
+        return c1 + c2
+</code></pre>
+
+<p>
+We can then solve the original problem as follows:
+</p>
+
+<pre><code class="language-python"># Python
+print(count(100))  # 292
+</code></pre>
+
+<p>
+When we increase the amount to 5.00$ instead, the computation starts to choke for a few seconds:
+</p>
+
+<pre><code class="language-python"># Python
+print(count(500))  # 59576
+</code></pre>
+
+<p>
+When we increase the amount to 10.00$, we get a stack overflow:
+</p>
+
+<pre><code class="language-python"># Python
+print(count(1000)) # RecursionError: maximum recursion depth exceeded in comparison
+</code></pre>
+
+<p>
+We can try using memoization strategy for efficiency:
+</p>
+
+<pre><code class="language-python"># Python
+coins = [1, 5, 10, 25, 50]
+
+def count_memo(amount):
+    memo = {}
+    def helper(amount, kinds):
+        if amount == 0:
+            return 1
+        elif amount &lt; 0 or kinds == 0:
+            return 0
+        elif (amount, kinds) in memo:
+            return memo[amount, kinds]
+        else:
+            c1 = helper(amount, kinds-1)
+            c2 = helper(amount - coins[kinds-1], kinds)
+            c = c1 + c2
+            memo[amount, kinds] = c
+            return c
+    return helper(amount, len(coins))
+</code></pre>
+
+<p>
+When we use memoization, computations are efficient but the stack overflow issue remains:
+</p>
+
+<pre><code class="language-python"># Python
+print(count_memo(100))  # 292
+print(count_memo(500))  # 59576
+print(count_memo(1000)) # RecursionError: maximum recursion depth exceeded in comparison
+</code></pre>
+
+<p>
+We can instead use tabulation strategy for safety:
+</p>
+
+<pre><code class="language-python"># Python
+coins = [1, 5, 10, 25, 50]
+
+def count_table(amount):
+    table = [[0 for i in range(len(coins)+1)] for j in range(amount+1)]
+    for i in range(len(coins)+1):
+        table[0][i] = 1
+    for i in range(1, len(coins)+1):
+        for j in range(1, amount+1):
+            c1 = table[j][i-1]
+            c2 = table[j-coins[i-1]][i] if j &gt;= coins[i-1] else 0
+            table[j][i] = c1 + c2
+    return table[amount][len(coins)]
+</code></pre>
+
+<p>
+When we use tabulation, computations are efficient and the stack does not overflow:
+</p>
+
+<pre><code class="language-python"># Python
+print(count_table(100))  # 292
+print(count_table(500))  # 59576
+print(count_table(1000)) # 801451
+</code></pre>
+
+<p>
+  <a href="../codes/coin.py">coin.py</a> &middot; <a href="../codes/coin.py.html">html</a>
+</p>
+
+</main>
+
+<footer>
+  <a href="/">home</a> &middot; <a href="https://github.com/gokcehan">github</a> &middot; gokcehankara (at) gmail (dot) com
+</footer>
+
+</body>
+
+</html>
