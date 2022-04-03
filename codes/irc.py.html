@@ -26,7 +26,7 @@
 # this script are sent when you first connect to the server:
 #
 #     NICK guest123
-#     USER guest123 localhost irc.freenode.net :John Doe
+#     USER guest123 localhost irc.libera.chat :John Doe
 #
 # PING messages from the server are automatically responded with a PONG
 # message. No special escaped commands are provided so you are required to
@@ -48,30 +48,33 @@ import socket
 import signal
 import threading
 
-nick = &apos;guest123&apos;
-real = &apos;John Doe&apos;
-host = &apos;irc.freenode.net&apos;
+nick = &quot;guest123&quot;
+real = &quot;John Doe&quot;
+host = &quot;irc.libera.chat&quot;
 port = 6667
 
 sock = socket.socket()
 sock.connect((host, port))
 
-sock.send(&apos;NICK %s\r\n&apos; % nick)
-sock.send(&apos;USER %s localhost %s :%s\r\n&apos; % (nick, host, real))
+sock.send(f&quot;NICK {nick}\r\n&quot;.encode())
+sock.send(f&quot;USER {nick} localhost {host} :{real}\r\n&quot;.encode())
+
 
 def reader(sock):
     while True:
         mesg = sock.recv(4096)
         toks = mesg.split()
-        if toks[0] == &apos;PING&apos;:
-            sock.send(&apos;PONG %s\r\n&apos; % toks[1])
+        if toks[0] == &quot;PING&quot;:
+            sock.send(f&quot;PONG {toks[1]}\r\n&quot;.encode())
         else:
-            print mesg,
+            print(mesg.decode(), end=&quot;&quot;, flush=True)
+
 
 def writer(sock):
     while True:
         line = sys.stdin.readline()
-        sock.send(&apos;%s\r\n&apos; % line.rstrip())
+        sock.send(f&quot;{line.rstrip()}\r\n&quot;.encode())
+
 
 t1 = threading.Thread(target=reader, args=(sock,))
 t2 = threading.Thread(target=writer, args=(sock,))
@@ -85,7 +88,7 @@ t2.start()
 try:
     signal.pause()
 except KeyboardInterrupt:
-    sock.send(&apos;QUIT\r\n&apos;)
+    sock.send(&quot;QUIT\r\n&quot;.encode())
     sock.close()
 </code></pre>
 

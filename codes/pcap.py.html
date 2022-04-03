@@ -15,7 +15,7 @@
 
 <body>
 
-<pre><code class="language-python">#!/usr/bin/env python3
+<pre><code class="language-python">#!/usr/bin/env python
 #
 # pcap.py
 #
@@ -35,7 +35,7 @@
 #     ./pcap.py example.pcap
 #
 # An example output of this script is as follows:
-# 
+#
 #     -- ETH Layer -- Tue Jun  5 10:52:34 2012 -- 54 bytes
 #             src: 00:12:cf:e5:54:a0
 #             dst: 00:1f:3c:23:db:d3
@@ -87,32 +87,36 @@ import time
 import struct
 
 if len(sys.argv) &lt; 2:
-    sys.stderr.write(&apos;usage: {} [PCAP_FILE]\n&apos;.format(sys.argv[0]))
+    sys.stderr.write(f&quot;usage: {sys.argv[0]} [PCAP_FILE]\n&quot;)
     sys.exit(1)
 
+
 def decode_eth(packet):
-    src = struct.unpack(&apos;6B&apos;, packet[0:6])
-    dst = struct.unpack(&apos;6B&apos;, packet[6:12])
-    typ = struct.unpack(&apos;H&apos;, packet[12:14])[0]
+    src = struct.unpack(&quot;6B&quot;, packet[0:6])
+    dst = struct.unpack(&quot;6B&quot;, packet[6:12])
+    typ = struct.unpack(&quot;H&quot;, packet[12:14])[0]
     return src, dst, typ
+
 
 def decode_ip(packet):
-    typ = struct.unpack(&apos;B&apos;, packet[9:10])[0]
-    src = struct.unpack(&apos;4B&apos;, packet[12:16])
-    dst = struct.unpack(&apos;4B&apos;, packet[16:20])
+    typ = struct.unpack(&quot;B&quot;, packet[9:10])[0]
+    src = struct.unpack(&quot;4B&quot;, packet[12:16])
+    dst = struct.unpack(&quot;4B&quot;, packet[16:20])
     return src, dst, typ
 
+
 def decode_tcp(packet):
-    src = struct.unpack(&apos;H&apos;, packet[0:2])[0]
-    dst = struct.unpack(&apos;H&apos;, packet[2:4])[0]
-    seq = struct.unpack(&apos;I&apos;, packet[4:8])[0]
-    ack = struct.unpack(&apos;I&apos;, packet[8:12])[0]
+    src = struct.unpack(&quot;H&quot;, packet[0:2])[0]
+    dst = struct.unpack(&quot;H&quot;, packet[2:4])[0]
+    seq = struct.unpack(&quot;I&quot;, packet[4:8])[0]
+    ack = struct.unpack(&quot;I&quot;, packet[8:12])[0]
     return src, dst, seq, ack
 
-with open(sys.argv[1], &apos;rb&apos;) as f:
-    bom, major, minor, off, cap, typ = struct.unpack(&apos;IHHQII&apos;, f.read(24))
+
+with open(sys.argv[1], &quot;rb&quot;) as f:
+    bom, major, minor, off, cap, typ = struct.unpack(&quot;IHHQII&quot;, f.read(24))
     if typ != 1:
-        sys.stderr.write(&apos;error: only ethernet frame is supported\n&apos;)
+        sys.stderr.write(&quot;error: only ethernet frame is supported\n&quot;)
         sys.exit(1)
 
     while True:
@@ -120,38 +124,38 @@ with open(sys.argv[1], &apos;rb&apos;) as f:
         if not header:
             break
 
-        sec, msec, real, size = struct.unpack(&apos;IIII&apos;, header)
-        print(&apos;-- ETH Layer --&apos;, time.ctime(sec), &apos;--&apos;, size, &apos;bytes&apos;)
+        sec, msec, real, size = struct.unpack(&quot;IIII&quot;, header)
+        print(&quot;-- ETH Layer --&quot;, time.ctime(sec), &quot;--&quot;, size, &quot;bytes&quot;)
         packet = f.read(size)
 
         eth_src, eth_dst, eth_typ = decode_eth(packet)
-        print(&apos;\tsrc:&apos;, &apos;:&apos;.join(&quot;%02x&quot; % i for i in eth_src))
-        print(&apos;\tdst:&apos;, &apos;:&apos;.join(&quot;%02x&quot; % i for i in eth_dst))
-        print(&apos;\ttyp:&apos;, eth_typ)
+        print(&quot;\tsrc:&quot;, &quot;:&quot;.join(&quot;%02x&quot; % i for i in eth_src))
+        print(&quot;\tdst:&quot;, &quot;:&quot;.join(&quot;%02x&quot; % i for i in eth_dst))
+        print(&quot;\ttyp:&quot;, eth_typ)
 
         if eth_typ != 8:
-            print(&apos;\t-- UNK Layer --&apos;)
-            print(&apos;\t\tdat:&apos;, packet[14:])
+            print(&quot;\t-- UNK Layer --&quot;)
+            print(&quot;\t\tdat:&quot;, packet[14:])
             continue
 
         ip_src, ip_dst, ip_typ = decode_ip(packet[14:])
-        print(&apos;\t-- IP Layer --&apos;)
-        print(&apos;\t\tsrc:&apos;, &apos;.&apos;.join(str(i) for i in ip_src))
-        print(&apos;\t\tdst:&apos;, &apos;.&apos;.join(str(i) for i in ip_dst))
-        print(&apos;\t\ttyp:&apos;, ip_typ)
+        print(&quot;\t-- IP Layer --&quot;)
+        print(&quot;\t\tsrc:&quot;, &quot;.&quot;.join(str(i) for i in ip_src))
+        print(&quot;\t\tdst:&quot;, &quot;.&quot;.join(str(i) for i in ip_dst))
+        print(&quot;\t\ttyp:&quot;, ip_typ)
 
         if ip_typ != 6:
-            print(&apos;\t\t-- UNK Layer --&apos;)
-            print(&apos;\t\t\tdat:&apos;, packet[34:])
+            print(&quot;\t\t-- UNK Layer --&quot;)
+            print(&quot;\t\t\tdat:&quot;, packet[34:])
             continue
 
         tcp_src, tcp_dst, tcp_seq, tcp_ack = decode_tcp(packet[34:])
-        print(&apos;\t\t-- TCP Layer --&apos;)
-        print(&apos;\t\t\tsrc:&apos;, tcp_src)
-        print(&apos;\t\t\tdst:&apos;, tcp_dst)
-        print(&apos;\t\t\tseq:&apos;, tcp_seq)
-        print(&apos;\t\t\tack:&apos;, tcp_ack)
-        print(&apos;\t\t\tdat:&apos;, packet[54:])
+        print(&quot;\t\t-- TCP Layer --&quot;)
+        print(&quot;\t\t\tsrc:&quot;, tcp_src)
+        print(&quot;\t\t\tdst:&quot;, tcp_dst)
+        print(&quot;\t\t\tseq:&quot;, tcp_seq)
+        print(&quot;\t\t\tack:&quot;, tcp_ack)
+        print(&quot;\t\t\tdat:&quot;, packet[54:])
 </code></pre>
 
 </body>

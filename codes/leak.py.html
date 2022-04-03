@@ -41,30 +41,31 @@
 import re
 import sys
 
-lines = filter(lambda l: &apos;malloc&apos; in l or &apos;free&apos; in l, sys.stdin)
+lines = list(filter(lambda l: &quot;malloc&quot; in l or &quot;free&quot; in l, sys.stdin))
 
-print &apos;\nThese are all the malloc and free calls in the execution&apos;
+print(&quot;These are all the malloc and free calls in the execution&quot;)
 for line in lines:
-    print line,
+    print(line, end=&quot;&quot;)
 
 mems = {}
 for line in lines:
     toks = line.split()
 
     # malloc(size) = addr
-    if &apos;malloc&apos; in toks[0]:
-        size = re.search(r&apos;malloc\((.*)\)&apos;, toks[0]).group(1)
+    if &quot;malloc&quot; in toks[0]:
+        size = re.search(r&quot;malloc\((.*)\)&quot;, toks[0]).group(1)
         addr = toks[2]
         mems[addr] = size
 
     # free(addr) = &lt;void&gt;
-    elif &apos;free&apos; in toks[0]:
-        addr = re.search(r&apos;free\((.*)\)&apos;, toks[0]).group(1)
+    elif &quot;free&quot; in toks[0]:
+        addr = re.search(r&quot;free\((.*)\)&quot;, toks[0]).group(1)
         mems.pop(addr, None)
 
-print &apos;\nExecution ended with the following non-freed allocations&apos;
-for k, v in mems.iteritems():
-    print &apos;leaked&apos;, v, &apos;bytes of memory at&apos;, k
+print()
+print(&quot;Execution ended with the following non-freed allocations&quot;)
+for k, v in mems.items():
+    print(&quot;leaked&quot;, v, &quot;bytes of memory at&quot;, k)
 </code></pre>
 
 </body>

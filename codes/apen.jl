@@ -26,14 +26,14 @@ function apen(data, window, level)
         for i = 1:len
             count = 0
             for j = 1:len
-                if maximum(abs(x[i,:] - x[j,:])) < r
+                if maximum(abs.(x[i,:] - x[j,:])) < r
                     count += 1
                 end
             end
             C[i] = count / len
         end
 
-        phi[k] = sum(log(C)) / len
+        phi[k] = sum(log.(C)) / len
     end
 
     phi[1] - phi[2]
@@ -41,7 +41,7 @@ end
 
 # example from wikipedia page:
 # https://en.wikipedia.org/wiki/Approximate_entropy
-u = repmat([85,80,89], 17)
+u = repeat([85,80,89], 17)
 m = 2
 r = 3
 println(apen(u, m, r))

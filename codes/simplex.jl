@@ -7,7 +7,7 @@
 
 function simplex(A, b, c, bi)
     m, n = size(A)
-    inds = IntSet(1 : n)
+    inds = BitSet(1 : n)
     ni = setdiff(inds, bi)
 
     while true
@@ -26,33 +26,33 @@ function simplex(A, b, c, bi)
         z_c[collect(ni)] = w * N - cn'
 
         if all(i -> i <= 0, z_c)
-            info("optimal solution is found")
-            info("bi: $bi")
+            @info("optimal solution is found")
+            @info("bi: $bi")
             x = zeros(n)
             x[collect(bi)] = xb
-            info("x: $x")
-            info("z: $z")
+            @info("x: $x")
+            @info("z: $z")
             return
         end
 
-        k = indmax(z_c)
+        k = argmax(z_c)
 
         # step 3
         yk = inv(B) * A[:, k]
 
         if all(i -> i <= 0, yk)
-            info("optimal solution is unbounded")
+            @info("optimal solution is unbounded")
             return
         end
 
         # step 4
         rs = fill(typemax(Float64), m)
-        pos = find(i -> i > 0, yk)
+        pos = findall(i -> i > 0, yk)
         rs[pos] = xb[pos] ./ yk[pos]
-        r = indmin(rs)
+        r = argmin(rs)
         br = collect(bi)[r]
 
-        info("pivot: $k => $br")
+        @info("pivot: $k => $br")
         push!(bi, k)
         push!(ni, br)
         pop!(bi, br)
@@ -71,20 +71,20 @@ function simplex_tableau(A, b, c, bi)
 
         # find entering variable k
         if all(i -> i <= 0, T[1, 2 : end - 1])
-            info("optimal solution is found")
+            @info("optimal solution is found")
             return
         end
-        k = indmax(T[1, 2 : end - 1])
+        k = argmax(T[1, 2 : end - 1])
 
         # find leaving variable r
         if all(i -> i <= 0, T[2 : end, k + 1])
-            info("optimal solution is unbounded")
+            @info("optimal solution is unbounded")
             return
         end
         rs = fill(typemax(Float64), m)
-        pos = find(i -> i > 0, T[2 : end, k + 1])
+        pos = findall(i -> i > 0, T[2 : end, k + 1])
         rs[pos] = T[pos, end] ./ T[pos, k + 1]
-        r = indmin(rs)
+        r = argmin(rs)
 
         # pivot k and r
         T[r + 1, :] /= T[r + 1, k + 1]
@@ -95,23 +95,21 @@ function simplex_tableau(A, b, c, bi)
             T[i, :] -= T[i, k + 1] * T[r + 1, :]
         end
 
-        info("pivot: $k => $r")
+        @info("pivot: $k => $r")
         println()
     end
 end
 
-using Base.Test
-
 A = [2 3 1 0; -1 1 0 1]
 b = [6 1]'
 c = [-1 -3 0 0]'
-bi = IntSet([3, 4])
+bi = BitSet([3, 4])
 
 simplex(A, b, c, bi)
 
 A = [1 1 2 1 0 0; 1 1 -1 0 1 0; -1 1 1 0 0 1]
 b = [9 2 4]'
 c = [1 1 -4 0 0 0]'
-bi = IntSet([4, 5, 6])
+bi = BitSet([4, 5, 6])
 
 simplex_tableau(A, b, c, bi)

@@ -46,16 +46,19 @@
 # Implementation given here is neither fast nor secure enough to be of any
 # practical use besides educational purposes.
 
+import codecs
 import math
 import random
+
 
 def is_prime(n):
     if n &lt; 2:
         return False
-    for i in xrange(2, int(math.sqrt(n)) + 1):
+    for i in range(2, int(math.sqrt(n)) + 1):
         if n % i == 0:
             return False
     return True
+
 
 def gen_prime(a, b):
     r = random.randrange(a, b)
@@ -63,19 +66,23 @@ def gen_prime(a, b):
         r = random.randrange(a, b)
     return r
 
+
 def gcd(a, b):
     while b:
         a, b = b, a % b
     return a
 
+
 def lcm(a, b):
-    return (a * b) / gcd(a, b)
+    return (a * b) // gcd(a, b)
+
 
 def gen_coprime(n):
     r = random.randrange(2, n)
     while gcd(n, r) != 1:
         r = random.randrange(2, n)
     return r
+
 
 def mod_inverse(a, b):
     r, r_old = a, b
@@ -85,41 +92,46 @@ def mod_inverse(a, b):
         x, x_old = x_old - q * x, x
     return x_old % b
 
+
 def number(s):
-    return long(s.encode(&apos;hex&apos;), 16)
+    return int(codecs.encode(s.encode(), &quot;hex&quot;), 16)
+
 
 def string(n):
-    return hex(n).lstrip(&apos;0x&apos;).rstrip(&apos;L&apos;).decode(&apos;hex&apos;)
+    return codecs.decode(hex(n).lstrip(&quot;0x&quot;), &quot;hex&quot;).decode()
+
 
 def encrypt(m, e, n):
     return pow(m, e, n)
 
+
 def decrypt(c, d, n):
     return pow(c, d, n)
+
 
 p = gen_prime(1e12, 1e13)
 q = gen_prime(1e14, 1e15)
 n = p * q
-t = lcm(p-1, q-1)
+t = lcm(p - 1, q - 1)
 e = gen_coprime(t)
 d = mod_inverse(e, t)
 
-print &apos;p&apos;, p
-print &apos;q&apos;, q
-print &apos;n&apos;, n
-print &apos;t&apos;, t
-print &apos;e&apos;, e
-print &apos;d&apos;, d
+print(&quot;p&quot;, p)
+print(&quot;q&quot;, q)
+print(&quot;n&quot;, n)
+print(&quot;t&quot;, t)
+print(&quot;e&quot;, e)
+print(&quot;d&quot;, d)
 
 # size of message should be less than size of n
 # or you may need to divide the message into blocks
 message = &quot;hello world&quot;
 
-print &apos;m&apos;, message
+print(&quot;m&quot;, message)
 cipher = encrypt(number(message), e, n)
-print &apos;c&apos;, cipher
+print(&quot;c&quot;, cipher)
 message = string(decrypt(cipher, d, n))
-print &apos;m&apos;, message
+print(&quot;m&quot;, message)
 </code></pre>
 
 </body>

@@ -24,27 +24,28 @@
 import re
 import sys
 
-lines = filter(lambda l: 'malloc' in l or 'free' in l, sys.stdin)
+lines = list(filter(lambda l: "malloc" in l or "free" in l, sys.stdin))
 
-print '\nThese are all the malloc and free calls in the execution'
+print("These are all the malloc and free calls in the execution")
 for line in lines:
-    print line,
+    print(line, end="")
 
 mems = {}
 for line in lines:
     toks = line.split()
 
     # malloc(size) = addr
-    if 'malloc' in toks[0]:
-        size = re.search(r'malloc\((.*)\)', toks[0]).group(1)
+    if "malloc" in toks[0]:
+        size = re.search(r"malloc\((.*)\)", toks[0]).group(1)
         addr = toks[2]
         mems[addr] = size
 
     # free(addr) = <void>
-    elif 'free' in toks[0]:
-        addr = re.search(r'free\((.*)\)', toks[0]).group(1)
+    elif "free" in toks[0]:
+        addr = re.search(r"free\((.*)\)", toks[0]).group(1)
         mems.pop(addr, None)
 
-print '\nExecution ended with the following non-freed allocations'
-for k, v in mems.iteritems():
-    print 'leaked', v, 'bytes of memory at', k
+print()
+print("Execution ended with the following non-freed allocations")
+for k, v in mems.items():
+    print("leaked", v, "bytes of memory at", k)
